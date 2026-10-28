@@ -87,7 +87,7 @@ def main():
         ("B 同一張照片（兩位學生）", f"開發集 {v('bPairs')} 對 × 2 人", f"一致 {v('bAgree')}／{v('bPairs')}，κ = {v('bKappa')}；表 7 各方法精確率用它", "annotations/dev/B.jsonl；results/annotation_B_agreement_dev_20261021_1744.json"),
         ("C 跨年重用：驗證程式第一名（Eden）", f"測試集 {count('annotations/test/C.jsonl')} 張；程式第一名被確認是同一張 {c_yes} 張", f"Eden 10/23 決定 Q6：只驗證第一名，14 題「複本沒被提示」的檢查題作廢；剩 6 題檢查題 0 錯。人工驗證的重用比例 {v('cVerifiedShare')}%（只看第一名，下界）；偵測器驗證通過的第一名 {v('cDetectorVerified')} 張裡 Eden 確認 {v('cBothVerified')} 張，精確率 {v('cVerifiedPrecision')}（§6.6）", f"annotations/test/C.jsonl；{latest('results/annotation_C_batch_check_a1_*.json')}；annotations/qc/C_checks_void.jsonl；{src('cVerifiedPrecision')}"),
         ("D 抽取漏框（a2）", f"測試集 {count('annotations/test/D.jsonl')} 頁", f"4 題檢查題作廢（檢查題設計問題）；§4.3：{v('dPages')} 頁裡漏框 {v('dMissed')} 張（{v('dMissedPages')} 頁），框不完整或合併 {v('dWrong')} 個（{v('dWrongPages')} 頁）", "annotations/test/D.jsonl；annotations/qc/D_checks_void.jsonl"),
-        ("S 章節歸類抽查（Eden）", f"開發集 {v('sCheckPages')} 頁，相同 {v('sCheckSame')}", "測試集的抽查頁還沒出（待辦）", "annotations/dev/S.jsonl；results/section_check_dev_20261020_1802.json"),
+        ("S 章節歸類抽查（Eden）", f"開發集 {v('sCheckPagesDev')} 頁，相同 {v('sCheckSameDev')}；測試集 {v('sCheckPages')} 頁，相同 {v('sCheckSame')}", "測試集 50 頁 Eden 10/28 11:20 交回，10/28 匯入", "annotations/dev/S.jsonl、annotations/test/S.jsonl；results/section_check_dev_20261020_1802.json、results/section_check_test_20261028_1427.json"),
         ("logo 參考圖（Eden 確認）", f"開發集 30 家：{logo_dev['firms_with_confirmed_ref']} 家有 logo、{logo_dev['confirmed_refs']} 張；測試集 120 家：{logo_test['firms_with_confirmed_ref']} 家有 logo、{logo_test['confirmed_refs']} 張", "evidence.py 的 logo 定錨只用確認過的圖", f"{latest('results/logo_refs_*_dev30.json')}；{latest('results/logo_refs_*_test120.json')}"),
     ]
 

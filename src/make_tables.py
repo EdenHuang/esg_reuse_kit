@@ -555,6 +555,9 @@ def numbers(man):
     if ag.get("S") and (ROOT / ag["S"]).exists():
         s = load(ag["S"]); src = ag["S"]
         mac("sCheckPages", intn(s["pages"]), src); mac("sCheckSame", intn(s["same"]), src)
+    if ag.get("S_dev") and (ROOT / ag["S_dev"]).exists():   # 10/28: S is on the test split now; 4.3 still quotes the development check
+        s = load(ag["S_dev"]); src = ag["S_dev"]
+        mac("sCheckPagesDev", intn(s["pages"]), src); mac("sCheckSameDev", intn(s["same"]), src)
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(out) + "\n", encoding="utf-8")
     print("numbers.tex ok")
 

@@ -8,8 +8,9 @@ Recognition* (ICDAR 2027 journal track).
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23720137.svg)](https://doi.org/10.5281/zenodo.23720137)
 Repository: https://github.com/EdenHuang/esg_reuse_kit · Archive of every tagged release on Zenodo: concept DOI
-[10.5281/zenodo.23720137](https://doi.org/10.5281/zenodo.23720137) (always the latest version); version 1.0.0 is
-[10.5281/zenodo.23720138](https://doi.org/10.5281/zenodo.23720138).
+[10.5281/zenodo.23720137](https://doi.org/10.5281/zenodo.23720137) (always the latest version); each version's own
+DOI is listed on that record. Version 1.0.0 is [10.5281/zenodo.23720138](https://doi.org/10.5281/zenodo.23720138);
+version 1.0.1 adds the English translations of the annotation guidelines and the test-split section check (annotation S).
 
 A photo in a report counts as **evidence** when it directly depicts what the text beside it claims *and* something
 recorded by the camera anchors it to the firm or the event (the firm's name, an event name, a year, or the firm's
@@ -66,14 +67,17 @@ so (C shows the retrieval's first choice).
 | D | Are the program's photo boxes on this page right? | `test/D.jsonl` | 200 test pages |
 | R | Which text boxes describe the photo; direct / topical / unrelated; anchors seen in the photo (text, logo, post-production overlay) | `dev/R.jsonl`, `test/R.jsonl` | 106 development + 306 test photos, the author |
 | R2 | Task R by a second annotator | `test/R2.jsonl` | 100 test photos (three-level weighted κ = 0.80 against R) |
-| S | Which section (E, S, G, company overview, other) the program assigned to a page | `dev/S.jsonl` | 50 development pages |
+| S | Which section (E, S, G, company overview, other) the program assigned to a page | `dev/S.jsonl`, `test/S.jsonl` | 50 development + 50 test pages, the author (`results/section_check_*.json`: the program's assignment matched on all 100) |
 | Logo references | Which repeated small images and cover elements are the firm's logo | `logo_refs/*.csv` | 30 development + 120 test firms, confirmed by the author |
 
 `annotations/qc/` holds the quality-control material: check items with their keys, practice items, the batch plans
 (`*_task_plan.json`), and the calibration reading of the development R items by an AI assistant
 (`R_dev_claude_reading.jsonl`, `R_dev_claude_edits.jsonl`), which was shown to the author after annotation and never
 used as a label. `annotations/guidelines/` holds the guidelines (version 1.5) in Chinese, the language of the
-annotators; English translations will follow.
+annotators, and their English translations: `README_en.md` (overview of all tasks), `A_photo_en.md`,
+`B_same_photo_en.md`, `C_find_in_last_year_en.md`, `D_photo_boxes_en.md` and `R_evidence_en.md` (R and R2). The
+Chinese text is the one the annotators used and is authoritative; the author's own operating notes
+(`Annotation_*_zh.md`, `LabelStudio_A_zh.md`: local paths, packaging, Label Studio set-up) are not translated.
 
 ## Rebuilding the dataset
 
@@ -129,7 +133,7 @@ Please cite the paper and the release (`CITATION.cff` has both in machine-readab
 > Measurement. Submitted to the *International Journal on Document Analysis and Recognition* (ICDAR 2027 journal track).
 
 > Huang, Y.-C. (2026). Do Sustainability Report Photos Show What the Text Claims? A Dataset and a Four-Level
-> Measurement (data and code release), version 1.0.0. Zenodo. https://doi.org/10.5281/zenodo.23720137
+> Measurement (data and code release), version 1.0.1. Zenodo. https://doi.org/10.5281/zenodo.23720137
 
 ## Contact
 

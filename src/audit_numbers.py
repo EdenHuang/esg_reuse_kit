@@ -50,7 +50,9 @@ def main():
     for f in FILES:
         for i, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
             code = line.replace("\\%", " ").split("%")[0]                                      # \% is a percent sign, not a comment
+            code = re.sub(r"\\href\{[^}]*\}\{(?:[^{}]|\{[^{}]*\})*\}", "", code)                      # \href{url}{shown text}: a link (DOI) is not a number
             code = re.sub(r"\\(?:ref|cite|label|input|includegraphics|url|href)\{[^}]*\}", "", code)   # labels, keys and URLs (ORCID) are not numbers
+            code = re.sub(r"\bCC BY(?:-[A-Z]{2})* \d\.\d\b", "", code)                                      # licence identifiers (CC BY 4.0) are not measurements
             code = re.sub(r"\\[A-Za-z]+\{\}", "", code)                                         # macros carry their own numbers
             for m in NUM.finditer(code):
                 after = code[m.end():m.end() + 2]
