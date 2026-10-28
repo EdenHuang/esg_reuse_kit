@@ -1,0 +1,25 @@
+{
+  "title": "Do Sustainability Report Photos Show What the Text Claims? A Dataset and a Four-Level Measurement (data and code release)",
+  "upload_type": "dataset",
+  "version": "1.0.0",
+  "language": "eng",
+  "access_right": "open",
+  "license": "cc-by-4.0",
+  "creators": [
+    {
+      "name": "Huang, Yueh-Cheng",
+      "affiliation": "Department of Computer Science and Information Engineering, National Dong Hwa University, Hualien, Taiwan"
+    }
+  ],
+  "keywords": [
+    "sustainability reports",
+    "document analysis",
+    "image-text relations",
+    "photographic evidence",
+    "dataset",
+    "ESG",
+    "Taiwan",
+    "vision-language models"
+  ],
+  "description": "<p>Data and code release of the paper <em>Do Sustainability Report Photos Show What the Text Claims? A Dataset and a Four-Level Measurement</em> (submitted to the International Journal on Document Analysis and Recognition, ICDAR 2027 journal track).</p><p>The dataset covers 443 Chinese-language sustainability reports from 150 listed Taiwanese firms (reporting years 2023&ndash;2025; 30 development and 120 test firms), 52,568 pages and 17,450 photos. A photo counts as <strong>evidence</strong> when it directly depicts what the text beside it claims and something recorded by the camera anchors it to the firm or the event (the firm's name, an event name, a year or the firm's logo); the other levels are <strong>illustration</strong> (direct depiction without an anchor), <strong>packaging</strong> (a photo on the topic but not of the described thing) and <strong>unrelated</strong>.</p><p>Contents: the report list with download URLs and SHA-256 hashes (<code>catalog.csv</code>); image placements and page structure with the text removed (<code>extraction/</code>, <code>page_structure/</code>); the photo filter's decisions (<code>photos/</code>); the sampled items, labels, guidelines, quality-control files and confirmed logo references of six annotation tasks (<code>annotations/</code>); every result file behind the paper's tables, each with its own provenance record (<code>results/</code>); the code, all parameters and prompts, and the configuration frozen before the test split was evaluated (<code>src/</code>, <code>configs/</code>). The report PDFs and the images cut from them are not redistributed: they are public filings on the ESG InfoHub of the Taiwan Stock Exchange, and the release rebuilds them from the source. Annotation guidelines are in Chinese (the language of the annotators); English translations will follow.</p><p>Licences: data under CC BY 4.0; code and configuration (<code>src/</code>, <code>configs/</code>, <code>requirements.txt</code>) under the MIT licence.</p>"
+}

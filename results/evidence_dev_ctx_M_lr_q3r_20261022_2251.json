@@ -1,0 +1,1985 @@
+{
+ "meta": {
+  "date": "2026-10-22T22:51:41+08:00",
+  "command": "python src/evidence.py --r-items dev --labels annotations/dev/R.jsonl --labelled-only --holistic --context work/context/M_lr_dev140.jsonl --tag dev_ctx_M_lr_q3r",
+  "git": {
+   "commit": "aac1f983d8f083f5624c8846e6a49b196ac7baa7",
+   "uncommitted_changes": true
+  },
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "packages": {
+   "torch": "2.14.1+cu130",
+   "transformers": "5.20.1",
+   "pillow": "13.0.0",
+   "pyyaml": "6.0.3"
+  },
+  "config_file": "configs\\default.yaml",
+  "config": "# 所有參數放這裡（PLAN v2.0）。標「初值」的門檻只能在開發集上調，11/2 凍結後另存 configs/frozen.yaml。\nseed: 2026\n\npaths:\n  raw: data/raw\n  catalog: data/catalog.csv\n  index: data/index\n  synthetic: data/synthetic\n  extract: work/extract\n  page_graph: work/page_graph\n  logo_refs: work/logo_refs\n  context: work/context\n  evidence: work/evidence\n  features: work/features\n  reuse: work/reuse\n  prompts: configs/prompts\n  annotations: annotations\n  results: results\n  reports: reports\n\ndata:\n  years: [2023, 2024, 2025]          # 報告年度（報告涵蓋的會計年度）\n  n_firms: 150\n  n_dev: 30                          # 以公司為單位\n  dev_must_include: [\"1101\", \"1707\"] # 台泥、葡萄王\n\nextract:\n  crop_long_side: 1024\n  jpg_quality: 90\n\npage_graph:\n  container_min_area: 0.02           # 色塊容器面積下限（占頁面比例）\n  container_max_area: 0.90\n  heading_levels: 3                  # 章、節、小標題\n  # 以下是 page_graph.py 用的初值（10/18 晚上加；只在開發集上看 HTML 調）\n  container_rect_fill: 0.90          # 線段／曲線圍成的形狀：多邊形面積 ≥ 外框的這個比例才算矩形（圓角矩形算，圓形不算）\n  colour_tolerance: 0.02             # 色塊顏色（乘上不透明度）跟底下顏色每個 RGB 通道都差不到這個值 → 只是重刷底色，不算容器\n  inside_container: 0.75             # 文字框、照片有這個比例以上在色塊裡，才算在這個容器裡\n  heading_min_ratio: 1.15            # 字級 ≥ 內文 × 這個值，才可能是標題\n  heading_min_pages: 3               # v2：一個字級至少出現在幾個不同頁的短文字框，才算一種標題字級（v1 是 heading_min_boxes: 3 個框）\n  heading_max_chars: 50              # 標題最多幾個字（不含空白）\n  split_size_jump: 0.20              # 同一個 MuPDF 區塊裡，相鄰兩行字級差超過 20% 就切開（標題和內文被放在同一區塊）\n  column_gap: 3                      # 分欄：兩群文字框的 x 範圍之間至少要空這麼多 pt\n  sparse_max_chars: 20               # --sparse-stats：一頁不超過這麼多字（不含空白）算「幾乎沒字」\n  # v2（10/18 晚上，審查後加；初值，只在開發集上看）\n  slot_tolerance: 4                  # 導覽列：同一段字在很多頁的「同一個位置」（左上角 x、y 差 ≤ 這麼多 pt）\n  repeat_heading_ratio: 1.5          # 重複出現的字 ≥ 內文 × 這個值、不在選單裡 → 當標題，不當導覽列\n  repeat_heading_max_share: 0.25     # …而且出現的頁數 ≤ 全本頁數的這個比例（超過的是頁首的報告名稱等）\n  caption_max_lines: 3               # 圖說型最多幾行\n  picture_unit_max_area: 0.6         # 閱讀順序：圖片 ≤ 頁面這個比例才排進順序（更大的是背景）\n  garbled_box_share: 0.5             # 文字框裡亂碼字 ≥ 這個比例 → 角色 garbled，不當標題\n  panel_area: 0.8                    # 色塊 ≥ 頁面這個比例（或包住整頁所有文字框）→ 標 panel（整頁大底板）\n\nlogo_refs:\n  ocr_workers: 10                    # 10/20：OCR 同時開幾個程序（一個只用到約 1.6 核，一張約 4 秒）\n  min_pages: 3                       # 出現幾頁以上的小圖算候選\n  min_short_side_pt: 10               # 10/18 決定 5：20 → 10 pt（每個提議 Eden 都會確認）\n  vector: true                       # 10/18 決定 10：向量畫的 logo 也當候選\n  vector_band: 0.15                  # 內頁只看頁首、頁尾各 15% 高的帶狀區\n  vector_tolerance: 6                # 向量圖形分群的間距（pt）：字形 logo 的字要連在一起\n  vector_min_items: 3                # 一群至少幾條路徑\n  vector_max_long_frac: 0.5          # 長邊不超過頁寬的一半\n  vector_render_px: 600              # 截圖長邊（像素）\n  use_cover: true\n  # 以下 10/18 晚上 logo_refs.py 加的；標「初值」的只在開發集上調\n  cover_min_short_side_pt: 8         # 封面、封底的小圖：PLAN 沒設尺寸門檻；20 pt 會漏掉真的 logo（5519、6693、8070，審查 10/18），改 8 pt\n  whatif_min_short_side_pt: 10       # 只供比較，不影響輸出；10/18 決定 5 已經把正式門檻改成 10 pt，所以現在不會多出候選\n  shared_scope: dev                  # 算「幾家公司也有」只用開發集報告（測試集的圖不拿來調門檻）；--all 要不要改用全部 450 本等 Eden 決定\n  text_on_top_share: 0.5             # 一半以上的位置上面疊了文字的圖是底圖（頁籤、標題底色），不是 logo\n  ocr: true                          # 候選跑 PaddleOCR（.venv_ocr），讀到的字對得上公司名稱就算符合提議條件\n  ocr_lang: chinese_cht\n  ocr_min_score: 0.5                 # OCR 信心分數低於這個值的字不用\n  review_glob: annotations/logo_refs/review*.csv   # Eden 在確認頁勾選後匯出的 CSV；只有確認過的圖才是參考圖\n  use_back_cover: true               # 封底（最後一頁）的小圖也算候選\n  min_px: 16                         # 內嵌圖檔短邊至少幾像素（更小的是項目符號、細線，SuperPoint 也抓不到特徵點）\n  max_area_frac: 0.10                # 頁面上畫出來的面積超過頁面 10% 的不算小圖（整頁背景、封面大圖）\n  edge_frac: 0.12                    # 離頁緣不超過頁面短邊的 12% 算「靠邊」\n  tile_gap_pt: 1.5                   # 跟同頁其他圖片邊對邊貼齊（間距 <= 這個值）的是大圖切成的碎片\n  shared_min_firms: 3                # 同一張圖出現在 >= 3 家公司的報告裡：共用圖示（GRI、SDG、獎項），不是公司 logo\n  lookalike_dhash_bits: 26           # 256 位元 dHash 相差 <= 26 位元（約 10%）、長寬比差 <= 10%、平均顏色差 <= 30 算「看起來同一張」\n  lookalike_aspect_tol: 0.10\n  lookalike_colour_tol: 30\n  shared_dhash_bits: 32              # 初值：算「別家公司也有」時放寬到 32 位元（各家的 SDG 圖示版本略有不同）；每張候選「別家最像的差幾位元」記在結果檔 nearest_other_firm_bits\n  ref_long_side: 1024               # 存下來的參考圖長邊上限（像素）\n  min_contrast: 48                   # 灰階第 2～98 百分位差 < 48 的是色塊、陰影、漸層，不是 logo\n  max_refs_per_firm: 5\n  select_min_score: 0.5              # 初值：logo 分數 >= 這個值，而且符合提議條件（多頁、跨年或名稱對得上）才自動提議；提議還要 Eden 確認\n  weights: {small: 1.0, edge: 1.0, repeat: 1.0, cover: 1.0, cross_year: 2.0, aspect: 0.5, alpha: 1.0, flat: 1.0}\n\nphoto_filter:\n  model: ViT-L-14\n  pretrained: openai\n  exclude_first_last_page: true\n  photo_prompts: [\"a photograph of a real scene\", \"a photograph of people\"]\n  nonphoto_prompts: [\"an illustration\", \"a chart or infographic\", \"a logo or icon\",\n                     \"a scanned certificate or document\", \"an abstract graphic design\"]\n  photo_threshold: 0.1               # 10/19 用標註 A 開發集 100 張（a1）定：加權準確率 0.5 → 85.5%、0.1 → 97.1%（results/photo_threshold_dev_20261019_1352.json）；a2 交回後再確認，11/2 凍結\n  vlm_threshold: 0.98                # 10/19：OpenCLIP 分數 ≥ photo_threshold「或」視覺語言模型說是照片 ≥ 這個值，就算照片（開發集 149 張加權準確率 93.7%，只用 OpenCLIP 91.4%；results/photo_threshold_dev_20261019_1749.json）\n  exclude_image_only_reports: true   # 整本轉成圖片的報告（results/download_check_*.json 的 image_only）\n  exclude_vector_shading: true       # PyMuPDF 把向量漸層當成圖片回報的位置（LOG 2026-10-18 晚上）\n  batch_size: 64\n  load_workers: 8                    # 讀裁切圖的執行緒數\n\ntiles:                               # 10/18 決定 16：切成小塊的照片（tile_groups.py）\n  gap_pt: 1.5                        # 同一頁兩張圖相對的邊相距 ≤ 這麼多 pt 算貼在一起\n  min_shared_edge: 0.5               # 共用的邊至少占較短那邊的這個比例\n  max_overlap: 0.1                   # 兩張圖重疊不超過較小那張面積的這個比例（疊在一起的不算拼塊）\n  seam_zoom: 2.0                     # 看接縫時頁面的解析度（每 pt 幾個像素）\n  seam_min_std: 2.0                  # 初值：緊貼接縫的兩排像素，明暗變化（標準差，灰階）都至少這麼大（白邊、分隔線不算）\n  seam_max_std_ratio: 1.5            # 初值：兩排的變化大小差不超過 1.5 倍\n  seam_min_corr: 0.9                 # 初值：兩排的相關係數 ≥ 0.9 才算畫面連續（同一張圖切開）；寧可漏併，不要把不同照片併在一起\n  decide_share: 0.02                 # 開發集「給模型判斷的圖」裡屬於「畫面連續」的組的比例 ≥ 2% 就寫 tile_merge.py 合併\n\ncontext_link:\n  model: logistic_regression\n  max_body_blocks: 2\n  baselines: [nearest_paragraph, same_column_nearest, caption_only, section_heading_only, rules_v1]\n\nevidence:\n  llm: Qwen/Qwen2.5-7B-Instruct      # 開工時確認可用，記錄 revision\n  vlm: Qwen/Qwen3-VL-8B-Instruct     # 10/20 起（Eden 照 D15 決定）；之前是 Qwen2.5-VL-7B（現在的 vlm_alt）\n  temperature: 0\n  ocr: paddleocr_chinese_cht\n  depiction_threshold: 0.5           # 10/19 開發集調後仍是 0.5（各題 p(是) 取最大值；results/tune_evidence_dev_20261019_2002.json）\n  topical_threshold: 0.6             # 10/19 開發集調（R 開發集 100 張，gate v4；results/tune_evidence_dev_20261019_2002.json）\n  ocr_match_threshold: 0.7           # 初值：字元二元組重疊\n  logo_min_inliers: 40               # 10/19 開發集調：R 開發集照片上找到 logo 的 9 張，目測對的內點 41–190、錯的 16–38（初值 15）；樣本小，R 開發集標完再看\n  logo_angle_range: [45, 135]        # 10/22：投影四邊形每個角的範圍（度）；原本寫死在 evidence.py，數值沒變\n  logo_area_range: [0.0005, 0.9]     # 10/22：投影四邊形占照片面積的範圍\n  logo_min_side_px: 8                # 10/22：投影四邊形最短邊（像素）\n  logo_aspect_range: [0.5, 2.0]      # 10/22：投影長寬比相對參考圖的倍數範圍\n  superpoint_keypoints: 2048         # 10/22：SuperPoint 最多特徵點數\n  short_name_split_punct: true       # 10/22 NEXT C11 試驗：true 時 ≤3 字母的英文簡稱以標點相鄰的 token 也算\n  years_roc_offset: 1911\n  baselines: [chinese_clip_vitl14, vlm_direct_zeroshot, vlm_direct_fewshot]\n  # 以下 10/18 baselines_evidence.py 加的（版本取自 results/models_20261018_1442.json）\n  vlm_revision: 0c351dd01ed87e9c1b53cbc748cba10e6187ff3b   # Qwen3-VL-8B-Instruct（Hugging Face，10/20 下載）\n  llm_revision: a09a35458c702b33eeacc393d103063234e8bc28   # Qwen2.5-7B-Instruct（results/models_20261018_1442.json）\n  vlm_max_pixels: 1003520            # 照片送進視覺語言模型前最多這麼多像素（1280 × 28 × 28）\n  vlm_alt: Qwen/Qwen2.5-VL-7B-Instruct   # 10/20 前的主模型；--vlm alt 重現比較表（表 5 的模型列）\n  vlm_alt_revision: cc594898137f460bfe9f0759e9844b3ce807cfb5\n  cnclip: OFA-Sys/chinese-clip-vit-large-patch14\n  cnclip_revision: 660941af70c6ff89ce658a1735404c0f3e536c38\n  context_max_chars: 900             # 規則版上下文（圖上文字、圖說、小標題、標題、內文 2 段）最多幾個字\n  e1_thresholds: null                # E1 的兩個門檻：等標註 R 開發集調；沒定之前用試跑照片相似度的三分位數（只是讓流程跑通）\n\nmeasure:\n  # D15（10/20 Eden 決定）：「拍到」改用視覺語言模型的直接判斷，少樣本、在開發集校正；定錨照用 OCR＋logo；\n  # 拆題（evidence.py 的可拍性判斷、是非題、DSG）改當消融。開發集換公司驗證：E3 校正 0.555、模組 2 0.454\n  # （results/eval_dev_methods_rules_q3_20261020_1423.json）。11/2 寫進 frozen.yaml 前可能再依開發集調整。\n  depiction: E3_cal                  # baselines_evidence.py --only e3，tune_evidence.py 的 E3_cal\n  prompt: direct_zeroshot            # configs/prompts/direct_zeroshot.txt（手冊 v1.5 的說法）\n  shots_per_level: 1                 # 每級 1 個開發集例子（直接對應、主題相關、無關）\n  cut_p_direct: 0.0017               # p(A) ≥ 這個值 → 直接對應；開發集全部 103 張調（results/tune_evidence_dev_20261020_1423_2.json）\n  cut_p_unrelated: 0.0002            # 否則 p(C) ≥ 這個值 → 無關；否則主題相關\n  anchors: [ocr, logo]\n\nreuse:\n  global_models: [dinov2_vitb14, sscd_disc_mixup]\n  topk: 10\n  years_back: [1]\n  use_flip: true\n  matcher: superpoint_lightglue\n  ransac: magsac\n  min_inliers: 25                    # 初值\n  min_coverage: 0.30                 # 初值\n  stock_topk_other_firms: 5\n\nsynthetic:\n  n_pos: 1000\n  n_neg: 5000\n  crop_keep_area: [0.5, 0.9]\n  brightness_contrast: 0.30\n  saturation: 0.50\n  hue_deg: 10\n  overlay_text_area: [0.10, 0.30]\n  jpeg_quality: [50, 90]\n  collage_area: [0.40, 0.70]\n  # 以下 10/18 make_synthetic.py 加的（初值）\n  source: photo_filter_keep          # 原圖：照片過濾留下的照片（目前是初值門檻 0.5 的結果）\n  p_transform: {crop: 0.6, flip: 0.3, color: 0.6, text: 0.3, collage: 0.2, jpeg: 0.6}   # 每個正例各變換的機率；至少一種\n  crop_aspect: [0.75, 1.33]          # 裁切框的長寬比相對原圖的變化\n  text_opacity: [0.6, 0.9]           # 壓字的底色不透明度\n  neg_max_sscd: 0.5                  # 負例兩張的 SSCD 餘弦相似度要 < 這個值（太像的可能真的是同一張圖庫照）\n\nevaluation:\n  bootstrap_unit: firm\n  bootstrap_n: 2000\n  ci: 0.95\n",
+  "data_sha256": {
+   "D:\\accounting\\esg_reuse_kit\\work\\photo_filter.csv": "3f6f6e206ee31a03d68bcd2313518dbc3b7201ec8dc427ade840bfe268f4fe5c",
+   "D:\\accounting\\esg_reuse_kit\\configs\\prompts\\gate.txt": "d9de2094299e9c52972a0b8c94ede3fbcdbf1b8ae3bb12e4d7731392eb9926cd",
+   "D:\\accounting\\esg_reuse_kit\\configs\\prompts\\question.txt": "fbd1ea36f7802d459eea59d69cc110b878328f209b8600ea3caa66c8a07a5d95",
+   "D:\\accounting\\esg_reuse_kit\\configs\\prompts\\vqa.txt": "69322411afb311ed359f2bf5e57f693a7ba4e5fc637bb0b4ca41dfa7a8e56a11",
+   "D:\\accounting\\esg_reuse_kit\\configs\\prompts\\topical.txt": "d9c45316f7527f89608660512a8dde0b52b4fc3a3066750d2e69de664893ff9d",
+   "D:\\accounting\\esg_reuse_kit\\configs\\prompts\\holistic.txt": "bc3adcb62ec90c0b0ff78e1901e9cd02d4fdbe685a39e7f9e62ea7dc20c8f8cb",
+   "annotations\\dev\\R.jsonl": "63e024a7d3cb2163c1a0bdbff705525702da3a5200c8c3840269089cbaf980f1",
+   "D:\\accounting\\esg_reuse_kit\\work\\context\\M_lr_dev140.jsonl": "c51fa2624bdce89a4aeb18f5156b48af81366fa7455ff6ac6f43ed9636a9b4ae"
+  }
+ },
+ "tag": "dev_ctx_M_lr_q3r",
+ "photos": 103,
+ "context": "M_lr",
+ "context_arg": "work/context/M_lr_dev140.jsonl",
+ "models": {
+  "llm": "Qwen/Qwen2.5-7B-Instruct",
+  "llm_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+  "vlm": "Qwen/Qwen3-VL-8B-Instruct",
+  "vlm_revision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+  "vlm_max_pixels": 1003520,
+  "ocr": null
+ },
+ "prompts_sha256": {
+  "gate": "d9de2094299e9c52972a0b8c94ede3fbcdbf1b8ae3bb12e4d7731392eb9926cd",
+  "question": "fbd1ea36f7802d459eea59d69cc110b878328f209b8600ea3caa66c8a07a5d95",
+  "vqa": "69322411afb311ed359f2bf5e57f693a7ba4e5fc637bb0b4ca41dfa7a8e56a11",
+  "topical": "d9c45316f7527f89608660512a8dde0b52b4fc3a3066750d2e69de664893ff9d",
+  "holistic": "bc3adcb62ec90c0b0ff78e1901e9cd02d4fdbe685a39e7f9e62ea7dc20c8f8cb"
+ },
+ "thresholds": {
+  "depiction": 0.5,
+  "topical": 0.6
+ },
+ "name_sources": [
+  "D:\\accounting\\esg_reuse_kit\\data\\index\\reports_index.csv",
+  "D:\\accounting\\esg_reuse_kit\\data\\index\\raw\\company_lists.json"
+ ],
+ "new_outputs": {
+  "gate": 0,
+  "question": 0,
+  "vqa": 0,
+  "topical": 0,
+  "holistic": 0
+ },
+ "ocr": {
+  "photos": 103,
+  "new": 0
+ },
+ "gate_failed": 2,
+ "no_referents": 28,
+ "questions": 490,
+ "template_questions": 0,
+ "levels4": {
+  "證據": 11,
+  "示意": 49,
+  "無關": 20,
+  "包裝": 23
+ },
+ "anchored_by_ocr": 16,
+ "anchor_kinds": {
+  "org": 11,
+  "event": 2,
+  "year": 7
+ },
+ "logo": {
+  "new": 0,
+  "min_inliers": 40,
+  "version": 2,
+  "firms_in_set": 25,
+  "firms_with_refs": 20,
+  "photos_with_refs": 80,
+  "photos_logo_found": 4
+ },
+ "anchored": 17,
+ "seconds": 1.4,
+ "vs_labels": {
+  "labels": "annotations/dev/R.jsonl",
+  "pairs": 103,
+  "same_level": 61,
+  "macro_f1": 0.3497,
+  "confusion_label_by_model": {
+   "direct": {
+    "direct": 57,
+    "unrelated": 14,
+    "topical": 19
+   },
+   "topical": {
+    "unrelated": 4,
+    "topical": 2,
+    "direct": 2
+   },
+   "unrelated": {
+    "unrelated": 2,
+    "topical": 2,
+    "direct": 1
+   }
+  },
+  "anchor_text": {
+   "label_yes": 23,
+   "ocr_yes": 16,
+   "both": 14
+  },
+  "anchor_logo": {
+   "photos_with_refs": 80,
+   "label_yes": 5,
+   "found": 4,
+   "both": 1
+  }
+ },
+ "per_photo": [
+  {
+   "crop": "2739_2024_p066_01.jpg",
+   "item": "R7ad35a2a",
+   "level4": "證據",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.4315,
+   "topical_p": 1.0,
+   "holistic_p": 1.0,
+   "anchored_text": true,
+   "anchored": true,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "5009_2024_p098_03.jpg",
+   "item": "Rb590628a",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.5001,
+   "topical_p": 0.9999,
+   "holistic_p": 0.9241,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "5009_2025_p120_03.jpg",
+   "item": "R63796264",
+   "level4": "證據",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.125,
+   "topical_p": 1.0,
+   "holistic_p": 0.1824,
+   "anchored_text": true,
+   "anchored": true,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2882_2025_p097_00.jpg",
+   "item": "Re6a7fa72",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.977,
+   "depicted_mean": 0.3492,
+   "topical_p": 1.0,
+   "holistic_p": 0.9859,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "4540_2024_p108_04.jpg",
+   "item": "R8ff3cca4",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0003,
+   "depicted_mean": 0.0,
+   "topical_p": 0.0002,
+   "holistic_p": 0.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2102_2023_p067_02.jpg",
+   "item": "Rf3d85e2c",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.0001,
+   "holistic_p": 0.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "3015_2025_p132_05.jpg",
+   "item": "Re64c2e76",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.2074,
+   "topical_p": 1.0,
+   "holistic_p": 0.0953,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "8070_2024_p061_02.jpg",
+   "item": "Rf83b0aef",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.9998,
+   "holistic_p": 0.9933,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "3015_2024_p115_01.jpg",
+   "item": "R7532c5cd",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.9994,
+   "holistic_p": 0.9707,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "4540_2023_p098_01.jpg",
+   "item": "R031248e3",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0004,
+   "depicted_mean": 0.0001,
+   "topical_p": 1.0,
+   "holistic_p": 0.9959,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1101_2023_p091_02.jpg",
+   "item": "Re24dbed9",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.9999,
+   "depicted_mean": 0.413,
+   "topical_p": 1.0,
+   "holistic_p": 0.9994,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2385_2024_p109_40.jpg",
+   "item": "R30dd88cb",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.5147,
+   "topical_p": 0.9999,
+   "holistic_p": 0.9968,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "7723_2024_p078_00.jpg",
+   "item": "R303140f8",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 1.0,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1455_2023_p009_01.jpg",
+   "item": "R2520f0d0",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.0001,
+   "holistic_p": 0.0007,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "unrelated",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2501_2023_p081_00.jpg",
+   "item": "Re2d9f1cf",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.3911,
+   "topical_p": 0.9999,
+   "holistic_p": 0.9998,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "5009_2025_p137_03.jpg",
+   "item": "R644bc57b",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.8176,
+   "depicted_mean": 0.2045,
+   "topical_p": 0.1192,
+   "holistic_p": 0.0002,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "3015_2023_p110_00.jpg",
+   "item": "R43f879eb",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.9579,
+   "depicted_mean": 0.4543,
+   "topical_p": 0.9997,
+   "holistic_p": 0.9998,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "5519_2023_p065_01.jpg",
+   "item": "R847b4754",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.5,
+   "depicted_mean": 0.25,
+   "topical_p": 0.6792,
+   "holistic_p": 0.0759,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2610_2025_p043_01.jpg",
+   "item": "Rd429dcb0",
+   "level4": "證據",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.7493,
+   "topical_p": 1.0,
+   "holistic_p": 0.982,
+   "anchored_text": true,
+   "anchored": true,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": true
+  },
+  {
+   "crop": "1101_2025_p191_00.jpg",
+   "item": "R82db240f",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.9997,
+   "depicted_mean": 0.9745,
+   "topical_p": 1.0,
+   "holistic_p": 0.3208,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "5519_2025_p085_03.jpg",
+   "item": "R87592089",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 1.0,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "8289_2025_p079_02.jpg",
+   "item": "R89e31c25",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.2689,
+   "depicted_mean": 0.1021,
+   "topical_p": 0.018,
+   "holistic_p": 0.8808,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1101_2025_p184_00.jpg",
+   "item": "Rcafef7da",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.999,
+   "holistic_p": null,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2610_2023_p048_01.jpg",
+   "item": "R90673532",
+   "level4": "證據",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.1455,
+   "topical_p": 1.0,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": true,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": true
+  },
+  {
+   "crop": "1101_2023_p090_00.jpg",
+   "item": "Re2013bcb",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0025,
+   "depicted_mean": 0.0013,
+   "topical_p": 1.0,
+   "holistic_p": 0.8808,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1455_2024_p051_07.jpg",
+   "item": "Rdcdba8ad",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.0,
+   "holistic_p": null,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "8289_2025_p056_03.jpg",
+   "item": "R31a8364f",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.9999,
+   "depicted_mean": 0.5129,
+   "topical_p": 1.0,
+   "holistic_p": 0.9999,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1101_2025_p042_04.jpg",
+   "item": "R9ef34bf5",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.974,
+   "holistic_p": 0.982,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "4105_2023_p075_05.jpg",
+   "item": "Rac5e8e50",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.6667,
+   "topical_p": 1.0,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2102_2024_p058_02.jpg",
+   "item": "Rda91702b",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 1.0,
+   "holistic_p": null,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "unrelated",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2739_2024_p066_05.jpg",
+   "item": "Rdbdc984d",
+   "level4": "證據",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.3705,
+   "topical_p": 0.5,
+   "holistic_p": 0.9959,
+   "anchored_text": true,
+   "anchored": true,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2739_2023_p059_02.jpg",
+   "item": "R90779209",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.991,
+   "topical_p": 0.9985,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "3015_2023_p121_02.jpg",
+   "item": "R73b59c8e",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.0293,
+   "holistic_p": 0.9993,
+   "anchored_text": true,
+   "anchored": true,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": true
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1707_2024_p113_00.jpg",
+   "item": "Rc928304a",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.4767,
+   "topical_p": 1.0,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1101_2023_p105_03.jpg",
+   "item": "Rcf34861f",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.1447,
+   "topical_p": 1.0,
+   "holistic_p": 0.9996,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "8426_2023_p040_16.jpg",
+   "item": "R4dae1d03",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.0003,
+   "holistic_p": 0.9399,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "topical",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1707_2025_p112_02.jpg",
+   "item": "R353bafd2",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.9964,
+   "depicted_mean": 0.2154,
+   "topical_p": 0.0097,
+   "holistic_p": 0.0019,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "4906_2025_p139_02.jpg",
+   "item": "R065b4686",
+   "level4": "證據",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.2291,
+   "topical_p": 1.0,
+   "holistic_p": 0.4378,
+   "anchored_text": true,
+   "anchored": true,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2610_2025_p047_01.jpg",
+   "item": "Ra5c4fd4b",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.5043,
+   "topical_p": 0.8176,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "3230_2023_p069_00.jpg",
+   "item": "Ra2b813b2",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.5,
+   "topical_p": 1.0,
+   "holistic_p": 0.9987,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1101_2025_p043_01.jpg",
+   "item": "Rb924d029",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.3208,
+   "depicted_mean": 0.0365,
+   "topical_p": 1.0,
+   "holistic_p": 0.6225,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1455_2023_p056_00.jpg",
+   "item": "R3b4a0d6b",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 1.0,
+   "holistic_p": 0.9995,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "topical",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2739_2023_p044_02.jpg",
+   "item": "Ra6ee90a8",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.9987,
+   "depicted_mean": 0.5231,
+   "topical_p": 0.9999,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "4105_2023_p075_02.jpg",
+   "item": "R34fc32e7",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0203,
+   "depicted_mean": 0.0101,
+   "topical_p": 0.3208,
+   "holistic_p": 1.0,
+   "anchored_text": true,
+   "anchored": true,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "4105_2024_p147_00.jpg",
+   "item": "R5d5295db",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.5,
+   "depicted_mean": 0.25,
+   "topical_p": 1.0,
+   "holistic_p": 0.9998,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": true
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2610_2025_p039_01.jpg",
+   "item": "Rb6b80d80",
+   "level4": "證據",
+   "level3": "direct",
+   "depicted_max": 0.982,
+   "depicted_mean": 0.2037,
+   "topical_p": 1.0,
+   "holistic_p": 0.982,
+   "anchored_text": true,
+   "anchored": true,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "3015_2023_p121_03.jpg",
+   "item": "Rea86574b",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0953,
+   "depicted_mean": 0.0497,
+   "topical_p": 1.0,
+   "holistic_p": 0.982,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2528_2023_p099_02.jpg",
+   "item": "R54ef6144",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.974,
+   "holistic_p": 1.0,
+   "anchored_text": true,
+   "anchored": true,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1101_2023_p124_01.jpg",
+   "item": "Rb50f64c8",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.9992,
+   "depicted_mean": 0.7909,
+   "topical_p": 0.9985,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "topical",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1707_2024_p113_03.jpg",
+   "item": "R8eab5548",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.852,
+   "depicted_mean": 0.1087,
+   "topical_p": 1.0,
+   "holistic_p": 0.0474,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2882_2024_p072_04.jpg",
+   "item": "Rf0eec274",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.5,
+   "topical_p": 1.0,
+   "holistic_p": 0.0028,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1101_2024_p012_00.jpg",
+   "item": "Rd6ddaf9f",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0003,
+   "depicted_mean": 0.0,
+   "topical_p": 0.6792,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2739_2024_p056_04.jpg",
+   "item": "Rac111295",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.982,
+   "depicted_mean": 0.1671,
+   "topical_p": 1.0,
+   "holistic_p": 0.9954,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "5519_2024_p085_03.jpg",
+   "item": "R029b99ba",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.3333,
+   "topical_p": 0.011,
+   "holistic_p": 0.9985,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "3230_2024_p019_19.jpg",
+   "item": "R2dcb7765",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.0,
+   "holistic_p": 0.8176,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "topical",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2501_2024_p108_00.jpg",
+   "item": "R8cfd3286",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 1.0,
+   "topical_p": 1.0,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2882_2023_p005_07.jpg",
+   "item": "Re893f74e",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.989,
+   "depicted_mean": 0.525,
+   "topical_p": 1.0,
+   "holistic_p": 0.9998,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1101_2025_p018_01.jpg",
+   "item": "R399167c1",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.9993,
+   "depicted_mean": 0.2098,
+   "topical_p": 0.9997,
+   "holistic_p": 0.9841,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "6693_2024_p100_00.jpg",
+   "item": "R1d94b301",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.5,
+   "topical_p": 0.0,
+   "holistic_p": 0.0067,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2501_2023_p105_02.jpg",
+   "item": "R1db63a5c",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.4997,
+   "topical_p": 0.0,
+   "holistic_p": 0.989,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1707_2023_p073_02.jpg",
+   "item": "R0753c00f",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0675,
+   "depicted_mean": 0.0103,
+   "topical_p": 0.9526,
+   "holistic_p": 0.0007,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1101_2025_p042_03.jpg",
+   "item": "Rce2f713d",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.3354,
+   "topical_p": 1.0,
+   "holistic_p": 0.9985,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "8070_2024_p090_01.jpg",
+   "item": "Raf2971cb",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.001,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "5519_2025_p091_04.jpg",
+   "item": "Rd1cb1cf7",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0022,
+   "depicted_mean": 0.0008,
+   "topical_p": 1.0,
+   "holistic_p": 0.9993,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "7723_2025_p102_01.jpg",
+   "item": "R996fdfc7",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.5472,
+   "topical_p": 1.0,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1101_2024_p023_01.jpg",
+   "item": "R1b876483",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.9999,
+   "holistic_p": 0.9241,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2882_2023_p005_05.jpg",
+   "item": "Ra08501b0",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.9985,
+   "depicted_mean": 0.9729,
+   "topical_p": 0.9999,
+   "holistic_p": 0.3208,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "4540_2023_p077_03.jpg",
+   "item": "R5e7534bc",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.9753,
+   "topical_p": 0.0474,
+   "holistic_p": 0.0601,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2739_2023_p053_01.jpg",
+   "item": "Rc27f20b1",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 1.0,
+   "topical_p": 1.0,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "8070_2024_p089_00.jpg",
+   "item": "R01646155",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 1.0,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "3015_2023_p051_00.jpg",
+   "item": "R3450e454",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 1.0,
+   "holistic_p": null,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "topical",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2882_2024_p124_02.jpg",
+   "item": "R0f4b892f",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.989,
+   "depicted_mean": 0.581,
+   "topical_p": 1.0,
+   "holistic_p": 0.4378,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": true
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "7723_2023_p102_02.jpg",
+   "item": "Rd49a7edd",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.4923,
+   "topical_p": 0.9999,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "4540_2023_p075_01.jpg",
+   "item": "R09def3dc",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.989,
+   "depicted_mean": 0.7742,
+   "topical_p": 0.9995,
+   "holistic_p": 0.0293,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2501_2024_p110_04.jpg",
+   "item": "R524b69c6",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.9978,
+   "depicted_mean": 0.5343,
+   "topical_p": 0.9999,
+   "holistic_p": 0.9998,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": true
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1101_2023_p081_02.jpg",
+   "item": "R1eb3f7ae",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.0159,
+   "holistic_p": 0.9325,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2645_2025_p092_00.jpg",
+   "item": "Rf1e77da7",
+   "level4": "證據",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.3613,
+   "topical_p": 0.9707,
+   "holistic_p": 0.9997,
+   "anchored_text": true,
+   "anchored": true,
+   "label": {
+    "level": "topical",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2882_2023_p085_01.jpg",
+   "item": "R01683cdc",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.8176,
+   "depicted_mean": 0.263,
+   "topical_p": 0.9999,
+   "holistic_p": 0.9991,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "6693_2024_p083_00.jpg",
+   "item": "R89e5454b",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0041,
+   "depicted_mean": 0.0006,
+   "topical_p": 0.1192,
+   "holistic_p": 0.0002,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "topical",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "7723_2024_p090_05.jpg",
+   "item": "Rd75c3451",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.2977,
+   "topical_p": 1.0,
+   "holistic_p": 0.852,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "5519_2025_p085_00.jpg",
+   "item": "Rb85fbff5",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 1.0,
+   "holistic_p": 0.9948,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2739_2025_p070_01.jpg",
+   "item": "R3b03188a",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.5043,
+   "topical_p": 1.0,
+   "holistic_p": 0.9997,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "7723_2023_p099_01.jpg",
+   "item": "R47d660b6",
+   "level4": "證據",
+   "level3": "direct",
+   "depicted_max": 0.9991,
+   "depicted_mean": 0.7203,
+   "topical_p": 0.0009,
+   "holistic_p": 0.9999,
+   "anchored_text": true,
+   "anchored": true,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2610_2025_p011_03.jpg",
+   "item": "R01a9d499",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.0,
+   "holistic_p": 0.0,
+   "anchored_text": true,
+   "anchored": true,
+   "label": {
+    "level": "topical",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2385_2025_p128_04.jpg",
+   "item": "R62841052",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.1667,
+   "topical_p": 1.0,
+   "holistic_p": 0.989,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1707_2023_p099_05.jpg",
+   "item": "Rffe360a6",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.9941,
+   "depicted_mean": 0.1378,
+   "topical_p": 0.9627,
+   "holistic_p": 0.0474,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2645_2025_p049_00.jpg",
+   "item": "R0b3e2994",
+   "level4": "證據",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.25,
+   "topical_p": 0.0,
+   "holistic_p": 0.0002,
+   "anchored_text": true,
+   "anchored": true,
+   "label": {
+    "level": "unrelated",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2645_2025_p018_00.jpg",
+   "item": "Rbd503689",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.7773,
+   "holistic_p": 0.9579,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "unrelated",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "3230_2025_p063_07.jpg",
+   "item": "Rf7ba7771",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.0002,
+   "holistic_p": 0.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1101_2023_p147_01.jpg",
+   "item": "Rf7e82404",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.9526,
+   "depicted_mean": 0.0684,
+   "topical_p": 0.9941,
+   "holistic_p": 0.852,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1707_2023_p099_03.jpg",
+   "item": "R3d6489a4",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.3997,
+   "topical_p": 1.0,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2882_2024_p098_03.jpg",
+   "item": "Rb9336526",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.0003,
+   "holistic_p": null,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": true
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2528_2023_p100_01.jpg",
+   "item": "Re6ce6d64",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 1.0,
+   "holistic_p": 0.9999,
+   "anchored_text": true,
+   "anchored": true,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": true
+  },
+  {
+   "crop": "1464_2023_p077_00.jpg",
+   "item": "Ra486ab05",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.0,
+   "holistic_p": 0.0001,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1455_2024_p050_03.jpg",
+   "item": "R33545a06",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.0,
+   "holistic_p": 0.852,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "1707_2025_p112_04.jpg",
+   "item": "Re5d6502f",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.5478,
+   "topical_p": 0.148,
+   "holistic_p": 0.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2610_2025_p073_00.jpg",
+   "item": "Read7d313",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0001,
+   "depicted_mean": 0.0001,
+   "topical_p": 0.0421,
+   "holistic_p": 0.0141,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "6016_2025_p099_01.jpg",
+   "item": "R45ab05d2",
+   "level4": "證據",
+   "level3": "direct",
+   "depicted_max": 0.9997,
+   "depicted_mean": 0.9991,
+   "topical_p": 1.0,
+   "holistic_p": 1.0,
+   "anchored_text": true,
+   "anchored": true,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": true
+   },
+   "logo_found": true
+  },
+  {
+   "crop": "2528_2024_p073_02.jpg",
+   "item": "Rc2412f21",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.0,
+   "holistic_p": 0.8176,
+   "anchored_text": true,
+   "anchored": true,
+   "label": {
+    "level": "direct",
+    "anchor_text": true,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2739_2025_p002_00.jpg",
+   "item": "R04616be5",
+   "level4": "無關",
+   "level3": "unrelated",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": null,
+   "holistic_p": null,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "unrelated",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "2385_2023_p098_01.jpg",
+   "item": "R382582c6",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 1.0,
+   "depicted_mean": 0.2759,
+   "topical_p": 1.0,
+   "holistic_p": 1.0,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "4906_2025_p137_00.jpg",
+   "item": "R2c57bdfd",
+   "level4": "包裝",
+   "level3": "topical",
+   "depicted_max": 0.0,
+   "depicted_mean": 0.0,
+   "topical_p": 0.9149,
+   "holistic_p": null,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  },
+  {
+   "crop": "4540_2023_p071_01.jpg",
+   "item": "R0011f896",
+   "level4": "示意",
+   "level3": "direct",
+   "depicted_max": 0.9241,
+   "depicted_mean": 0.2039,
+   "topical_p": 0.7773,
+   "holistic_p": 0.0067,
+   "anchored_text": false,
+   "anchored": false,
+   "label": {
+    "level": "direct",
+    "anchor_text": false,
+    "anchor_logo": false
+   },
+   "logo_found": false
+  }
+ ]
+}

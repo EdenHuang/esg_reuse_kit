@@ -1,0 +1,9 @@
+numpy==2.5.4
+pandas==3.0.6
+pillow==13.0.0
+pymupdf==1.28.2
+python-dateutil==2.9.0.post0
+PyYAML==6.0.3
+six==1.17.0
+# 10/18 雲端重跑用的環境（不是 Eden 本機）：Python 3.13.16 | Linux 6.18.44-fc-v139 x86_64
+# 只裝了抽取需要的套件；本機完整環境由 setup_local.ps1 產生 results/env_<日期>.txt

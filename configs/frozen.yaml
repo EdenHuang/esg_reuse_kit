@@ -1,0 +1,518 @@
+frozen_at: 2026-10-27 19:47
+note: Eden confirmed 2026-10-27 19:50 (R-R2 three-level weighted kappa 0.80, checkpoint
+  passed); settings as in configs/default.yaml at commit 126c922
+evidence:
+  llm: Qwen/Qwen2.5-7B-Instruct
+  llm_revision: a09a35458c702b33eeacc393d103063234e8bc28
+  vlm: Qwen/Qwen3-VL-8B-Instruct
+  vlm_revision: 0c351dd01ed87e9c1b53cbc748cba10e6187ff3b
+  vlm_max_pixels: 1003520
+  cnclip: OFA-Sys/chinese-clip-vit-large-patch14
+  cnclip_revision: 660941af70c6ff89ce658a1735404c0f3e536c38
+  context_max_chars: 900
+  ocr_match_threshold: 0.7
+  logo_min_inliers: 40
+measure:
+  depiction: E3_cal
+  prompt: direct_zeroshot
+  shots_per_level: 1
+  cut_p_direct: 0.0017
+  cut_p_unrelated: 0.0002
+  anchors:
+  - ocr
+  - logo
+  e3_examples:
+  - 7723_2024_p090_05.jpg
+  - 2645_2025_p092_00.jpg
+  - 2645_2025_p018_00.jpg
+photo_filter:
+  photo_threshold: 0.1
+  vlm_threshold: 0.98
+reuse:
+  min_inliers: 25
+  min_coverage: 0.3
+  topk: 10
+  stock_topk_other_firms: 5
+logo_refs:
+  ocr_min_score: 0.5
+  ocr_lang: chinese_cht
+prompts_sha256:
+  direct_zeroshot: 3a02eaeee878043dfd17af859604d217830e3956a0843a56584fd5fc205595bf
+  direct_zeroshot_v1: e1545e32dd4579844f06951e52d345ddaf9a0856fa3dd983fdbf75e18477f955
+  gate: d9de2094299e9c52972a0b8c94ede3fbcdbf1b8ae3bb12e4d7731392eb9926cd
+  holistic: bc3adcb62ec90c0b0ff78e1901e9cd02d4fdbe685a39e7f9e62ea7dc20c8f8cb
+  is_photo: ca28e904c12ae6f13affe792e038a17fe141dd8b7490ed80344656141c7a8bab
+  question: fbd1ea36f7802d459eea59d69cc110b878328f209b8600ea3caa66c8a07a5d95
+  section: ea308626021b772596ef86ff37e1d85d68013410372ffec3bd1d438960e424e6
+  topical: d9c45316f7527f89608660512a8dde0b52b4fc3a3066750d2e69de664893ff9d
+  vqa: 69322411afb311ed359f2bf5e57f693a7ba4e5fc637bb0b4ca41dfa7a8e56a11
+thresholds:
+  rules_q3r:
+    m2_no_ocr:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_logo:
+    - max
+    - 0.1
+    - 0.05
+    module2:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_dsg:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_topical:
+    - max
+    - 0.1
+    - null
+    m2_one_question:
+    - one
+    - 0.1
+    - 0.05
+    m2_no_gate:
+    - max
+    - 0.1
+    - 0.05
+    E1:
+    - 0.24
+    - 0.266
+    E2_cal_no_ocr:
+    - 0.0076
+    - 0.0002
+    E2_cal_no_logo:
+    - 0.0076
+    - 0.0002
+    E2_cal:
+    - 0.0076
+    - 0.0002
+    E2: null
+    _source: results/tune_evidence_dev_20261022_2255.json
+  rules_q3e3r:
+    m2_no_ocr:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_logo:
+    - max
+    - 0.1
+    - 0.05
+    module2:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_dsg:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_topical:
+    - max
+    - 0.1
+    - null
+    m2_one_question:
+    - one
+    - 0.1
+    - 0.05
+    m2_no_gate:
+    - max
+    - 0.1
+    - 0.05
+    E3_cal_no_ocr:
+    - 0.0017
+    - 0.0002
+    E3_cal_no_logo:
+    - 0.0017
+    - 0.0002
+    E3_cal:
+    - 0.0017
+    - 0.0002
+    E3: null
+    _source: results/tune_evidence_dev_20261022_2255_2.json
+  M_lr_q3e3r:
+    m2_no_ocr:
+    - max
+    - 0.1
+    - 0.8
+    m2_no_logo:
+    - max
+    - 0.1
+    - 0.8
+    module2:
+    - max
+    - 0.1
+    - 0.8
+    m2_no_dsg:
+    - max
+    - 0.1
+    - 0.8
+    m2_no_topical:
+    - max
+    - 0.1
+    - null
+    m2_one_question:
+    - one
+    - 0.1
+    - 0.05
+    m2_no_gate:
+    - max
+    - 0.1
+    - 0.05
+    E3_cal_no_ocr:
+    - 0.0032
+    - 0.0004
+    E3_cal_no_logo:
+    - 0.0032
+    - 0.0004
+    E3_cal:
+    - 0.0032
+    - 0.0004
+    E3: null
+    _source: results/tune_evidence_dev_20261022_2255_3.json
+  L1_nearest_q3e3r:
+    m2_no_ocr:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_logo:
+    - max
+    - 0.1
+    - 0.05
+    module2:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_dsg:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_topical:
+    - max
+    - 0.1
+    - null
+    m2_one_question:
+    - one
+    - 0.2
+    - 0.05
+    m2_no_gate:
+    - max
+    - 0.1
+    - 0.05
+    E3_cal_no_ocr:
+    - 0.0019
+    - 0.1056
+    E3_cal_no_logo:
+    - 0.0019
+    - 0.1056
+    E3_cal:
+    - 0.0019
+    - 0.1056
+    E3: null
+    _source: results/tune_evidence_dev_20261022_2255_4.json
+  L2_column_q3e3r:
+    m2_no_ocr:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_logo:
+    - max
+    - 0.1
+    - 0.05
+    module2:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_dsg:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_topical:
+    - max
+    - 0.1
+    - null
+    m2_one_question:
+    - one
+    - 0.4
+    - 0.05
+    m2_no_gate:
+    - max
+    - 0.4
+    - 0.05
+    E3_cal_no_ocr:
+    - 0.0004
+    - 0.0001
+    E3_cal_no_logo:
+    - 0.0004
+    - 0.0001
+    E3_cal:
+    - 0.0004
+    - 0.0001
+    E3: null
+    _source: results/tune_evidence_dev_20261022_2255_5.json
+  L3_caption_q3e3r:
+    m2_no_ocr:
+    - max
+    - 0.1
+    - 0.8
+    m2_no_logo:
+    - max
+    - 0.1
+    - 0.8
+    module2:
+    - max
+    - 0.1
+    - 0.8
+    m2_no_dsg:
+    - max
+    - 0.1
+    - 0.8
+    m2_no_topical:
+    - max
+    - 0.1
+    - null
+    m2_one_question:
+    - one
+    - 0.98
+    - 0.8
+    m2_no_gate:
+    - mean
+    - 0.4
+    - 0.05
+    E3_cal_no_ocr:
+    - 0.0002
+    - 0.1476
+    E3_cal_no_logo:
+    - 0.0002
+    - 0.1476
+    E3_cal:
+    - 0.0002
+    - 0.1476
+    E3: null
+    _source: results/tune_evidence_dev_20261022_2256.json
+  L4_heading_q3e3r:
+    m2_no_ocr:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_logo:
+    - max
+    - 0.1
+    - 0.05
+    module2:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_dsg:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_topical:
+    - max
+    - 0.1
+    - null
+    m2_one_question:
+    - one
+    - 0.1
+    - 0.05
+    m2_no_gate:
+    - max
+    - 0.1
+    - 0.05
+    E3_cal_no_ocr:
+    - 0.0001
+    - 0.9988
+    E3_cal_no_logo:
+    - 0.0001
+    - 0.9988
+    E3_cal:
+    - 0.0001
+    - 0.9988
+    E3: null
+    _source: results/tune_evidence_dev_20261022_2256_2.json
+  gold_q3e3r:
+    m2_no_ocr:
+    - max
+    - 0.1
+    - 0.8
+    m2_no_logo:
+    - max
+    - 0.1
+    - 0.8
+    module2:
+    - max
+    - 0.1
+    - 0.8
+    m2_no_dsg:
+    - max
+    - 0.1
+    - 0.8
+    m2_no_topical:
+    - max
+    - 0.1
+    - null
+    m2_one_question:
+    - one
+    - 0.1
+    - 0.8
+    m2_no_gate:
+    - max
+    - 0.1
+    - 0.8
+    E3_cal_no_ocr:
+    - 0.0002
+    - 0.1824
+    E3_cal_no_logo:
+    - 0.0002
+    - 0.1824
+    E3_cal:
+    - 0.0002
+    - 0.1824
+    E3: null
+    _source: results/tune_evidence_dev_20261022_2256_3.json
+  rules_r:
+    m2_no_ocr:
+    - top2
+    - 0.1
+    - 0.1
+    m2_no_logo:
+    - top2
+    - 0.1
+    - 0.1
+    module2:
+    - top2
+    - 0.1
+    - 0.1
+    m2_no_dsg:
+    - top2
+    - 0.1
+    - 0.1
+    m2_no_topical:
+    - top2
+    - 0.1
+    - null
+    m2_one_question:
+    - one
+    - 0.1
+    - 0.1
+    m2_no_gate:
+    - top2
+    - 0.1
+    - 0.1
+    E1:
+    - 0.24
+    - 0.266
+    E2_cal_no_ocr:
+    - 0.0391
+    - 0.934
+    E2_cal_no_logo:
+    - 0.0391
+    - 0.934
+    E2_cal:
+    - 0.0391
+    - 0.934
+    E3_cal_no_ocr:
+    - 0.0121
+    - 0.9732
+    E3_cal_no_logo:
+    - 0.0121
+    - 0.9732
+    E3_cal:
+    - 0.0121
+    - 0.9732
+    E2: null
+    E3: null
+    _source: results/tune_evidence_dev_20261022_2256_4.json
+  rules_e2v1r:
+    m2_no_ocr:
+    - top2
+    - 0.1
+    - 0.1
+    m2_no_logo:
+    - top2
+    - 0.1
+    - 0.1
+    module2:
+    - top2
+    - 0.1
+    - 0.1
+    m2_no_dsg:
+    - top2
+    - 0.1
+    - 0.1
+    m2_no_topical:
+    - top2
+    - 0.1
+    - null
+    m2_one_question:
+    - one
+    - 0.1
+    - 0.1
+    m2_no_gate:
+    - top2
+    - 0.1
+    - 0.1
+    E1:
+    - 0.24
+    - 0.266
+    E2_cal_no_ocr:
+    - 0.0637
+    - 0.7598
+    E2_cal_no_logo:
+    - 0.0637
+    - 0.7598
+    E2_cal:
+    - 0.0637
+    - 0.7598
+    E2: null
+    _source: results/tune_evidence_dev_20261022_2256_5.json
+  rules_q3ivl:
+    m2_no_ocr:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_logo:
+    - max
+    - 0.1
+    - 0.05
+    module2:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_dsg:
+    - max
+    - 0.1
+    - 0.05
+    m2_no_topical:
+    - max
+    - 0.1
+    - null
+    m2_one_question:
+    - one
+    - 0.1
+    - 0.05
+    m2_no_gate:
+    - max
+    - 0.1
+    - 0.05
+    E2_cal_no_ocr:
+    - 0.0776
+    - 0.009
+    E2_cal_no_logo:
+    - 0.0776
+    - 0.009
+    E2_cal:
+    - 0.0776
+    - 0.009
+    E3_cal_no_ocr:
+    - 0.0255
+    - 0.9849
+    E3_cal_no_logo:
+    - 0.0255
+    - 0.9849
+    E3_cal:
+    - 0.0255
+    - 0.9849
+    E2: null
+    E3: null
+    _source: results/tune_evidence_dev_20261022_2323.json

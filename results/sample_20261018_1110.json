@@ -1,0 +1,1549 @@
+{
+ "meta": {
+  "date": "2026-10-18T11:10:19+08:00",
+  "command": "python src/sample_firms.py --population data/population_2023_2025_20261018.csv --names data/firm_names_20261018.csv",
+  "git": {
+   "commit": null,
+   "uncommitted_changes": null,
+   "note": "not run inside a git repository"
+  },
+  "python": "3.13.16",
+  "platform": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39",
+  "packages": {
+   "pymupdf": "1.28.2",
+   "pillow": "13.0.0",
+   "numpy": "2.5.4",
+   "pyyaml": "6.0.3"
+  },
+  "config_file": "configs/default.yaml",
+  "config": "# 所有參數放這裡。標「初值」的門檻只能在開發集上調，11/2 凍結後另存 configs/frozen.yaml。\nseed: 2026\n\npaths:\n  raw: data/raw\n  catalog: data/catalog.csv\n  synthetic: data/synthetic\n  extract: work/extract\n  features: work/features\n  candidates: work/candidates\n  verified: work/verified\n  models: work/models\n  annotations: annotations\n  results: results\n  reports: reports\n\ndata:\n  years: [2023, 2024, 2025]        # 報告年度（報告涵蓋的會計年度）\n  n_firms: 150\n  n_dev: 30                        # 以公司為單位\n  dev_must_include: [\"1101\", \"1707\"]   # 台泥、葡萄王\n\nextract:\n  crop_long_side: 1024\n  jpg_quality: 90\n\nphoto_filter:\n  model: ViT-L-14\n  pretrained: openai\n  exclude_first_last_page: true\n  photo_prompts: [\"a photograph of a real scene\", \"a photograph of people\"]\n  nonphoto_prompts: [\"an illustration\", \"a chart or infographic\", \"a logo or icon\",\n                     \"a scanned certificate or document\", \"an abstract graphic design\"]\n\nretrieve:\n  global_models: [dinov2_vitb14, sscd_disc_mixup]\n  topk: 10\n  years_back: [1, 2]               # t 年對 t-1、t-2\n  use_flip: true\n\nverify:\n  max_keypoints: 2048\n  matcher: superpoint_lightglue    # 對照：sift_ratio0.8\n  ransac: magsac\n  reproj_threshold_px: 8.0         # 初值\n  min_inliers: 25                  # 初值\n  min_coverage: 0.30               # 初值：內點涵蓋較小那張圖的比例\n  min_ssim: 0.60                   # 初值：對齊後重疊區的 SSIM\n\nsynthetic:\n  n_pos: 2000\n  n_neg: 10000\n  crop_keep_area: [0.5, 0.9]\n  brightness_contrast: 0.30\n  saturation: 0.50\n  hue_deg: 10\n  overlay_text_area: [0.10, 0.30]\n  jpeg_quality: [50, 90]\n  downscale: [0.5, 0.8]\n  collage_area: [0.40, 0.70]\n\nanalysis:\n  text_sim_max: 0.5                # 兩年旁邊文字相似度低於這個值算「說法換了」；論文要報敏感度\n  text_ngram: 3                    # 字元三元組 TF-IDF\n  year_cues:\n    2023: [\"2023\", \"112年\", \"112 年\"]\n    2024: [\"2024\", \"113年\", \"113 年\"]\n    2025: [\"2025\", \"114年\", \"114 年\"]\n\nevaluation:\n  bootstrap_unit: firm\n  bootstrap_n: 2000\n  ci: 0.95\n",
+  "data_sha256": {
+   "data/population_2023_2025_20261018.csv": "e8fdea8b6f0d47e7800e0a28583f3bdcfc04f3966514735278b86b53f15615de",
+   "data/firm_names_20261018.csv": "ad3918c128b07ed94fa0377cc4c51ed2cc1f8921fd7a4f1f73bc0a2aeb665bb6"
+  }
+ },
+ "seed": 2026,
+ "method": "seats proportional to industry size (n * N_h / N), largest-remainder rounding\n(ties: smaller industry code first). An industry holding a must-include firm\n(configs: data.dev_must_include) gets at least one seat.\nSelection: inside each industry the must-include firms come first, then the other firms in\nthe order of sha256(\"{seed}:{firm_id}\") -- a seeded random order that comes out the same on\nevery machine, operating system and Python version.\nSplit (by firm): must-include firms go to dev; the other sampled firms are ordered by\nsha256(\"{seed}:split:{firm_id}\"); the first n_dev - len(must_include) go to dev, the rest to test.",
+ "population_file": "data/population_2023_2025_20261018.csv",
+ "population_sha256": "e8fdea8b6f0d47e7800e0a28583f3bdcfc04f3966514735278b86b53f15615de",
+ "catalog_file": "data/catalog.csv",
+ "catalog_sha256": "923d73f6328b1c353d550e62d6c7f4f28f866274e383cdd94e6dd1437454fbf3",
+ "summary": {
+  "population": 1069,
+  "population_market": {
+   "TWSE": 723,
+   "TPEx": 346
+  },
+  "sampled": 150,
+  "sample_market": {
+   "TWSE": 102,
+   "TPEx": 48
+  },
+  "dev": 30,
+  "test": 120,
+  "industries": 33,
+  "industries_sampled": 33,
+  "catalog_rows": 450
+ },
+ "allocation": [
+  {
+   "industry_code": "01",
+   "industry": "水泥工業",
+   "population": 7,
+   "quota": 0.9822,
+   "seats": 1,
+   "dev": 1,
+   "test": 0
+  },
+  {
+   "industry_code": "02",
+   "industry": "食品工業",
+   "population": 28,
+   "quota": 3.9289,
+   "seats": 4,
+   "dev": 0,
+   "test": 4
+  },
+  {
+   "industry_code": "03",
+   "industry": "塑膠工業",
+   "population": 19,
+   "quota": 2.666,
+   "seats": 3,
+   "dev": 0,
+   "test": 3
+  },
+  {
+   "industry_code": "04",
+   "industry": "紡織纖維",
+   "population": 27,
+   "quota": 3.7886,
+   "seats": 4,
+   "dev": 2,
+   "test": 2
+  },
+  {
+   "industry_code": "05",
+   "industry": "電機機械",
+   "population": 44,
+   "quota": 6.174,
+   "seats": 6,
+   "dev": 1,
+   "test": 5
+  },
+  {
+   "industry_code": "06",
+   "industry": "電器電纜",
+   "population": 8,
+   "quota": 1.1225,
+   "seats": 1,
+   "dev": 0,
+   "test": 1
+  },
+  {
+   "industry_code": "08",
+   "industry": "玻璃陶瓷",
+   "population": 4,
+   "quota": 0.5613,
+   "seats": 1,
+   "dev": 0,
+   "test": 1
+  },
+  {
+   "industry_code": "09",
+   "industry": "造紙工業",
+   "population": 6,
+   "quota": 0.8419,
+   "seats": 1,
+   "dev": 0,
+   "test": 1
+  },
+  {
+   "industry_code": "10",
+   "industry": "鋼鐵工業",
+   "population": 35,
+   "quota": 4.9111,
+   "seats": 5,
+   "dev": 1,
+   "test": 4
+  },
+  {
+   "industry_code": "11",
+   "industry": "橡膠工業",
+   "population": 10,
+   "quota": 1.4032,
+   "seats": 1,
+   "dev": 1,
+   "test": 0
+  },
+  {
+   "industry_code": "12",
+   "industry": "汽車工業",
+   "population": 17,
+   "quota": 2.3854,
+   "seats": 2,
+   "dev": 0,
+   "test": 2
+  },
+  {
+   "industry_code": "14",
+   "industry": "建材營造",
+   "population": 56,
+   "quota": 7.8578,
+   "seats": 8,
+   "dev": 3,
+   "test": 5
+  },
+  {
+   "industry_code": "15",
+   "industry": "航運業",
+   "population": 25,
+   "quota": 3.508,
+   "seats": 4,
+   "dev": 2,
+   "test": 2
+  },
+  {
+   "industry_code": "16",
+   "industry": "觀光餐旅",
+   "population": 29,
+   "quota": 4.0692,
+   "seats": 4,
+   "dev": 2,
+   "test": 2
+  },
+  {
+   "industry_code": "17",
+   "industry": "金融保險業",
+   "population": 39,
+   "quota": 5.4724,
+   "seats": 5,
+   "dev": 2,
+   "test": 3
+  },
+  {
+   "industry_code": "18",
+   "industry": "貿易百貨",
+   "population": 10,
+   "quota": 1.4032,
+   "seats": 1,
+   "dev": 0,
+   "test": 1
+  },
+  {
+   "industry_code": "20",
+   "industry": "其他",
+   "population": 43,
+   "quota": 6.0337,
+   "seats": 6,
+   "dev": 1,
+   "test": 5
+  },
+  {
+   "industry_code": "21",
+   "industry": "化學工業",
+   "population": 41,
+   "quota": 5.753,
+   "seats": 6,
+   "dev": 0,
+   "test": 6
+  },
+  {
+   "industry_code": "22",
+   "industry": "生技醫療業",
+   "population": 68,
+   "quota": 9.5416,
+   "seats": 10,
+   "dev": 3,
+   "test": 7
+  },
+  {
+   "industry_code": "23",
+   "industry": "油電燃氣業",
+   "population": 9,
+   "quota": 1.2629,
+   "seats": 1,
+   "dev": 0,
+   "test": 1
+  },
+  {
+   "industry_code": "24",
+   "industry": "半導體業",
+   "population": 115,
+   "quota": 16.1366,
+   "seats": 16,
+   "dev": 1,
+   "test": 15
+  },
+  {
+   "industry_code": "25",
+   "industry": "電腦及週邊設備業",
+   "population": 71,
+   "quota": 9.9626,
+   "seats": 10,
+   "dev": 1,
+   "test": 9
+  },
+  {
+   "industry_code": "26",
+   "industry": "光電業",
+   "population": 54,
+   "quota": 7.5772,
+   "seats": 8,
+   "dev": 3,
+   "test": 5
+  },
+  {
+   "industry_code": "27",
+   "industry": "通信網路業",
+   "population": 48,
+   "quota": 6.7353,
+   "seats": 7,
+   "dev": 1,
+   "test": 6
+  },
+  {
+   "industry_code": "28",
+   "industry": "電子零組件業",
+   "population": 107,
+   "quota": 15.014,
+   "seats": 15,
+   "dev": 3,
+   "test": 12
+  },
+  {
+   "industry_code": "29",
+   "industry": "電子通路業",
+   "population": 17,
+   "quota": 2.3854,
+   "seats": 2,
+   "dev": 1,
+   "test": 1
+  },
+  {
+   "industry_code": "30",
+   "industry": "資訊服務業",
+   "population": 20,
+   "quota": 2.8064,
+   "seats": 3,
+   "dev": 1,
+   "test": 2
+  },
+  {
+   "industry_code": "31",
+   "industry": "其他電子業",
+   "population": 43,
+   "quota": 6.0337,
+   "seats": 6,
+   "dev": 0,
+   "test": 6
+  },
+  {
+   "industry_code": "32",
+   "industry": "文化創意業",
+   "population": 10,
+   "quota": 1.4032,
+   "seats": 1,
+   "dev": 0,
+   "test": 1
+  },
+  {
+   "industry_code": "35",
+   "industry": "綠能環保",
+   "population": 18,
+   "quota": 2.5257,
+   "seats": 3,
+   "dev": 0,
+   "test": 3
+  },
+  {
+   "industry_code": "36",
+   "industry": "數位雲端",
+   "population": 10,
+   "quota": 1.4032,
+   "seats": 1,
+   "dev": 0,
+   "test": 1
+  },
+  {
+   "industry_code": "37",
+   "industry": "運動休閒",
+   "population": 15,
+   "quota": 2.1048,
+   "seats": 2,
+   "dev": 0,
+   "test": 2
+  },
+  {
+   "industry_code": "38",
+   "industry": "居家生活",
+   "population": 16,
+   "quota": 2.2451,
+   "seats": 2,
+   "dev": 0,
+   "test": 2
+  }
+ ],
+ "sample": [
+  {
+   "firm_id": "1101",
+   "firm_name": "台泥",
+   "market": "TWSE",
+   "industry_code": "01",
+   "industry": "水泥工業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "1217",
+   "firm_name": "愛之味",
+   "market": "TWSE",
+   "industry_code": "02",
+   "industry": "食品工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "1227",
+   "firm_name": "佳格",
+   "market": "TWSE",
+   "industry_code": "02",
+   "industry": "食品工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "1232",
+   "firm_name": "大統益",
+   "market": "TWSE",
+   "industry_code": "02",
+   "industry": "食品工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "1314",
+   "firm_name": "中石化",
+   "market": "TWSE",
+   "industry_code": "03",
+   "industry": "塑膠工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "1323",
+   "firm_name": "永裕",
+   "market": "TWSE",
+   "industry_code": "03",
+   "industry": "塑膠工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "1402",
+   "firm_name": "遠東新",
+   "market": "TWSE",
+   "industry_code": "04",
+   "industry": "紡織纖維",
+   "split": "test"
+  },
+  {
+   "firm_id": "1416",
+   "firm_name": "廣豐",
+   "market": "TWSE",
+   "industry_code": "20",
+   "industry": "其他",
+   "split": "test"
+  },
+  {
+   "firm_id": "1419",
+   "firm_name": "新紡",
+   "market": "TWSE",
+   "industry_code": "04",
+   "industry": "紡織纖維",
+   "split": "test"
+  },
+  {
+   "firm_id": "1455",
+   "firm_name": "集盛",
+   "market": "TWSE",
+   "industry_code": "04",
+   "industry": "紡織纖維",
+   "split": "dev"
+  },
+  {
+   "firm_id": "1464",
+   "firm_name": "得力",
+   "market": "TWSE",
+   "industry_code": "04",
+   "industry": "紡織纖維",
+   "split": "dev"
+  },
+  {
+   "firm_id": "1513",
+   "firm_name": "中興電",
+   "market": "TWSE",
+   "industry_code": "05",
+   "industry": "電機機械",
+   "split": "test"
+  },
+  {
+   "firm_id": "1535",
+   "firm_name": "中宇",
+   "market": "TWSE",
+   "industry_code": "05",
+   "industry": "電機機械",
+   "split": "test"
+  },
+  {
+   "firm_id": "1612",
+   "firm_name": "宏泰",
+   "market": "TWSE",
+   "industry_code": "06",
+   "industry": "電器電纜",
+   "split": "test"
+  },
+  {
+   "firm_id": "1707",
+   "firm_name": "葡萄王",
+   "market": "TWSE",
+   "industry_code": "22",
+   "industry": "生技醫療業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "1737",
+   "firm_name": "臺鹽",
+   "market": "TWSE",
+   "industry_code": "02",
+   "industry": "食品工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "1776",
+   "firm_name": "展宇",
+   "market": "TWSE",
+   "industry_code": "21",
+   "industry": "化學工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "1785",
+   "firm_name": "光洋科",
+   "market": "TPEx",
+   "industry_code": "31",
+   "industry": "其他電子業",
+   "split": "test"
+  },
+  {
+   "firm_id": "1802",
+   "firm_name": "台玻",
+   "market": "TWSE",
+   "industry_code": "08",
+   "industry": "玻璃陶瓷",
+   "split": "test"
+  },
+  {
+   "firm_id": "2028",
+   "firm_name": "威致",
+   "market": "TWSE",
+   "industry_code": "10",
+   "industry": "鋼鐵工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2063",
+   "firm_name": "世鎧精密",
+   "market": "TPEx",
+   "industry_code": "10",
+   "industry": "鋼鐵工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2065",
+   "firm_name": "世豐",
+   "market": "TPEx",
+   "industry_code": "10",
+   "industry": "鋼鐵工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2102",
+   "firm_name": "泰豐",
+   "market": "TWSE",
+   "industry_code": "11",
+   "industry": "橡膠工業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "2115",
+   "firm_name": "六暉-KY",
+   "market": "TWSE",
+   "industry_code": "12",
+   "industry": "汽車工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2312",
+   "firm_name": "金寶",
+   "market": "TWSE",
+   "industry_code": "31",
+   "industry": "其他電子業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2331",
+   "firm_name": "精英",
+   "market": "TWSE",
+   "industry_code": "25",
+   "industry": "電腦及週邊設備業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2332",
+   "firm_name": "友訊",
+   "market": "TWSE",
+   "industry_code": "27",
+   "industry": "通信網路業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2337",
+   "firm_name": "旺宏",
+   "market": "TWSE",
+   "industry_code": "24",
+   "industry": "半導體業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2362",
+   "firm_name": "藍天",
+   "market": "TWSE",
+   "industry_code": "25",
+   "industry": "電腦及週邊設備業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2367",
+   "firm_name": "燿華",
+   "market": "TWSE",
+   "industry_code": "28",
+   "industry": "電子零組件業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2376",
+   "firm_name": "技嘉",
+   "market": "TWSE",
+   "industry_code": "25",
+   "industry": "電腦及週邊設備業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2385",
+   "firm_name": "群光",
+   "market": "TWSE",
+   "industry_code": "28",
+   "industry": "電子零組件業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "2392",
+   "firm_name": "正崴",
+   "market": "TWSE",
+   "industry_code": "28",
+   "industry": "電子零組件業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2395",
+   "firm_name": "研華",
+   "market": "TWSE",
+   "industry_code": "25",
+   "industry": "電腦及週邊設備業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2423",
+   "firm_name": "固緯",
+   "market": "TWSE",
+   "industry_code": "31",
+   "industry": "其他電子業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2450",
+   "firm_name": "神腦",
+   "market": "TWSE",
+   "industry_code": "27",
+   "industry": "通信網路業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2454",
+   "firm_name": "聯發科",
+   "market": "TWSE",
+   "industry_code": "24",
+   "industry": "半導體業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2455",
+   "firm_name": "全新",
+   "market": "TWSE",
+   "industry_code": "27",
+   "industry": "通信網路業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2480",
+   "firm_name": "敦陽科",
+   "market": "TWSE",
+   "industry_code": "30",
+   "industry": "資訊服務業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2481",
+   "firm_name": "強茂",
+   "market": "TWSE",
+   "industry_code": "24",
+   "industry": "半導體業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2484",
+   "firm_name": "希華",
+   "market": "TWSE",
+   "industry_code": "28",
+   "industry": "電子零組件業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2492",
+   "firm_name": "華新科",
+   "market": "TWSE",
+   "industry_code": "28",
+   "industry": "電子零組件業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2495",
+   "firm_name": "普安",
+   "market": "TWSE",
+   "industry_code": "25",
+   "industry": "電腦及週邊設備業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2498",
+   "firm_name": "宏達電",
+   "market": "TWSE",
+   "industry_code": "27",
+   "industry": "通信網路業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2501",
+   "firm_name": "國建",
+   "market": "TWSE",
+   "industry_code": "14",
+   "industry": "建材營造",
+   "split": "dev"
+  },
+  {
+   "firm_id": "2528",
+   "firm_name": "皇普",
+   "market": "TWSE",
+   "industry_code": "14",
+   "industry": "建材營造",
+   "split": "dev"
+  },
+  {
+   "firm_id": "2530",
+   "firm_name": "華建",
+   "market": "TWSE",
+   "industry_code": "14",
+   "industry": "建材營造",
+   "split": "test"
+  },
+  {
+   "firm_id": "2545",
+   "firm_name": "皇翔",
+   "market": "TWSE",
+   "industry_code": "14",
+   "industry": "建材營造",
+   "split": "test"
+  },
+  {
+   "firm_id": "2610",
+   "firm_name": "華航",
+   "market": "TWSE",
+   "industry_code": "15",
+   "industry": "航運業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "2641",
+   "firm_name": "正德",
+   "market": "TPEx",
+   "industry_code": "15",
+   "industry": "航運業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2642",
+   "firm_name": "宅配通",
+   "market": "TWSE",
+   "industry_code": "15",
+   "industry": "航運業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2645",
+   "firm_name": "長榮航太",
+   "market": "TWSE",
+   "industry_code": "15",
+   "industry": "航運業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "2739",
+   "firm_name": "寒舍",
+   "market": "TWSE",
+   "industry_code": "16",
+   "industry": "觀光餐旅",
+   "split": "dev"
+  },
+  {
+   "firm_id": "2748",
+   "firm_name": "雲品",
+   "market": "TWSE",
+   "industry_code": "16",
+   "industry": "觀光餐旅",
+   "split": "test"
+  },
+  {
+   "firm_id": "2882",
+   "firm_name": "國泰金",
+   "market": "TWSE",
+   "industry_code": "17",
+   "industry": "金融保險業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "2892",
+   "firm_name": "第一金",
+   "market": "TWSE",
+   "industry_code": "17",
+   "industry": "金融保險業",
+   "split": "test"
+  },
+  {
+   "firm_id": "2915",
+   "firm_name": "潤泰全",
+   "market": "TWSE",
+   "industry_code": "18",
+   "industry": "貿易百貨",
+   "split": "test"
+  },
+  {
+   "firm_id": "3015",
+   "firm_name": "全漢",
+   "market": "TWSE",
+   "industry_code": "28",
+   "industry": "電子零組件業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "3026",
+   "firm_name": "禾伸堂",
+   "market": "TWSE",
+   "industry_code": "28",
+   "industry": "電子零組件業",
+   "split": "test"
+  },
+  {
+   "firm_id": "3031",
+   "firm_name": "佰鴻",
+   "market": "TWSE",
+   "industry_code": "26",
+   "industry": "光電業",
+   "split": "test"
+  },
+  {
+   "firm_id": "3034",
+   "firm_name": "聯詠",
+   "market": "TWSE",
+   "industry_code": "24",
+   "industry": "半導體業",
+   "split": "test"
+  },
+  {
+   "firm_id": "3071",
+   "firm_name": "協禧",
+   "market": "TPEx",
+   "industry_code": "25",
+   "industry": "電腦及週邊設備業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "3131",
+   "firm_name": "弘塑",
+   "market": "TPEx",
+   "industry_code": "24",
+   "industry": "半導體業",
+   "split": "test"
+  },
+  {
+   "firm_id": "3230",
+   "firm_name": "錦明",
+   "market": "TPEx",
+   "industry_code": "26",
+   "industry": "光電業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "3231",
+   "firm_name": "緯創",
+   "market": "TWSE",
+   "industry_code": "25",
+   "industry": "電腦及週邊設備業",
+   "split": "test"
+  },
+  {
+   "firm_id": "3265",
+   "firm_name": "台星科",
+   "market": "TPEx",
+   "industry_code": "24",
+   "industry": "半導體業",
+   "split": "test"
+  },
+  {
+   "firm_id": "3293",
+   "firm_name": "鈊象",
+   "market": "TPEx",
+   "industry_code": "32",
+   "industry": "文化創意業",
+   "split": "test"
+  },
+  {
+   "firm_id": "3325",
+   "firm_name": "旭品",
+   "market": "TPEx",
+   "industry_code": "25",
+   "industry": "電腦及週邊設備業",
+   "split": "test"
+  },
+  {
+   "firm_id": "3362",
+   "firm_name": "先進光",
+   "market": "TPEx",
+   "industry_code": "26",
+   "industry": "光電業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "3653",
+   "firm_name": "健策",
+   "market": "TWSE",
+   "industry_code": "28",
+   "industry": "電子零組件業",
+   "split": "test"
+  },
+  {
+   "firm_id": "3679",
+   "firm_name": "新至陞",
+   "market": "TWSE",
+   "industry_code": "28",
+   "industry": "電子零組件業",
+   "split": "test"
+  },
+  {
+   "firm_id": "3711",
+   "firm_name": "日月光投控",
+   "market": "TWSE",
+   "industry_code": "24",
+   "industry": "半導體業",
+   "split": "test"
+  },
+  {
+   "firm_id": "4105",
+   "firm_name": "東洋",
+   "market": "TPEx",
+   "industry_code": "22",
+   "industry": "生技醫療業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "4121",
+   "firm_name": "優盛",
+   "market": "TPEx",
+   "industry_code": "22",
+   "industry": "生技醫療業",
+   "split": "test"
+  },
+  {
+   "firm_id": "4126",
+   "firm_name": "太醫",
+   "market": "TPEx",
+   "industry_code": "22",
+   "industry": "生技醫療業",
+   "split": "test"
+  },
+  {
+   "firm_id": "4128",
+   "firm_name": "中天",
+   "market": "TPEx",
+   "industry_code": "22",
+   "industry": "生技醫療業",
+   "split": "test"
+  },
+  {
+   "firm_id": "4174",
+   "firm_name": "浩鼎",
+   "market": "TPEx",
+   "industry_code": "22",
+   "industry": "生技醫療業",
+   "split": "test"
+  },
+  {
+   "firm_id": "4306",
+   "firm_name": "炎洲",
+   "market": "TWSE",
+   "industry_code": "03",
+   "industry": "塑膠工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "4419",
+   "firm_name": "皇家美食",
+   "market": "TPEx",
+   "industry_code": "16",
+   "industry": "觀光餐旅",
+   "split": "test"
+  },
+  {
+   "firm_id": "4506",
+   "firm_name": "崇友",
+   "market": "TPEx",
+   "industry_code": "05",
+   "industry": "電機機械",
+   "split": "test"
+  },
+  {
+   "firm_id": "4540",
+   "firm_name": "全球傳動",
+   "market": "TWSE",
+   "industry_code": "05",
+   "industry": "電機機械",
+   "split": "dev"
+  },
+  {
+   "firm_id": "4549",
+   "firm_name": "桓達",
+   "market": "TPEx",
+   "industry_code": "05",
+   "industry": "電機機械",
+   "split": "test"
+  },
+  {
+   "firm_id": "4558",
+   "firm_name": "寶緯",
+   "market": "TPEx",
+   "industry_code": "05",
+   "industry": "電機機械",
+   "split": "test"
+  },
+  {
+   "firm_id": "4706",
+   "firm_name": "大恭",
+   "market": "TPEx",
+   "industry_code": "21",
+   "industry": "化學工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "4707",
+   "firm_name": "磐亞",
+   "market": "TPEx",
+   "industry_code": "21",
+   "industry": "化學工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "4714",
+   "firm_name": "永捷",
+   "market": "TPEx",
+   "industry_code": "21",
+   "industry": "化學工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "4755",
+   "firm_name": "三福化",
+   "market": "TWSE",
+   "industry_code": "21",
+   "industry": "化學工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "4764",
+   "firm_name": "雙鍵",
+   "market": "TWSE",
+   "industry_code": "21",
+   "industry": "化學工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "4906",
+   "firm_name": "正文",
+   "market": "TWSE",
+   "industry_code": "27",
+   "industry": "通信網路業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "4927",
+   "firm_name": "泰鼎-KY",
+   "market": "TWSE",
+   "industry_code": "28",
+   "industry": "電子零組件業",
+   "split": "test"
+  },
+  {
+   "firm_id": "4934",
+   "firm_name": "太極",
+   "market": "TWSE",
+   "industry_code": "26",
+   "industry": "光電業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "4949",
+   "firm_name": "有成精密",
+   "market": "TWSE",
+   "industry_code": "26",
+   "industry": "光電業",
+   "split": "test"
+  },
+  {
+   "firm_id": "4961",
+   "firm_name": "天鈺",
+   "market": "TWSE",
+   "industry_code": "24",
+   "industry": "半導體業",
+   "split": "test"
+  },
+  {
+   "firm_id": "4979",
+   "firm_name": "華星光",
+   "market": "TPEx",
+   "industry_code": "27",
+   "industry": "通信網路業",
+   "split": "test"
+  },
+  {
+   "firm_id": "5009",
+   "firm_name": "榮剛",
+   "market": "TPEx",
+   "industry_code": "10",
+   "industry": "鋼鐵工業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "5201",
+   "firm_name": "凱衛",
+   "market": "TPEx",
+   "industry_code": "30",
+   "industry": "資訊服務業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "5213",
+   "firm_name": "亞昕",
+   "market": "TPEx",
+   "industry_code": "14",
+   "industry": "建材營造",
+   "split": "test"
+  },
+  {
+   "firm_id": "5312",
+   "firm_name": "寶島科",
+   "market": "TPEx",
+   "industry_code": "22",
+   "industry": "生技醫療業",
+   "split": "test"
+  },
+  {
+   "firm_id": "5426",
+   "firm_name": "振發",
+   "market": "TPEx",
+   "industry_code": "25",
+   "industry": "電腦及週邊設備業",
+   "split": "test"
+  },
+  {
+   "firm_id": "5515",
+   "firm_name": "建國",
+   "market": "TWSE",
+   "industry_code": "14",
+   "industry": "建材營造",
+   "split": "test"
+  },
+  {
+   "firm_id": "5519",
+   "firm_name": "隆大",
+   "market": "TWSE",
+   "industry_code": "14",
+   "industry": "建材營造",
+   "split": "dev"
+  },
+  {
+   "firm_id": "5522",
+   "firm_name": "遠雄",
+   "market": "TWSE",
+   "industry_code": "14",
+   "industry": "建材營造",
+   "split": "test"
+  },
+  {
+   "firm_id": "5878",
+   "firm_name": "台名",
+   "market": "TPEx",
+   "industry_code": "17",
+   "industry": "金融保險業",
+   "split": "test"
+  },
+  {
+   "firm_id": "5880",
+   "firm_name": "合庫金",
+   "market": "TWSE",
+   "industry_code": "17",
+   "industry": "金融保險業",
+   "split": "test"
+  },
+  {
+   "firm_id": "5902",
+   "firm_name": "德記",
+   "market": "TPEx",
+   "industry_code": "38",
+   "industry": "居家生活",
+   "split": "test"
+  },
+  {
+   "firm_id": "6016",
+   "firm_name": "康和證",
+   "market": "TPEx",
+   "industry_code": "17",
+   "industry": "金融保險業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "6116",
+   "firm_name": "彩晶",
+   "market": "TWSE",
+   "industry_code": "26",
+   "industry": "光電業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6120",
+   "firm_name": "達運",
+   "market": "TWSE",
+   "industry_code": "26",
+   "industry": "光電業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6142",
+   "firm_name": "友勁",
+   "market": "TWSE",
+   "industry_code": "27",
+   "industry": "通信網路業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6248",
+   "firm_name": "沛波",
+   "market": "TPEx",
+   "industry_code": "10",
+   "industry": "鋼鐵工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6269",
+   "firm_name": "台郡",
+   "market": "TWSE",
+   "industry_code": "28",
+   "industry": "電子零組件業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6271",
+   "firm_name": "同欣電",
+   "market": "TWSE",
+   "industry_code": "24",
+   "industry": "半導體業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6281",
+   "firm_name": "全國電",
+   "market": "TWSE",
+   "industry_code": "29",
+   "industry": "電子通路業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6409",
+   "firm_name": "旭隼",
+   "market": "TWSE",
+   "industry_code": "31",
+   "industry": "其他電子業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6464",
+   "firm_name": "台數科",
+   "market": "TWSE",
+   "industry_code": "20",
+   "industry": "其他",
+   "split": "test"
+  },
+  {
+   "firm_id": "6491",
+   "firm_name": "晶碩",
+   "market": "TWSE",
+   "industry_code": "22",
+   "industry": "生技醫療業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6499",
+   "firm_name": "益安",
+   "market": "TPEx",
+   "industry_code": "22",
+   "industry": "生技醫療業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "6538",
+   "firm_name": "倉和",
+   "market": "TPEx",
+   "industry_code": "28",
+   "industry": "電子零組件業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6552",
+   "firm_name": "易華電",
+   "market": "TWSE",
+   "industry_code": "24",
+   "industry": "半導體業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6576",
+   "firm_name": "逸達",
+   "market": "TPEx",
+   "industry_code": "22",
+   "industry": "生技醫療業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6593",
+   "firm_name": "台灣銘板",
+   "market": "TPEx",
+   "industry_code": "30",
+   "industry": "資訊服務業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6605",
+   "firm_name": "帝寶",
+   "market": "TWSE",
+   "industry_code": "12",
+   "industry": "汽車工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6670",
+   "firm_name": "復盛應用",
+   "market": "TWSE",
+   "industry_code": "37",
+   "industry": "運動休閒",
+   "split": "test"
+  },
+  {
+   "firm_id": "6689",
+   "firm_name": "伊雲谷",
+   "market": "TWSE",
+   "industry_code": "36",
+   "industry": "數位雲端",
+   "split": "test"
+  },
+  {
+   "firm_id": "6691",
+   "firm_name": "洋基工程",
+   "market": "TWSE",
+   "industry_code": "31",
+   "industry": "其他電子業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6693",
+   "firm_name": "廣閎科",
+   "market": "TPEx",
+   "industry_code": "24",
+   "industry": "半導體業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "6716",
+   "firm_name": "應廣",
+   "market": "TPEx",
+   "industry_code": "24",
+   "industry": "半導體業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6790",
+   "firm_name": "永豐實",
+   "market": "TWSE",
+   "industry_code": "09",
+   "industry": "造紙工業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6823",
+   "firm_name": "濾能",
+   "market": "TPEx",
+   "industry_code": "24",
+   "industry": "半導體業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6854",
+   "firm_name": "錼創科技-KY創",
+   "market": "TWSE",
+   "industry_code": "24",
+   "industry": "半導體業",
+   "split": "test"
+  },
+  {
+   "firm_id": "6968",
+   "firm_name": "萬達寵物",
+   "market": "TPEx",
+   "industry_code": "38",
+   "industry": "居家生活",
+   "split": "test"
+  },
+  {
+   "firm_id": "7723",
+   "firm_name": "築間",
+   "market": "TPEx",
+   "industry_code": "16",
+   "industry": "觀光餐旅",
+   "split": "dev"
+  },
+  {
+   "firm_id": "8016",
+   "firm_name": "矽創",
+   "market": "TWSE",
+   "industry_code": "24",
+   "industry": "半導體業",
+   "split": "test"
+  },
+  {
+   "firm_id": "8021",
+   "firm_name": "尖點",
+   "market": "TWSE",
+   "industry_code": "31",
+   "industry": "其他電子業",
+   "split": "test"
+  },
+  {
+   "firm_id": "8046",
+   "firm_name": "南電",
+   "market": "TWSE",
+   "industry_code": "28",
+   "industry": "電子零組件業",
+   "split": "test"
+  },
+  {
+   "firm_id": "8069",
+   "firm_name": "元太",
+   "market": "TPEx",
+   "industry_code": "26",
+   "industry": "光電業",
+   "split": "test"
+  },
+  {
+   "firm_id": "8070",
+   "firm_name": "長華*",
+   "market": "TWSE",
+   "industry_code": "29",
+   "industry": "電子通路業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "8150",
+   "firm_name": "南茂",
+   "market": "TWSE",
+   "industry_code": "24",
+   "industry": "半導體業",
+   "split": "test"
+  },
+  {
+   "firm_id": "8163",
+   "firm_name": "達方",
+   "market": "TWSE",
+   "industry_code": "25",
+   "industry": "電腦及週邊設備業",
+   "split": "test"
+  },
+  {
+   "firm_id": "8171",
+   "firm_name": "天宇",
+   "market": "TPEx",
+   "industry_code": "35",
+   "industry": "綠能環保",
+   "split": "test"
+  },
+  {
+   "firm_id": "8182",
+   "firm_name": "加高",
+   "market": "TPEx",
+   "industry_code": "28",
+   "industry": "電子零組件業",
+   "split": "test"
+  },
+  {
+   "firm_id": "8289",
+   "firm_name": "泰藝",
+   "market": "TPEx",
+   "industry_code": "28",
+   "industry": "電子零組件業",
+   "split": "dev"
+  },
+  {
+   "firm_id": "8426",
+   "firm_name": "紅木-KY",
+   "market": "TPEx",
+   "industry_code": "20",
+   "industry": "其他",
+   "split": "dev"
+  },
+  {
+   "firm_id": "8466",
+   "firm_name": "美吉吉-KY",
+   "market": "TWSE",
+   "industry_code": "20",
+   "industry": "其他",
+   "split": "test"
+  },
+  {
+   "firm_id": "8473",
+   "firm_name": "山林水",
+   "market": "TWSE",
+   "industry_code": "35",
+   "industry": "綠能環保",
+   "split": "test"
+  },
+  {
+   "firm_id": "8476",
+   "firm_name": "台境*",
+   "market": "TWSE",
+   "industry_code": "35",
+   "industry": "綠能環保",
+   "split": "test"
+  },
+  {
+   "firm_id": "8929",
+   "firm_name": "富堡",
+   "market": "TPEx",
+   "industry_code": "20",
+   "industry": "其他",
+   "split": "test"
+  },
+  {
+   "firm_id": "9910",
+   "firm_name": "豐泰",
+   "market": "TWSE",
+   "industry_code": "37",
+   "industry": "運動休閒",
+   "split": "test"
+  },
+  {
+   "firm_id": "9933",
+   "firm_name": "中鼎",
+   "market": "TWSE",
+   "industry_code": "20",
+   "industry": "其他",
+   "split": "test"
+  },
+  {
+   "firm_id": "9937",
+   "firm_name": "全國",
+   "market": "TWSE",
+   "industry_code": "23",
+   "industry": "油電燃氣業",
+   "split": "test"
+  }
+ ]
+}

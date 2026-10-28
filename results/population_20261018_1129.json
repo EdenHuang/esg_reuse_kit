@@ -1,0 +1,77 @@
+{
+ "meta": {
+  "date": "2026-10-18T11:29:43+08:00",
+  "command": "python src\\build_population.py --compare data\\population_2023_2025_20261018.csv",
+  "git": {
+   "commit": null,
+   "uncommitted_changes": null,
+   "note": "not run inside a git repository"
+  },
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "packages": {
+   "pymupdf": "1.28.2",
+   "pillow": "13.0.0",
+   "numpy": "2.4.6",
+   "pyyaml": "6.0.3"
+  },
+  "config_file": "configs\\default.yaml",
+  "config": "# 所有參數放這裡。標「初值」的門檻只能在開發集上調，11/2 凍結後另存 configs/frozen.yaml。\nseed: 2026\n\npaths:\n  raw: data/raw\n  catalog: data/catalog.csv\n  synthetic: data/synthetic\n  extract: work/extract\n  features: work/features\n  candidates: work/candidates\n  verified: work/verified\n  models: work/models\n  annotations: annotations\n  results: results\n  reports: reports\n\ndata:\n  years: [2023, 2024, 2025]        # 報告年度（報告涵蓋的會計年度）\n  n_firms: 150\n  n_dev: 30                        # 以公司為單位\n  dev_must_include: [\"1101\", \"1707\"]   # 台泥、葡萄王\n\nextract:\n  crop_long_side: 1024\n  jpg_quality: 90\n\nphoto_filter:\n  model: ViT-L-14\n  pretrained: openai\n  exclude_first_last_page: true\n  photo_prompts: [\"a photograph of a real scene\", \"a photograph of people\"]\n  nonphoto_prompts: [\"an illustration\", \"a chart or infographic\", \"a logo or icon\",\n                     \"a scanned certificate or document\", \"an abstract graphic design\"]\n\nretrieve:\n  global_models: [dinov2_vitb14, sscd_disc_mixup]\n  topk: 10\n  years_back: [1, 2]               # t 年對 t-1、t-2\n  use_flip: true\n\nverify:\n  max_keypoints: 2048\n  matcher: superpoint_lightglue    # 對照：sift_ratio0.8\n  ransac: magsac\n  reproj_threshold_px: 8.0         # 初值\n  min_inliers: 25                  # 初值\n  min_coverage: 0.30               # 初值：內點涵蓋較小那張圖的比例\n  min_ssim: 0.60                   # 初值：對齊後重疊區的 SSIM\n\nsynthetic:\n  n_pos: 2000\n  n_neg: 10000\n  crop_keep_area: [0.5, 0.9]\n  brightness_contrast: 0.30\n  saturation: 0.50\n  hue_deg: 10\n  overlay_text_area: [0.10, 0.30]\n  jpeg_quality: [50, 90]\n  downscale: [0.5, 0.8]\n  collage_area: [0.40, 0.70]\n\nanalysis:\n  text_sim_max: 0.5                # 兩年旁邊文字相似度低於這個值算「說法換了」；論文要報敏感度\n  text_ngram: 3                    # 字元三元組 TF-IDF\n  year_cues:\n    2023: [\"2023\", \"112年\", \"112 年\"]\n    2024: [\"2024\", \"113年\", \"113 年\"]\n    2025: [\"2025\", \"114年\", \"114 年\"]\n\nevaluation:\n  bootstrap_unit: firm\n  bootstrap_n: 2000\n  ci: 0.95\n",
+  "data_sha256": {
+   "data\\population_2023_2025_20261018.csv": "e8fdea8b6f0d47e7800e0a28583f3bdcfc04f3966514735278b86b53f15615de"
+  }
+ },
+ "source": "https://esggenplus.twse.com.tw/api/api/",
+ "years": [
+  2023,
+  2024,
+  2025
+ ],
+ "summary": {
+  "records_per_year_market": {
+   "2023_TWSE": 727,
+   "2023_TPEx": 348,
+   "2024_TWSE": 1044,
+   "2024_TPEx": 849,
+   "2025_TWSE": 1071,
+   "2025_TPEx": 879
+  },
+  "dropped_records": {
+   "status_not_2": 2,
+   "no_chinese_file": 1
+  },
+  "firms_with_report_each_year": {
+   "2023": 1074,
+   "2024": 1891,
+   "2025": 1950
+  },
+  "firms_all_years": 1073,
+  "dropped_wrong_period": [
+   "2301",
+   "2345",
+   "2505",
+   "3011",
+   "4119",
+   "5475"
+  ],
+  "population": 1067,
+  "population_market": {
+   "TWSE": 721,
+   "TPEx": 346
+  }
+ },
+ "comparison": {
+  "file": "data\\population_2023_2025_20261018.csv",
+  "same": false,
+  "only_new": [],
+  "only_old": [
+   "2301",
+   "2345"
+  ],
+  "changed": []
+ },
+ "outputs": [
+  "work\\esg_api\\20261018_1129\\population.csv",
+  "work\\esg_api\\20261018_1129\\report_index.csv"
+ ]
+}

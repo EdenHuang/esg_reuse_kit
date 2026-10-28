@@ -1,0 +1,14 @@
+﻿firm_id,row_type,cand_id,keys,is_logo,logo_form,seen,note,result_file,exported_at
+8021,firm,,,,,1,Eden 10/23 13:40：「8021 尖點算看過了，用我勾的那張。」p4 匯出時漏勾「這家看完了」，本機補這個檔，勾選照 p4 原樣,results/logo_refs_20261022_2354_test120.json,2026-10-23T05:13:59.886Z
+8021,ref,cand_01,"vector:8021_2023:48,68,72,88",0,,1,,results/logo_refs_20261022_2354_test120.json,2026-10-23T05:13:59.886Z
+8021,ref,cand_02,md5:865f8ae1df7708732f08440a1e2a215f,0,,1,,results/logo_refs_20261022_2354_test120.json,2026-10-23T05:13:59.886Z
+8021,ref,cand_04,"vector:8021_2023:572,520,608,552",0,,1,,results/logo_refs_20261022_2354_test120.json,2026-10-23T05:13:59.886Z
+8021,ref,cand_05,"vector:8021_2023:624,520,656,552",0,,1,,results/logo_refs_20261022_2354_test120.json,2026-10-23T05:13:59.886Z
+8021,ref,cand_11,"vector:8021_2023:356,300,492,348",1,,1,,results/logo_refs_20261022_2354_test120.json,2026-10-23T05:13:59.886Z
+8021,ref,cand_00,md5:2f115d1ce7938d81a19fb755802b4ddb md5:ae27f7795237764f943fffce14c0cd5f,0,,1,,results/logo_refs_20261022_2354_test120.json,2026-10-23T05:13:59.886Z
+8021,ref,cand_03,"vector:8021_2025:44,28,100,52 vector:8021_2025:548,28,608,52",0,,1,,results/logo_refs_20261022_2354_test120.json,2026-10-23T05:13:59.886Z
+8021,ref,cand_06,inline:6e5b45bf78dea1c19f9469d616317f15:172x81,0,,1,,results/logo_refs_20261022_2354_test120.json,2026-10-23T05:13:59.886Z
+8021,ref,cand_07,"vector:8021_2025:184,28,244,52 vector:8021_2025:260,28,316,52 vector:8021_2025:332,28,392,52 vector:8021_2025:408,28,468,52 vector:8021_2025:484,28,540,52",0,,1,,results/logo_refs_20261022_2354_test120.json,2026-10-23T05:13:59.886Z
+8021,ref,cand_08,"vector:8021_2025:112,28,168,52",0,,1,,results/logo_refs_20261022_2354_test120.json,2026-10-23T05:13:59.886Z
+8021,ref,cand_09,md5:f23462f3b086ceb5223700f7f563219d,0,,1,,results/logo_refs_20261022_2354_test120.json,2026-10-23T05:13:59.886Z
+8021,ref,cand_10,"vector:8021_2023:124,460,132,596",0,,1,,results/logo_refs_20261022_2354_test120.json,2026-10-23T05:13:59.886Z

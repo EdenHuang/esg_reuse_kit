@@ -1,0 +1,155 @@
+{
+ "meta": {
+  "date": "2026-10-18T18:08:53+08:00",
+  "command": "python src\\compare_extract.py --catalog data\\catalog.csv --old work\\extract_v1 --new work\\extract --only 1101_2025 1707_2025 --tag official2",
+  "git": {
+   "commit": "639fff2fa003adc8b1dc89abef4a8bd47ea9ead2",
+   "uncommitted_changes": true
+  },
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "packages": {
+   "pymupdf": "1.28.2",
+   "pillow": "13.0.0",
+   "numpy": "2.4.6",
+   "pyyaml": "6.0.3"
+  },
+  "config_file": "configs\\default.yaml",
+  "config": "# 所有參數放這裡（PLAN v2.0）。標「初值」的門檻只能在開發集上調，11/2 凍結後另存 configs/frozen.yaml。\nseed: 2026\n\npaths:\n  raw: data/raw\n  catalog: data/catalog.csv\n  index: data/index\n  synthetic: data/synthetic\n  extract: work/extract\n  page_graph: work/page_graph\n  logo_refs: work/logo_refs\n  context: work/context\n  evidence: work/evidence\n  features: work/features\n  reuse: work/reuse\n  prompts: configs/prompts\n  annotations: annotations\n  results: results\n  reports: reports\n\ndata:\n  years: [2023, 2024, 2025]          # 報告年度（報告涵蓋的會計年度）\n  n_firms: 150\n  n_dev: 30                          # 以公司為單位\n  dev_must_include: [\"1101\", \"1707\"] # 台泥、葡萄王\n\nextract:\n  crop_long_side: 1024\n  jpg_quality: 90\n\npage_graph:\n  container_min_area: 0.02           # 色塊容器面積下限（占頁面比例）\n  container_max_area: 0.90\n  heading_levels: 3                  # 章、節、小標題\n\nlogo_refs:\n  min_pages: 3                       # 出現幾頁以上的小圖算候選\n  min_short_side_pt: 20\n  use_cover: true\n\nphoto_filter:\n  model: ViT-L-14\n  pretrained: openai\n  exclude_first_last_page: true\n  photo_prompts: [\"a photograph of a real scene\", \"a photograph of people\"]\n  nonphoto_prompts: [\"an illustration\", \"a chart or infographic\", \"a logo or icon\",\n                     \"a scanned certificate or document\", \"an abstract graphic design\"]\n  photo_threshold: 0.5               # 初值：照片類提示詞的機率加總 ≥ 這個值算照片；用標註 A 開發集 100 張決定\n  exclude_image_only_reports: true   # 整本轉成圖片的報告（results/download_check_*.json 的 image_only）\n  exclude_vector_shading: true       # PyMuPDF 把向量漸層當成圖片回報的位置（LOG 2026-10-18 晚上）\n  batch_size: 64\n  load_workers: 8                    # 讀裁切圖的執行緒數\n\ncontext_link:\n  model: logistic_regression\n  max_body_blocks: 2\n  baselines: [nearest_paragraph, same_column_nearest, caption_only, section_heading_only, rules_v1]\n\nevidence:\n  llm: Qwen/Qwen2.5-7B-Instruct      # 開工時確認可用，記錄 revision\n  vlm: Qwen/Qwen2.5-VL-7B-Instruct   # 或 Qwen3-VL-8B\n  temperature: 0\n  ocr: paddleocr_chinese_cht\n  depiction_threshold: 0.5           # 初值\n  topical_threshold: 0.5             # 初值\n  ocr_match_threshold: 0.7           # 初值：字元二元組重疊\n  logo_min_inliers: 15               # 初值\n  years_roc_offset: 1911\n  baselines: [chinese_clip_vitl14, vlm_direct_zeroshot, vlm_direct_fewshot]\n\nreuse:\n  global_models: [dinov2_vitb14, sscd_disc_mixup]\n  topk: 10\n  years_back: [1]\n  use_flip: true\n  matcher: superpoint_lightglue\n  ransac: magsac\n  min_inliers: 25                    # 初值\n  min_coverage: 0.30                 # 初值\n  stock_topk_other_firms: 5\n\nsynthetic:\n  n_pos: 1000\n  n_neg: 5000\n  crop_keep_area: [0.5, 0.9]\n  brightness_contrast: 0.30\n  saturation: 0.50\n  hue_deg: 10\n  overlay_text_area: [0.10, 0.30]\n  jpeg_quality: [50, 90]\n  collage_area: [0.40, 0.70]\n\nevaluation:\n  bootstrap_unit: firm\n  bootstrap_n: 2000\n  ci: 0.95\n",
+  "data_sha256": {
+   "data\\catalog.csv": "62c48866537324a53b2d5de29b716d4b9ec2b7af32a70c968eb92fcbf1d4eabd"
+  }
+ },
+ "old": "work\\extract_v1",
+ "new": "work\\extract",
+ "summary": {
+  "reports": 2,
+  "explained": 2,
+  "not_explained": [],
+  "shading_pictures_v1": 16,
+  "diff_total": {
+   "placements": 34,
+   "pictures": 16,
+   "distinct": 16,
+   "analysed": 16
+  },
+  "kept_pictures_that_lost_a_shading_layer": 4
+ },
+ "reports": [
+  {
+   "report": "1101_2025",
+   "explained": true,
+   "old": {
+    "pages": 235,
+    "placements": 315,
+    "pictures": 289,
+    "distinct": 281,
+    "layout_groups": 2,
+    "layout_places": 9,
+    "same_page_groups": 0,
+    "reused_2pages": 1,
+    "analysed": 279
+   },
+   "new": {
+    "pages": 235,
+    "placements": 293,
+    "pictures": 280,
+    "distinct": 272,
+    "layout_groups": 2,
+    "layout_places": 9,
+    "same_page_groups": 0,
+    "reused_2pages": 1,
+    "analysed": 270
+   },
+   "diff": {
+    "placements": 22,
+    "pictures": 9,
+    "distinct": 9,
+    "analysed": 9
+   },
+   "expected_from_shading": {
+    "placements": 22,
+    "pictures": 9,
+    "distinct": 9,
+    "analysed": 9
+   },
+   "shading_pictures_v1": 9,
+   "v1_pictures_with_a_shading_layer_kept": 1,
+   "removed": 9,
+   "removed_not_shading": [],
+   "shading_not_removed": [],
+   "added": [],
+   "layers_dropped_from_kept": 12,
+   "bad_layer_drops": [],
+   "vector_check_mismatch_pages": [],
+   "field_differences": {
+    "dup_group": 275,
+    "layers": 12,
+    "layer_md5": 12,
+    "layer_xmp_date": 12,
+    "bbox": 7,
+    "paragraphs": 5,
+    "area_ratio": 5
+   }
+  },
+  {
+   "report": "1707_2025",
+   "explained": true,
+   "old": {
+    "pages": 155,
+    "placements": 130,
+    "pictures": 123,
+    "distinct": 107,
+    "layout_groups": 2,
+    "layout_places": 14,
+    "same_page_groups": 4,
+    "reused_2pages": 0,
+    "analysed": 105
+   },
+   "new": {
+    "pages": 155,
+    "placements": 118,
+    "pictures": 116,
+    "distinct": 100,
+    "layout_groups": 2,
+    "layout_places": 14,
+    "same_page_groups": 4,
+    "reused_2pages": 0,
+    "analysed": 98
+   },
+   "diff": {
+    "placements": 12,
+    "pictures": 7,
+    "distinct": 7,
+    "analysed": 7
+   },
+   "expected_from_shading": {
+    "placements": 12,
+    "pictures": 7,
+    "distinct": 7,
+    "analysed": 7
+   },
+   "shading_pictures_v1": 7,
+   "v1_pictures_with_a_shading_layer_kept": 3,
+   "removed": 7,
+   "removed_not_shading": [],
+   "shading_not_removed": [],
+   "added": [],
+   "layers_dropped_from_kept": 5,
+   "bad_layer_drops": [],
+   "vector_check_mismatch_pages": [],
+   "field_differences": {
+    "dup_group": 98,
+    "layers": 5,
+    "area_ratio": 5,
+    "paragraphs": 2,
+    "bbox": 5,
+    "overlay_text": 4,
+    "layer_md5": 5,
+    "layer_xmp_date": 5,
+    "caption": 2,
+    "caption_pos": 1
+   }
+  }
+ ]
+}

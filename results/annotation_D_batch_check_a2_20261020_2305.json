@@ -1,0 +1,75 @@
+{
+ "meta": {
+  "date": "2026-10-20T23:05:36+08:00",
+  "command": "python src/annotate_bcd.py check --task D --annotator a2",
+  "git": {
+   "commit": "6f5cdadcb539279f134aa292db341d8f7b735604",
+   "uncommitted_changes": true
+  },
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "packages": {
+   "pymupdf": "1.28.2",
+   "pillow": "13.0.0",
+   "numpy": "2.4.6",
+   "pyyaml": "6.0.3"
+  },
+  "config_file": "configs\\default.yaml",
+  "config": "# 所有參數放這裡（PLAN v2.0）。標「初值」的門檻只能在開發集上調，11/2 凍結後另存 configs/frozen.yaml。\nseed: 2026\n\npaths:\n  raw: data/raw\n  catalog: data/catalog.csv\n  index: data/index\n  synthetic: data/synthetic\n  extract: work/extract\n  page_graph: work/page_graph\n  logo_refs: work/logo_refs\n  context: work/context\n  evidence: work/evidence\n  features: work/features\n  reuse: work/reuse\n  prompts: configs/prompts\n  annotations: annotations\n  results: results\n  reports: reports\n\ndata:\n  years: [2023, 2024, 2025]          # 報告年度（報告涵蓋的會計年度）\n  n_firms: 150\n  n_dev: 30                          # 以公司為單位\n  dev_must_include: [\"1101\", \"1707\"] # 台泥、葡萄王\n\nextract:\n  crop_long_side: 1024\n  jpg_quality: 90\n\npage_graph:\n  container_min_area: 0.02           # 色塊容器面積下限（占頁面比例）\n  container_max_area: 0.90\n  heading_levels: 3                  # 章、節、小標題\n  # 以下是 page_graph.py 用的初值（10/18 晚上加；只在開發集上看 HTML 調）\n  container_rect_fill: 0.90          # 線段／曲線圍成的形狀：多邊形面積 ≥ 外框的這個比例才算矩形（圓角矩形算，圓形不算）\n  colour_tolerance: 0.02             # 色塊顏色（乘上不透明度）跟底下顏色每個 RGB 通道都差不到這個值 → 只是重刷底色，不算容器\n  inside_container: 0.75             # 文字框、照片有這個比例以上在色塊裡，才算在這個容器裡\n  heading_min_ratio: 1.15            # 字級 ≥ 內文 × 這個值，才可能是標題\n  heading_min_pages: 3               # v2：一個字級至少出現在幾個不同頁的短文字框，才算一種標題字級（v1 是 heading_min_boxes: 3 個框）\n  heading_max_chars: 50              # 標題最多幾個字（不含空白）\n  split_size_jump: 0.20              # 同一個 MuPDF 區塊裡，相鄰兩行字級差超過 20% 就切開（標題和內文被放在同一區塊）\n  column_gap: 3                      # 分欄：兩群文字框的 x 範圍之間至少要空這麼多 pt\n  sparse_max_chars: 20               # --sparse-stats：一頁不超過這麼多字（不含空白）算「幾乎沒字」\n  # v2（10/18 晚上，審查後加；初值，只在開發集上看）\n  slot_tolerance: 4                  # 導覽列：同一段字在很多頁的「同一個位置」（左上角 x、y 差 ≤ 這麼多 pt）\n  repeat_heading_ratio: 1.5          # 重複出現的字 ≥ 內文 × 這個值、不在選單裡 → 當標題，不當導覽列\n  repeat_heading_max_share: 0.25     # …而且出現的頁數 ≤ 全本頁數的這個比例（超過的是頁首的報告名稱等）\n  caption_max_lines: 3               # 圖說型最多幾行\n  picture_unit_max_area: 0.6         # 閱讀順序：圖片 ≤ 頁面這個比例才排進順序（更大的是背景）\n  garbled_box_share: 0.5             # 文字框裡亂碼字 ≥ 這個比例 → 角色 garbled，不當標題\n  panel_area: 0.8                    # 色塊 ≥ 頁面這個比例（或包住整頁所有文字框）→ 標 panel（整頁大底板）\n\nlogo_refs:\n  ocr_workers: 10                    # 10/20：OCR 同時開幾個程序（一個只用到約 1.6 核，一張約 4 秒）\n  min_pages: 3                       # 出現幾頁以上的小圖算候選\n  min_short_side_pt: 10               # 10/18 決定 5：20 → 10 pt（每個提議 Eden 都會確認）\n  vector: true                       # 10/18 決定 10：向量畫的 logo 也當候選\n  vector_band: 0.15                  # 內頁只看頁首、頁尾各 15% 高的帶狀區\n  vector_tolerance: 6                # 向量圖形分群的間距（pt）：字形 logo 的字要連在一起\n  vector_min_items: 3                # 一群至少幾條路徑\n  vector_max_long_frac: 0.5          # 長邊不超過頁寬的一半\n  vector_render_px: 600              # 截圖長邊（像素）\n  use_cover: true\n  # 以下 10/18 晚上 logo_refs.py 加的；標「初值」的只在開發集上調\n  cover_min_short_side_pt: 8         # 封面、封底的小圖：PLAN 沒設尺寸門檻；20 pt 會漏掉真的 logo（5519、6693、8070，審查 10/18），改 8 pt\n  whatif_min_short_side_pt: 10       # 只供比較，不影響輸出；10/18 決定 5 已經把正式門檻改成 10 pt，所以現在不會多出候選\n  shared_scope: dev                  # 算「幾家公司也有」只用開發集報告（測試集的圖不拿來調門檻）；--all 要不要改用全部 450 本等 Eden 決定\n  text_on_top_share: 0.5             # 一半以上的位置上面疊了文字的圖是底圖（頁籤、標題底色），不是 logo\n  ocr: true                          # 候選跑 PaddleOCR（.venv_ocr），讀到的字對得上公司名稱就算符合提議條件\n  ocr_lang: chinese_cht\n  ocr_min_score: 0.5                 # OCR 信心分數低於這個值的字不用\n  review_glob: annotations/logo_refs/review*.csv   # Eden 在確認頁勾選後匯出的 CSV；只有確認過的圖才是參考圖\n  use_back_cover: true               # 封底（最後一頁）的小圖也算候選\n  min_px: 16                         # 內嵌圖檔短邊至少幾像素（更小的是項目符號、細線，SuperPoint 也抓不到特徵點）\n  max_area_frac: 0.10                # 頁面上畫出來的面積超過頁面 10% 的不算小圖（整頁背景、封面大圖）\n  edge_frac: 0.12                    # 離頁緣不超過頁面短邊的 12% 算「靠邊」\n  tile_gap_pt: 1.5                   # 跟同頁其他圖片邊對邊貼齊（間距 <= 這個值）的是大圖切成的碎片\n  shared_min_firms: 3                # 同一張圖出現在 >= 3 家公司的報告裡：共用圖示（GRI、SDG、獎項），不是公司 logo\n  lookalike_dhash_bits: 26           # 256 位元 dHash 相差 <= 26 位元（約 10%）、長寬比差 <= 10%、平均顏色差 <= 30 算「看起來同一張」\n  lookalike_aspect_tol: 0.10\n  lookalike_colour_tol: 30\n  shared_dhash_bits: 32              # 初值：算「別家公司也有」時放寬到 32 位元（各家的 SDG 圖示版本略有不同）；每張候選「別家最像的差幾位元」記在結果檔 nearest_other_firm_bits\n  ref_long_side: 1024               # 存下來的參考圖長邊上限（像素）\n  min_contrast: 48                   # 灰階第 2～98 百分位差 < 48 的是色塊、陰影、漸層，不是 logo\n  max_refs_per_firm: 5\n  select_min_score: 0.5              # 初值：logo 分數 >= 這個值，而且符合提議條件（多頁、跨年或名稱對得上）才自動提議；提議還要 Eden 確認\n  weights: {small: 1.0, edge: 1.0, repeat: 1.0, cover: 1.0, cross_year: 2.0, aspect: 0.5, alpha: 1.0, flat: 1.0}\n\nphoto_filter:\n  model: ViT-L-14\n  pretrained: openai\n  exclude_first_last_page: true\n  photo_prompts: [\"a photograph of a real scene\", \"a photograph of people\"]\n  nonphoto_prompts: [\"an illustration\", \"a chart or infographic\", \"a logo or icon\",\n                     \"a scanned certificate or document\", \"an abstract graphic design\"]\n  photo_threshold: 0.1               # 10/19 用標註 A 開發集 100 張（a1）定：加權準確率 0.5 → 85.5%、0.1 → 97.1%（results/photo_threshold_dev_20261019_1352.json）；a2 交回後再確認，11/2 凍結\n  vlm_threshold: 0.98                # 10/19：OpenCLIP 分數 ≥ photo_threshold「或」視覺語言模型說是照片 ≥ 這個值，就算照片（開發集 149 張加權準確率 93.7%，只用 OpenCLIP 91.4%；results/photo_threshold_dev_20261019_1749.json）\n  exclude_image_only_reports: true   # 整本轉成圖片的報告（results/download_check_*.json 的 image_only）\n  exclude_vector_shading: true       # PyMuPDF 把向量漸層當成圖片回報的位置（LOG 2026-10-18 晚上）\n  batch_size: 64\n  load_workers: 8                    # 讀裁切圖的執行緒數\n\ntiles:                               # 10/18 決定 16：切成小塊的照片（tile_groups.py）\n  gap_pt: 1.5                        # 同一頁兩張圖相對的邊相距 ≤ 這麼多 pt 算貼在一起\n  min_shared_edge: 0.5               # 共用的邊至少占較短那邊的這個比例\n  max_overlap: 0.1                   # 兩張圖重疊不超過較小那張面積的這個比例（疊在一起的不算拼塊）\n  seam_zoom: 2.0                     # 看接縫時頁面的解析度（每 pt 幾個像素）\n  seam_min_std: 2.0                  # 初值：緊貼接縫的兩排像素，明暗變化（標準差，灰階）都至少這麼大（白邊、分隔線不算）\n  seam_max_std_ratio: 1.5            # 初值：兩排的變化大小差不超過 1.5 倍\n  seam_min_corr: 0.9                 # 初值：兩排的相關係數 ≥ 0.9 才算畫面連續（同一張圖切開）；寧可漏併，不要把不同照片併在一起\n  decide_share: 0.02                 # 開發集「給模型判斷的圖」裡屬於「畫面連續」的組的比例 ≥ 2% 就寫 tile_merge.py 合併\n\ncontext_link:\n  model: logistic_regression\n  max_body_blocks: 2\n  baselines: [nearest_paragraph, same_column_nearest, caption_only, section_heading_only, rules_v1]\n\nevidence:\n  llm: Qwen/Qwen2.5-7B-Instruct      # 開工時確認可用，記錄 revision\n  vlm: Qwen/Qwen3-VL-8B-Instruct     # 10/20 起（Eden 照 D15 決定）；之前是 Qwen2.5-VL-7B（現在的 vlm_alt）\n  temperature: 0\n  ocr: paddleocr_chinese_cht\n  depiction_threshold: 0.5           # 10/19 開發集調後仍是 0.5（各題 p(是) 取最大值；results/tune_evidence_dev_20261019_2002.json）\n  topical_threshold: 0.6             # 10/19 開發集調（R 開發集 100 張，gate v4；results/tune_evidence_dev_20261019_2002.json）\n  ocr_match_threshold: 0.7           # 初值：字元二元組重疊\n  logo_min_inliers: 40               # 10/19 開發集調：R 開發集照片上找到 logo 的 9 張，目測對的內點 41–190、錯的 16–38（初值 15）；樣本小，R 開發集標完再看\n  years_roc_offset: 1911\n  baselines: [chinese_clip_vitl14, vlm_direct_zeroshot, vlm_direct_fewshot]\n  # 以下 10/18 baselines_evidence.py 加的（版本取自 results/models_20261018_1442.json）\n  vlm_revision: 0c351dd01ed87e9c1b53cbc748cba10e6187ff3b   # Qwen3-VL-8B-Instruct（Hugging Face，10/20 下載）\n  llm_revision: a09a35458c702b33eeacc393d103063234e8bc28   # Qwen2.5-7B-Instruct（results/models_20261018_1442.json）\n  vlm_max_pixels: 1003520            # 照片送進視覺語言模型前最多這麼多像素（1280 × 28 × 28）\n  vlm_alt: Qwen/Qwen2.5-VL-7B-Instruct   # 10/20 前的主模型；--vlm alt 重現比較表（表 5 的模型列）\n  vlm_alt_revision: cc594898137f460bfe9f0759e9844b3ce807cfb5\n  cnclip: OFA-Sys/chinese-clip-vit-large-patch14\n  cnclip_revision: 660941af70c6ff89ce658a1735404c0f3e536c38\n  context_max_chars: 900             # 規則版上下文（圖上文字、圖說、小標題、標題、內文 2 段）最多幾個字\n  e1_thresholds: null                # E1 的兩個門檻：等標註 R 開發集調；沒定之前用試跑照片相似度的三分位數（只是讓流程跑通）\n\nmeasure:\n  # D15（10/20 Eden 決定）：「拍到」改用視覺語言模型的直接判斷，少樣本、在開發集校正；定錨照用 OCR＋logo；\n  # 拆題（evidence.py 的可拍性判斷、是非題、DSG）改當消融。開發集換公司驗證：E3 校正 0.555、模組 2 0.454\n  # （results/eval_dev_methods_rules_q3_20261020_1423.json）。11/2 寫進 frozen.yaml 前可能再依開發集調整。\n  depiction: E3_cal                  # baselines_evidence.py --only e3，tune_evidence.py 的 E3_cal\n  prompt: direct_zeroshot            # configs/prompts/direct_zeroshot.txt（手冊 v1.5 的說法）\n  shots_per_level: 1                 # 每級 1 個開發集例子（直接對應、主題相關、無關）\n  cut_p_direct: 0.0017               # p(A) ≥ 這個值 → 直接對應；開發集全部 103 張調（results/tune_evidence_dev_20261020_1423_2.json）\n  cut_p_unrelated: 0.0002            # 否則 p(C) ≥ 這個值 → 無關；否則主題相關\n  anchors: [ocr, logo]\n\nreuse:\n  global_models: [dinov2_vitb14, sscd_disc_mixup]\n  topk: 10\n  years_back: [1]\n  use_flip: true\n  matcher: superpoint_lightglue\n  ransac: magsac\n  min_inliers: 25                    # 初值\n  min_coverage: 0.30                 # 初值\n  stock_topk_other_firms: 5\n\nsynthetic:\n  n_pos: 1000\n  n_neg: 5000\n  crop_keep_area: [0.5, 0.9]\n  brightness_contrast: 0.30\n  saturation: 0.50\n  hue_deg: 10\n  overlay_text_area: [0.10, 0.30]\n  jpeg_quality: [50, 90]\n  collage_area: [0.40, 0.70]\n  # 以下 10/18 make_synthetic.py 加的（初值）\n  source: photo_filter_keep          # 原圖：照片過濾留下的照片（目前是初值門檻 0.5 的結果）\n  p_transform: {crop: 0.6, flip: 0.3, color: 0.6, text: 0.3, collage: 0.2, jpeg: 0.6}   # 每個正例各變換的機率；至少一種\n  crop_aspect: [0.75, 1.33]          # 裁切框的長寬比相對原圖的變化\n  text_opacity: [0.6, 0.9]           # 壓字的底色不透明度\n  neg_max_sscd: 0.5                  # 負例兩張的 SSCD 餘弦相似度要 < 這個值（太像的可能真的是同一張圖庫照）\n\nevaluation:\n  bootstrap_unit: firm\n  bootstrap_n: 2000\n  ci: 0.95\n",
+  "data_sha256": {
+   "D:\\accounting\\esg_reuse_kit\\work\\annotation\\D\\returns\\D_a2_batch01_20261020_224453.json": "ffaca810cb743741fc3108691ee9fd5ad44c764c1f9e62a1687f042fb995285a",
+   "D:\\accounting\\esg_reuse_kit\\work\\annotation\\D\\returns\\D_a2_batch02_20261020_224755.json": "dd8e7872d6d73212b31cc1d9fcfc0f4eb7559320ec1049071b65c8f7873d7924"
+  }
+ },
+ "task": "D",
+ "annotator": "a2",
+ "notes": [],
+ "limits": {
+  "check_error": 0.2,
+  "median_seconds": 3.0
+ },
+ "batches": [
+  {
+   "batch": 1,
+   "split": "test",
+   "file": "D_a2_batch01_20261020_224453.json",
+   "expected": 55,
+   "missing": 0,
+   "checks": 4,
+   "checks_void": 1,
+   "checks_wrong": 2,
+   "median_seconds": 1.3,
+   "longest_same_answer": null,
+   "flags": [
+    "檢查題錯 2/4（超過 2 成）：這一批要重標，先不匯入",
+    "每題秒數中位數 1.3 秒（不到 3 秒）：先停，跟標註者確認",
+    "第 20、48 頁勾了「這頁沒有照片」又改了框：匯入時以「沒有照片」為準，改的框另存"
+   ],
+   "imported": false
+  },
+  {
+   "batch": 2,
+   "split": "test",
+   "file": "D_a2_batch02_20261020_224755.json",
+   "expected": 55,
+   "missing": 0,
+   "checks": 4,
+   "checks_void": 1,
+   "checks_wrong": 0,
+   "median_seconds": 1,
+   "longest_same_answer": null,
+   "flags": [
+    "每題秒數中位數 1.0 秒（不到 3 秒）：先停，跟標註者確認",
+    "第 21、31、36、46 頁勾了「這頁沒有照片」又改了框：匯入時以「沒有照片」為準，改的框另存"
+   ],
+   "imported": true
+  }
+ ],
+ "alerts": [
+  "batch 1: 檢查題錯 2/4（超過 2 成）：這一批要重標，先不匯入",
+  "batch 1: 每題秒數中位數 1.3 秒（不到 3 秒）：先停，跟標註者確認",
+  "batch 1: 第 20、48 頁勾了「這頁沒有照片」又改了框：匯入時以「沒有照片」為準，改的框另存",
+  "batch 2: 每題秒數中位數 1.0 秒（不到 3 秒）：先停，跟標註者確認",
+  "batch 2: 第 21、31、36、46 頁勾了「這頁沒有照片」又改了框：匯入時以「沒有照片」為準，改的框另存"
+ ]
+}

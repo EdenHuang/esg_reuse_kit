@@ -1,0 +1,2006 @@
+{
+ "meta": {
+  "date": "2026-10-18T18:52:27+08:00",
+  "command": "python src\\page_graph.py --firms 1101 1707 2882 2610 2385 --verify-running --workers 6",
+  "git": {
+   "commit": null,
+   "uncommitted_changes": null,
+   "note": "not run inside a git repository"
+  },
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "packages": {
+   "pymupdf": "1.28.2",
+   "pillow": "13.0.0",
+   "numpy": "2.4.6",
+   "pyyaml": "6.0.3"
+  },
+  "config_file": "configs\\default.yaml",
+  "config": "# 所有參數放這裡（PLAN v2.0）。標「初值」的門檻只能在開發集上調，11/2 凍結後另存 configs/frozen.yaml。\nseed: 2026\n\npaths:\n  raw: data/raw\n  catalog: data/catalog.csv\n  index: data/index\n  synthetic: data/synthetic\n  extract: work/extract\n  page_graph: work/page_graph\n  logo_refs: work/logo_refs\n  context: work/context\n  evidence: work/evidence\n  features: work/features\n  reuse: work/reuse\n  prompts: configs/prompts\n  annotations: annotations\n  results: results\n  reports: reports\n\ndata:\n  years: [2023, 2024, 2025]          # 報告年度（報告涵蓋的會計年度）\n  n_firms: 150\n  n_dev: 30                          # 以公司為單位\n  dev_must_include: [\"1101\", \"1707\"] # 台泥、葡萄王\n\nextract:\n  crop_long_side: 1024\n  jpg_quality: 90\n\npage_graph:\n  container_min_area: 0.02           # 色塊容器面積下限（占頁面比例）\n  container_max_area: 0.90\n  heading_levels: 3                  # 章、節、小標題\n  # 以下是 page_graph.py 用的初值（10/18 晚上加；只在開發集上看 HTML 調）\n  container_rect_fill: 0.90          # 線段／曲線圍成的形狀：多邊形面積 ≥ 外框的這個比例才算矩形（圓角矩形算，圓形不算）\n  colour_tolerance: 0.02             # 色塊顏色（乘上不透明度）跟底下顏色每個 RGB 通道都差不到這個值 → 只是重刷底色，不算容器\n  inside_container: 0.75             # 文字框、照片有這個比例以上在色塊裡，才算在這個容器裡\n  heading_min_ratio: 1.15            # 字級 ≥ 內文 × 這個值，才可能是標題\n  heading_min_boxes: 3               # 一個字級至少出現在幾個短文字框，才算一種標題字級\n  heading_max_chars: 50              # 標題最多幾個字（不含空白）\n  split_size_jump: 0.20              # 同一個 MuPDF 區塊裡，相鄰兩行字級差超過 20% 就切開（標題和內文被放在同一區塊）\n  column_gap: 3                      # 分欄：兩群文字框的 x 範圍之間至少要空這麼多 pt\n  sparse_max_chars: 20               # --sparse-stats：一頁不超過這麼多字（不含空白）算「幾乎沒字」\n\nlogo_refs:\n  min_pages: 3                       # 出現幾頁以上的小圖算候選\n  min_short_side_pt: 20\n  use_cover: true\n  # 以下 10/18 晚上 logo_refs.py 加的；標「初值」的只在開發集上調\n  use_back_cover: true               # 封底（最後一頁）的小圖也算候選\n  min_px: 16                         # 內嵌圖檔短邊至少幾像素（更小的是項目符號、細線，SuperPoint 也抓不到特徵點）\n  max_area_frac: 0.10                # 頁面上畫出來的面積超過頁面 10% 的不算小圖（整頁背景、封面大圖）\n  edge_frac: 0.12                    # 離頁緣不超過頁面短邊的 12% 算「靠邊」\n  tile_gap_pt: 1.5                   # 跟同頁其他圖片邊對邊貼齊（間距 <= 這個值）的是大圖切成的碎片\n  shared_min_firms: 3                # 同一張圖出現在 >= 3 家公司的報告裡：共用圖示（GRI、SDG、獎項），不是公司 logo\n  lookalike_dhash_bits: 26           # 256 位元 dHash 相差 <= 26 位元（約 10%）、長寬比差 <= 10%、平均顏色差 <= 30 算「看起來同一張」\n  lookalike_aspect_tol: 0.10\n  lookalike_colour_tol: 30\n  shared_dhash_bits: 32              # 算「別家公司也有」時放寬到 32 位元：各家的 SDG 圖示版本略有不同（相差 22～28 位元），真的 logo 跟別家最近也差 60 位元以上（10/18 開發集 5 家）\n  ref_long_side: 1024               # 存下來的參考圖長邊上限（像素）\n  min_contrast: 48                   # 灰階第 2～98 百分位差 < 48 的是色塊、陰影、漸層，不是 logo\n  max_refs_per_firm: 5\n  select_min_score: 0.5              # 初值：logo 分數 >= 這個值才選\n  weights: {small: 1.0, edge: 1.0, repeat: 1.0, cover: 1.0, cross_year: 2.0, aspect: 0.5, alpha: 1.0, flat: 1.0}\n\nphoto_filter:\n  model: ViT-L-14\n  pretrained: openai\n  exclude_first_last_page: true\n  photo_prompts: [\"a photograph of a real scene\", \"a photograph of people\"]\n  nonphoto_prompts: [\"an illustration\", \"a chart or infographic\", \"a logo or icon\",\n                     \"a scanned certificate or document\", \"an abstract graphic design\"]\n  photo_threshold: 0.5               # 初值：照片類提示詞的機率加總 ≥ 這個值算照片；用標註 A 開發集 100 張決定\n  exclude_image_only_reports: true   # 整本轉成圖片的報告（results/download_check_*.json 的 image_only）\n  exclude_vector_shading: true       # PyMuPDF 把向量漸層當成圖片回報的位置（LOG 2026-10-18 晚上）\n  batch_size: 64\n  load_workers: 8                    # 讀裁切圖的執行緒數\n\ncontext_link:\n  model: logistic_regression\n  max_body_blocks: 2\n  baselines: [nearest_paragraph, same_column_nearest, caption_only, section_heading_only, rules_v1]\n\nevidence:\n  llm: Qwen/Qwen2.5-7B-Instruct      # 開工時確認可用，記錄 revision\n  vlm: Qwen/Qwen2.5-VL-7B-Instruct   # 或 Qwen3-VL-8B\n  temperature: 0\n  ocr: paddleocr_chinese_cht\n  depiction_threshold: 0.5           # 初值\n  topical_threshold: 0.5             # 初值\n  ocr_match_threshold: 0.7           # 初值：字元二元組重疊\n  logo_min_inliers: 15               # 初值\n  years_roc_offset: 1911\n  baselines: [chinese_clip_vitl14, vlm_direct_zeroshot, vlm_direct_fewshot]\n\nreuse:\n  global_models: [dinov2_vitb14, sscd_disc_mixup]\n  topk: 10\n  years_back: [1]\n  use_flip: true\n  matcher: superpoint_lightglue\n  ransac: magsac\n  min_inliers: 25                    # 初值\n  min_coverage: 0.30                 # 初值\n  stock_topk_other_firms: 5\n\nsynthetic:\n  n_pos: 1000\n  n_neg: 5000\n  crop_keep_area: [0.5, 0.9]\n  brightness_contrast: 0.30\n  saturation: 0.50\n  hue_deg: 10\n  overlay_text_area: [0.10, 0.30]\n  jpeg_quality: [50, 90]\n  collage_area: [0.40, 0.70]\n\nevaluation:\n  bootstrap_unit: firm\n  bootstrap_n: 2000\n  ci: 0.95\n",
+  "data_sha256": {
+   "data/catalog.csv": "62c48866537324a53b2d5de29b716d4b9ec2b7af32a70c968eb92fcbf1d4eabd",
+   "D:\\accounting\\esg_reuse_kit\\results\\download_check_20261018_1603.json": "616f0e6023ccfcc827dd2ce0d2c294eb97f39279bdffd0016e0d4e779636a739",
+   "work\\extract\\1101_2023_pairs.jsonl": "21a0f2ca800a015a4ed123f311466a773be6fa01d2da14bc119017c18afce934",
+   "work\\extract\\1101_2024_pairs.jsonl": "fd68ef9f3a84c1778e3b3d375c42ce8ed2553875f8794167cb8d7c7476c3d592",
+   "work\\extract\\1101_2025_pairs.jsonl": "7f72b08706230c879dd7699c9f8a66ef8807f71858c18bd907c3372289cbe4e9",
+   "work\\extract\\1707_2023_pairs.jsonl": "5342dcd6276c768ab465ccbd3783f9ff67272c82f03ee3d2c3b394255a96c33c",
+   "work\\extract\\1707_2024_pairs.jsonl": "39598a5628fe77658b483806d72d15ae3ad08ef3712bb66831f293a3c6024632",
+   "work\\extract\\1707_2025_pairs.jsonl": "60f79d86975e07779756352d03ef5a9b9836d5224454254225e893f0856b271a",
+   "work\\extract\\2385_2023_pairs.jsonl": "4a0f37b60ddce5de0980b1c6d9dd99611295bbd563962d733ab06fae1936fb50",
+   "work\\extract\\2385_2024_pairs.jsonl": "1ea3aaee04d067cc1746cca3a9b49462a7579a7ea571c184763c6af74557c107",
+   "work\\extract\\2385_2025_pairs.jsonl": "dcd75dfe9830984541bb7a432ecc5613dc25403cc38f952137d65d1eb19a26b2",
+   "work\\extract\\2610_2023_pairs.jsonl": "2ee5488b74970943520c1b5dac4b090fba3a968b7971483be5e9c25c69b04a84",
+   "work\\extract\\2610_2024_pairs.jsonl": "7333d7f05d826c42dfabd828af4364c9d4729b5804ba391bbd65c7a6e75da5e7",
+   "work\\extract\\2610_2025_pairs.jsonl": "a0c4804cab819b53d349f7ae07625c46227333d75c509431aa2c535be5d90d1b",
+   "work\\extract\\2882_2023_pairs.jsonl": "7699452ff8fc8e5be8797e2186a785369307239522c16b276de7d9fbb30e2861",
+   "work\\extract\\2882_2024_pairs.jsonl": "11fd37896b1c6137cf7c9fd49fb0f47e0f396633aa6cc2b2d17429bcd56bf92f",
+   "work\\extract\\2882_2025_pairs.jsonl": "95d2e217af66808bd8c570c5332057586603c952ef4f3486495038fa8a0ae735"
+  }
+ },
+ "version": 1,
+ "params": {
+  "container_min_area": 0.02,
+  "container_max_area": 0.9,
+  "heading_levels": 3,
+  "container_rect_fill": 0.9,
+  "colour_tolerance": 0.02,
+  "inside_container": 0.75,
+  "heading_min_ratio": 1.15,
+  "heading_min_boxes": 3,
+  "heading_max_chars": 50,
+  "split_size_jump": 0.2,
+  "column_gap": 3,
+  "sparse_max_chars": 20
+ },
+ "tag": "5firms",
+ "out_dir": "D:\\accounting\\esg_reuse_kit\\work\\page_graph",
+ "download_check": "D:\\accounting\\esg_reuse_kit\\results\\download_check_20261018_1603.json",
+ "skipped_image_only": [],
+ "errors": {},
+ "seconds": 32.2,
+ "totals": {
+  "pages_with_pictures": 1358,
+  "picture_records": 7231,
+  "boxes": 50647,
+  "running_boxes": 9320,
+  "containers": 3916,
+  "blocks_split": 7163,
+  "lines_joined": 18443,
+  "paragraph_cuts": 3575,
+  "reports": 15,
+  "roles": {
+   "run": 9320,
+   "body": 31831,
+   "h1": 521,
+   "caption": 2846,
+   "h3": 4269,
+   "h2": 1373,
+   "note": 487
+  },
+  "fills_dropped": {
+   "hidden_later": 668,
+   "not_rectangle": 4387,
+   "picture_tint": 174,
+   "same_colour_as_under": 257,
+   "page_background": 102
+  },
+  "running_keys_checked": 15,
+  "running_keys_same": 15
+ },
+ "per_report": {
+  "1101_2023": {
+   "report": "1101_2023",
+   "version": 1,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\1101_2023.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\1101_2023_pairs.jsonl",
+   "pairs_sha256": "21a0f2ca800a015a4ed123f311466a773be6fa01d2da14bc119017c18afce934",
+   "params_sha256": "e3f58cc76cce3285ccec410a577a1a3a4a02c053c4baad8c163a0c781e1c1c6a",
+   "pages": 216,
+   "picture_records": 414,
+   "pages_with_pictures": 146,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 59,
+   "running_keys_exact": 71,
+   "running_keys_check": {
+    "same": true,
+    "keys": 59,
+    "keys_all_dict": 59,
+    "exact_keys": 71,
+    "exact_keys_all_dict": 71
+   },
+   "font": {
+    "body": 8.5,
+    "threshold": 9.77,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 19.0,
+      "max": 69.0,
+      "sizes": {
+       "19.0": 5,
+       "20.5": 17,
+       "21.0": 32,
+       "25.0": 7,
+       "26.0": 17,
+       "28.0": 5,
+       "69.0": 4
+      },
+      "boxes": 87,
+      "hi": null,
+      "lo": 18.49
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 12.5,
+      "max": 18.0,
+      "sizes": {
+       "12.5": 3,
+       "13.0": 53,
+       "13.5": 3,
+       "14.0": 3,
+       "15.0": 15,
+       "15.5": 30,
+       "16.0": 6,
+       "18.0": 7
+      },
+      "boxes": 120,
+      "hi": 18.49,
+      "lo": 12.25
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 10.0,
+      "max": 12.0,
+      "sizes": {
+       "10.0": 172,
+       "11.0": 302,
+       "12.0": 14
+      },
+      "boxes": 488,
+      "hi": 12.25,
+      "lo": 9.77
+     }
+    ],
+    "body_bold_share": 0.083,
+    "size_chars": {
+     "8.5": 86643,
+     "8.0": 5725,
+     "9.0": 5150,
+     "6.0": 4260,
+     "11.0": 3939,
+     "7.0": 2947,
+     "10.0": 2505,
+     "6.5": 1273,
+     "7.5": 740,
+     "4.0": 588,
+     "15.5": 450,
+     "5.5": 374,
+     "13.0": 347,
+     "21.0": 329,
+     "15.0": 299,
+     "12.0": 260,
+     "9.5": 206,
+     "5.0": 183,
+     "26.0": 148,
+     "3.5": 125,
+     "25.0": 118
+    },
+    "heading_size_boxes": {
+     "10.0": 172,
+     "10.5": 2,
+     "11.0": 302,
+     "11.5": 2,
+     "12.0": 14,
+     "12.5": 3,
+     "13.0": 53,
+     "13.5": 3,
+     "14.0": 3,
+     "15.0": 15,
+     "15.5": 30,
+     "16.0": 6,
+     "17.0": 1,
+     "18.0": 7,
+     "19.0": 5,
+     "20.0": 2,
+     "20.5": 17,
+     "21.0": 32,
+     "22.0": 1,
+     "24.0": 1,
+     "24.5": 1,
+     "25.0": 7,
+     "26.0": 17,
+     "28.0": 5,
+     "28.5": 1,
+     "29.0": 1,
+     "30.0": 1,
+     "34.5": 1,
+     "35.5": 1,
+     "37.5": 1,
+     "69.0": 4
+    }
+   },
+   "boxes": 4392,
+   "running_boxes": 804,
+   "roles": {
+    "h3": 805,
+    "h2": 121,
+    "h1": 98,
+    "body": 2215,
+    "caption": 328,
+    "run": 804,
+    "note": 21
+   },
+   "containers": 254,
+   "fills_dropped": {
+    "page_background": 9,
+    "not_rectangle": 89,
+    "hidden_later": 31,
+    "same_colour_as_under": 7,
+    "picture_tint": 2
+   },
+   "blocks_split": 448,
+   "lines_joined": 1200,
+   "paragraph_cuts": 206,
+   "seconds": 11.7
+  },
+  "1101_2024": {
+   "report": "1101_2024",
+   "version": 1,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\1101_2024.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\1101_2024_pairs.jsonl",
+   "pairs_sha256": "fd68ef9f3a84c1778e3b3d375c42ce8ed2553875f8794167cb8d7c7476c3d592",
+   "params_sha256": "e3f58cc76cce3285ccec410a577a1a3a4a02c053c4baad8c163a0c781e1c1c6a",
+   "pages": 269,
+   "picture_records": 159,
+   "pages_with_pictures": 115,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 33,
+   "running_keys_exact": 43,
+   "running_keys_check": {
+    "same": true,
+    "keys": 33,
+    "keys_all_dict": 33,
+    "exact_keys": 43,
+    "exact_keys_all_dict": 43
+   },
+   "font": {
+    "body": 9.0,
+    "threshold": 10.35,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 42.0,
+      "max": 118.0,
+      "sizes": {
+       "42.0": 5,
+       "118.0": 3
+      },
+      "boxes": 8,
+      "hi": null,
+      "lo": 33.05
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 17.0,
+      "max": 26.0,
+      "sizes": {
+       "17.0": 10,
+       "18.0": 11,
+       "19.0": 12,
+       "20.0": 10,
+       "21.0": 28,
+       "22.0": 4,
+       "23.0": 3,
+       "25.0": 21,
+       "26.0": 6
+      },
+      "boxes": 105,
+      "hi": 33.05,
+      "lo": 16.49
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 11.0,
+      "max": 16.0,
+      "sizes": {
+       "11.0": 74,
+       "13.0": 7,
+       "13.5": 4,
+       "15.0": 46,
+       "15.5": 5,
+       "16.0": 12
+      },
+      "boxes": 148,
+      "hi": 16.49,
+      "lo": 10.35
+     }
+    ],
+    "body_bold_share": 0.056,
+    "size_chars": {
+     "9.0": 55028,
+     "7.0": 3053,
+     "8.0": 1815,
+     "10.0": 1322,
+     "11.0": 1060,
+     "8.5": 849,
+     "15.0": 447,
+     "21.0": 420,
+     "5.0": 323,
+     "7.5": 286,
+     "25.0": 240,
+     "19.0": 198,
+     "13.0": 162,
+     "17.0": 142,
+     "18.0": 117,
+     "9.5": 111,
+     "20.0": 99,
+     "6.5": 94,
+     "4.5": 76
+    },
+    "heading_size_boxes": {
+     "10.5": 1,
+     "11.0": 74,
+     "12.5": 1,
+     "13.0": 7,
+     "13.5": 4,
+     "14.0": 2,
+     "15.0": 46,
+     "15.5": 5,
+     "16.0": 12,
+     "17.0": 10,
+     "17.5": 1,
+     "18.0": 11,
+     "19.0": 12,
+     "19.5": 1,
+     "20.0": 10,
+     "21.0": 28,
+     "22.0": 4,
+     "23.0": 3,
+     "23.5": 1,
+     "24.0": 2,
+     "24.5": 1,
+     "25.0": 21,
+     "26.0": 6,
+     "26.5": 2,
+     "27.5": 1,
+     "28.0": 1,
+     "30.0": 2,
+     "30.5": 1,
+     "31.0": 2,
+     "31.5": 1,
+     "33.5": 1,
+     "36.0": 1,
+     "36.5": 1,
+     "40.0": 1,
+     "42.0": 5,
+     "91.5": 1,
+     "118.0": 3
+    }
+   },
+   "boxes": 2197,
+   "running_boxes": 432,
+   "roles": {
+    "body": 1157,
+    "h1": 13,
+    "h3": 330,
+    "h2": 121,
+    "run": 432,
+    "caption": 132,
+    "note": 12
+   },
+   "containers": 214,
+   "fills_dropped": {
+    "page_background": 19,
+    "not_rectangle": 44,
+    "picture_tint": 13,
+    "same_colour_as_under": 14,
+    "hidden_later": 8
+   },
+   "blocks_split": 227,
+   "lines_joined": 397,
+   "paragraph_cuts": 84,
+   "seconds": 6.9
+  },
+  "1101_2025": {
+   "report": "1101_2025",
+   "version": 1,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\1101_2025.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\1101_2025_pairs.jsonl",
+   "pairs_sha256": "7f72b08706230c879dd7699c9f8a66ef8807f71858c18bd907c3372289cbe4e9",
+   "params_sha256": "e3f58cc76cce3285ccec410a577a1a3a4a02c053c4baad8c163a0c781e1c1c6a",
+   "pages": 235,
+   "picture_records": 280,
+   "pages_with_pictures": 130,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 124,
+   "running_keys_exact": 138,
+   "running_keys_check": {
+    "same": true,
+    "keys": 124,
+    "keys_all_dict": 124,
+    "exact_keys": 138,
+    "exact_keys_all_dict": 138
+   },
+   "font": {
+    "body": 9.0,
+    "threshold": 10.35,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 22.0,
+      "max": 61.0,
+      "sizes": {
+       "22.0": 4,
+       "25.0": 23,
+       "38.0": 5,
+       "61.0": 6
+      },
+      "boxes": 38,
+      "hi": null,
+      "lo": 20.98
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 15.0,
+      "max": 20.0,
+      "sizes": {
+       "15.0": 162,
+       "16.0": 8,
+       "16.5": 3,
+       "17.0": 4,
+       "18.0": 7,
+       "19.0": 3,
+       "20.0": 5
+      },
+      "boxes": 192,
+      "hi": 20.98,
+      "lo": 13.96
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 10.5,
+      "max": 13.0,
+      "sizes": {
+       "10.5": 4,
+       "11.0": 48,
+       "12.0": 27,
+       "12.5": 6,
+       "13.0": 58
+      },
+      "boxes": 143,
+      "hi": 13.96,
+      "lo": 10.35
+     }
+    ],
+    "body_bold_share": 0.054,
+    "size_chars": {
+     "9.0": 75884,
+     "8.0": 5926,
+     "7.0": 4272,
+     "10.0": 2483,
+     "15.0": 2133,
+     "8.5": 934,
+     "13.0": 823,
+     "11.0": 540,
+     "12.0": 522,
+     "7.5": 500,
+     "25.0": 312,
+     "6.0": 292,
+     "9.5": 261,
+     "5.0": 245,
+     "22.0": 148,
+     "6.5": 123
+    },
+    "heading_size_boxes": {
+     "10.5": 4,
+     "11.0": 48,
+     "11.5": 1,
+     "12.0": 27,
+     "12.5": 6,
+     "13.0": 58,
+     "13.5": 2,
+     "15.0": 162,
+     "15.5": 1,
+     "16.0": 8,
+     "16.5": 3,
+     "17.0": 4,
+     "17.5": 1,
+     "18.0": 7,
+     "19.0": 3,
+     "20.0": 5,
+     "21.5": 1,
+     "22.0": 4,
+     "23.0": 2,
+     "23.5": 2,
+     "24.0": 2,
+     "25.0": 23,
+     "27.0": 1,
+     "28.0": 1,
+     "29.5": 1,
+     "30.0": 2,
+     "31.5": 1,
+     "34.0": 2,
+     "35.0": 1,
+     "35.5": 1,
+     "38.0": 5,
+     "38.5": 1,
+     "40.5": 1,
+     "46.0": 1,
+     "59.0": 1,
+     "61.0": 6,
+     "106.0": 1
+    }
+   },
+   "boxes": 3869,
+   "running_boxes": 1258,
+   "roles": {
+    "h2": 194,
+    "body": 1649,
+    "run": 1258,
+    "h3": 411,
+    "caption": 270,
+    "h1": 60,
+    "note": 27
+   },
+   "containers": 445,
+   "fills_dropped": {
+    "not_rectangle": 211,
+    "page_background": 36,
+    "hidden_later": 44,
+    "same_colour_as_under": 13,
+    "picture_tint": 10
+   },
+   "blocks_split": 286,
+   "lines_joined": 148,
+   "paragraph_cuts": 162,
+   "seconds": 10.4
+  },
+  "1707_2023": {
+   "report": "1707_2023",
+   "version": 1,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\1707_2023.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\1707_2023_pairs.jsonl",
+   "pairs_sha256": "5342dcd6276c768ab465ccbd3783f9ff67272c82f03ee3d2c3b394255a96c33c",
+   "params_sha256": "e3f58cc76cce3285ccec410a577a1a3a4a02c053c4baad8c163a0c781e1c1c6a",
+   "pages": 143,
+   "picture_records": 118,
+   "pages_with_pictures": 62,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 12,
+   "running_keys_exact": 10,
+   "running_keys_check": {
+    "same": true,
+    "keys": 12,
+    "keys_all_dict": 12,
+    "exact_keys": 10,
+    "exact_keys_all_dict": 10
+   },
+   "font": {
+    "body": 9.0,
+    "threshold": 10.35,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 16.0,
+      "max": 18.0,
+      "sizes": {
+       "16.0": 4,
+       "18.0": 33
+      },
+      "boxes": 37,
+      "hi": null,
+      "lo": 15.23
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 14.0,
+      "max": 14.5,
+      "sizes": {
+       "14.0": 60,
+       "14.5": 3
+      },
+      "boxes": 63,
+      "hi": 15.23,
+      "lo": 12.96
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 10.5,
+      "max": 12.0,
+      "sizes": {
+       "10.5": 14,
+       "11.0": 11,
+       "12.0": 110
+      },
+      "boxes": 135,
+      "hi": 12.96,
+      "lo": 10.35
+     }
+    ],
+    "body_bold_share": 0.014,
+    "size_chars": {
+     "9.0": 33880,
+     "8.0": 7903,
+     "7.0": 6412,
+     "8.5": 3828,
+     "6.5": 3293,
+     "6.0": 2443,
+     "14.0": 1325,
+     "12.0": 890,
+     "10.0": 469,
+     "18.0": 379,
+     "5.0": 338,
+     "5.5": 301,
+     "7.5": 103,
+     "10.5": 84,
+     "11.0": 80
+    },
+    "heading_size_boxes": {
+     "10.5": 14,
+     "11.0": 11,
+     "12.0": 110,
+     "13.5": 1,
+     "14.0": 60,
+     "14.5": 3,
+     "15.5": 2,
+     "16.0": 4,
+     "18.0": 33,
+     "22.5": 1,
+     "23.5": 1,
+     "41.0": 1
+    }
+   },
+   "boxes": 2313,
+   "running_boxes": 314,
+   "roles": {
+    "run": 314,
+    "body": 1618,
+    "h1": 42,
+    "caption": 72,
+    "h3": 193,
+    "h2": 64,
+    "note": 10
+   },
+   "containers": 190,
+   "fills_dropped": {
+    "hidden_later": 14,
+    "not_rectangle": 31,
+    "picture_tint": 1,
+    "same_colour_as_under": 6,
+    "page_background": 1
+   },
+   "blocks_split": 518,
+   "lines_joined": 1304,
+   "paragraph_cuts": 190,
+   "seconds": 2.0
+  },
+  "1707_2024": {
+   "report": "1707_2024",
+   "version": 1,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\1707_2024.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\1707_2024_pairs.jsonl",
+   "pairs_sha256": "39598a5628fe77658b483806d72d15ae3ad08ef3712bb66831f293a3c6024632",
+   "params_sha256": "e3f58cc76cce3285ccec410a577a1a3a4a02c053c4baad8c163a0c781e1c1c6a",
+   "pages": 149,
+   "picture_records": 129,
+   "pages_with_pictures": 76,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 24,
+   "running_keys_exact": 27,
+   "running_keys_check": {
+    "same": true,
+    "keys": 24,
+    "keys_all_dict": 24,
+    "exact_keys": 27,
+    "exact_keys_all_dict": 27
+   },
+   "font": {
+    "body": 8.0,
+    "threshold": 9.2,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 45.0,
+      "max": 45.0,
+      "sizes": {
+       "45.0": 11
+      },
+      "boxes": 11,
+      "hi": null,
+      "lo": 30.0
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 14.0,
+      "max": 20.0,
+      "sizes": {
+       "14.0": 55,
+       "14.5": 3,
+       "15.0": 3,
+       "15.5": 4,
+       "18.0": 28,
+       "19.0": 8,
+       "20.0": 3
+      },
+      "boxes": 104,
+      "hi": 30.0,
+      "lo": 13.49
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 9.5,
+      "max": 13.0,
+      "sizes": {
+       "9.5": 13,
+       "10.0": 50,
+       "10.5": 7,
+       "11.0": 36,
+       "11.5": 4,
+       "12.0": 121,
+       "13.0": 12
+      },
+      "boxes": 243,
+      "hi": 13.49,
+      "lo": 9.2
+     }
+    ],
+    "body_bold_share": 0.968,
+    "size_chars": {
+     "8.0": 34538,
+     "7.0": 8877,
+     "6.5": 5767,
+     "7.5": 4390,
+     "9.0": 2249,
+     "6.0": 1607,
+     "14.0": 1249,
+     "12.0": 1029,
+     "5.5": 807,
+     "8.5": 453,
+     "5.0": 367,
+     "10.0": 342,
+     "13.0": 314,
+     "18.0": 255,
+     "11.0": 172,
+     "11.5": 137,
+     "4.0": 129,
+     "4.5": 104,
+     "45.0": 83,
+     "9.5": 70
+    },
+    "heading_size_boxes": {
+     "9.5": 13,
+     "10.0": 50,
+     "10.5": 7,
+     "11.0": 36,
+     "11.5": 4,
+     "12.0": 121,
+     "12.5": 2,
+     "13.0": 12,
+     "14.0": 55,
+     "14.5": 3,
+     "15.0": 3,
+     "15.5": 4,
+     "16.0": 2,
+     "16.5": 1,
+     "18.0": 28,
+     "19.0": 8,
+     "20.0": 3,
+     "23.0": 1,
+     "23.5": 1,
+     "45.0": 11
+    }
+   },
+   "boxes": 2506,
+   "running_boxes": 328,
+   "roles": {
+    "run": 328,
+    "h2": 109,
+    "body": 1714,
+    "caption": 61,
+    "h1": 11,
+    "h3": 270,
+    "note": 13
+   },
+   "containers": 217,
+   "fills_dropped": {
+    "page_background": 11,
+    "not_rectangle": 99,
+    "hidden_later": 4,
+    "same_colour_as_under": 4,
+    "picture_tint": 2
+   },
+   "blocks_split": 355,
+   "lines_joined": 1182,
+   "paragraph_cuts": 137,
+   "seconds": 3.0
+  },
+  "1707_2025": {
+   "report": "1707_2025",
+   "version": 1,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\1707_2025.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\1707_2025_pairs.jsonl",
+   "pairs_sha256": "60f79d86975e07779756352d03ef5a9b9836d5224454254225e893f0856b271a",
+   "params_sha256": "e3f58cc76cce3285ccec410a577a1a3a4a02c053c4baad8c163a0c781e1c1c6a",
+   "pages": 155,
+   "picture_records": 116,
+   "pages_with_pictures": 69,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 26,
+   "running_keys_exact": 28,
+   "running_keys_check": {
+    "same": true,
+    "keys": 26,
+    "keys_all_dict": 26,
+    "exact_keys": 28,
+    "exact_keys_all_dict": 28
+   },
+   "font": {
+    "body": 8.0,
+    "threshold": 9.2,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 45.0,
+      "max": 45.0,
+      "sizes": {
+       "45.0": 11
+      },
+      "boxes": 11,
+      "hi": null,
+      "lo": 30.0
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 13.0,
+      "max": 20.0,
+      "sizes": {
+       "13.0": 3,
+       "14.0": 49,
+       "14.5": 4,
+       "15.0": 15,
+       "16.0": 9,
+       "18.0": 25,
+       "20.0": 3
+      },
+      "boxes": 108,
+      "hi": 30.0,
+      "lo": 12.49
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 9.5,
+      "max": 12.0,
+      "sizes": {
+       "9.5": 12,
+       "10.0": 91,
+       "11.0": 14,
+       "12.0": 115
+      },
+      "boxes": 232,
+      "hi": 12.49,
+      "lo": 9.2
+     }
+    ],
+    "body_bold_share": 0.023,
+    "size_chars": {
+     "8.0": 44900,
+     "7.0": 2787,
+     "9.0": 1496,
+     "10.0": 1152,
+     "14.0": 1129,
+     "12.0": 866,
+     "6.0": 599,
+     "2.0": 593,
+     "1.5": 558,
+     "5.5": 295,
+     "13.0": 236,
+     "6.5": 225,
+     "18.0": 205,
+     "11.0": 197,
+     "16.0": 122,
+     "3.0": 115,
+     "7.5": 106,
+     "5.0": 102,
+     "45.0": 83,
+     "15.0": 82,
+     "4.0": 80,
+     "9.5": 66
+    },
+    "heading_size_boxes": {
+     "9.5": 12,
+     "10.0": 91,
+     "11.0": 14,
+     "12.0": 115,
+     "12.5": 1,
+     "13.0": 3,
+     "14.0": 49,
+     "14.5": 4,
+     "15.0": 15,
+     "16.0": 9,
+     "18.0": 25,
+     "19.0": 1,
+     "20.0": 3,
+     "22.0": 1,
+     "22.5": 1,
+     "41.0": 1,
+     "45.0": 11
+    }
+   },
+   "boxes": 2072,
+   "running_boxes": 241,
+   "roles": {
+    "body": 1335,
+    "h1": 12,
+    "h2": 112,
+    "h3": 315,
+    "run": 241,
+    "caption": 47,
+    "note": 10
+   },
+   "containers": 169,
+   "fills_dropped": {
+    "page_background": 11,
+    "not_rectangle": 52,
+    "hidden_later": 4,
+    "same_colour_as_under": 3,
+    "picture_tint": 2
+   },
+   "blocks_split": 356,
+   "lines_joined": 291,
+   "paragraph_cuts": 301,
+   "seconds": 2.5
+  },
+  "2385_2023": {
+   "report": "2385_2023",
+   "version": 1,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2385_2023.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2385_2023_pairs.jsonl",
+   "pairs_sha256": "4a0f37b60ddce5de0980b1c6d9dd99611295bbd563962d733ab06fae1936fb50",
+   "params_sha256": "e3f58cc76cce3285ccec410a577a1a3a4a02c053c4baad8c163a0c781e1c1c6a",
+   "pages": 113,
+   "picture_records": 52,
+   "pages_with_pictures": 19,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 24,
+   "running_keys_exact": 43,
+   "running_keys_check": {
+    "same": true,
+    "keys": 24,
+    "keys_all_dict": 24,
+    "exact_keys": 43,
+    "exact_keys_all_dict": 43
+   },
+   "font": {
+    "body": 11.0,
+    "threshold": 12.65,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 14.0,
+      "max": 14.0,
+      "sizes": {
+       "14.0": 14
+      },
+      "boxes": 14,
+      "hi": null,
+      "lo": 12.65
+     }
+    ],
+    "body_bold_share": 0.001,
+    "size_chars": {
+     "11.0": 7284,
+     "10.0": 1104,
+     "9.0": 499,
+     "4.0": 468,
+     "5.0": 464,
+     "7.0": 255,
+     "6.0": 205,
+     "4.5": 136,
+     "5.5": 128,
+     "6.5": 118,
+     "14.0": 111,
+     "12.0": 95,
+     "8.0": 81,
+     "11.5": 50
+    },
+    "heading_size_boxes": {
+     "14.0": 14
+    }
+   },
+   "boxes": 504,
+   "running_boxes": 175,
+   "roles": {
+    "run": 175,
+    "body": 194,
+    "h1": 14,
+    "caption": 96,
+    "h3": 18,
+    "note": 7
+   },
+   "containers": 19,
+   "fills_dropped": {
+    "not_rectangle": 5,
+    "picture_tint": 9,
+    "hidden_later": 10,
+    "same_colour_as_under": 25
+   },
+   "blocks_split": 66,
+   "lines_joined": 85,
+   "paragraph_cuts": 11,
+   "seconds": 3.4
+  },
+  "2385_2024": {
+   "report": "2385_2024",
+   "version": 1,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2385_2024.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2385_2024_pairs.jsonl",
+   "pairs_sha256": "1ea3aaee04d067cc1746cca3a9b49462a7579a7ea571c184763c6af74557c107",
+   "params_sha256": "e3f58cc76cce3285ccec410a577a1a3a4a02c053c4baad8c163a0c781e1c1c6a",
+   "pages": 122,
+   "picture_records": 4550,
+   "pages_with_pictures": 122,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 18,
+   "running_keys_exact": 24,
+   "running_keys_check": {
+    "same": true,
+    "keys": 18,
+    "keys_all_dict": 18,
+    "exact_keys": 24,
+    "exact_keys_all_dict": 24
+   },
+   "font": {
+    "body": 10.0,
+    "threshold": 11.5,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 30.0,
+      "max": 32.0,
+      "sizes": {
+       "30.0": 6,
+       "32.0": 7
+      },
+      "boxes": 13,
+      "hi": null,
+      "lo": 23.87
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 14.0,
+      "max": 19.0,
+      "sizes": {
+       "14.0": 24,
+       "15.0": 82,
+       "15.5": 4,
+       "16.0": 35,
+       "19.0": 3
+      },
+      "boxes": 148,
+      "hi": 23.87,
+      "lo": 13.49
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 12.0,
+      "max": 13.0,
+      "sizes": {
+       "12.0": 160,
+       "13.0": 70
+      },
+      "boxes": 230,
+      "hi": 13.49,
+      "lo": 11.5
+     }
+    ],
+    "body_bold_share": 0.016,
+    "size_chars": {
+     "10.0": 41184,
+     "8.0": 23838,
+     "9.0": 10508,
+     "7.0": 5030,
+     "12.0": 1552,
+     "11.0": 1116,
+     "15.0": 1020,
+     "13.0": 667,
+     "9.5": 425,
+     "7.5": 271,
+     "6.5": 260,
+     "16.0": 234,
+     "14.0": 201,
+     "2.5": 100,
+     "3.0": 96
+    },
+    "heading_size_boxes": {
+     "11.5": 2,
+     "12.0": 160,
+     "13.0": 70,
+     "14.0": 24,
+     "14.5": 2,
+     "15.0": 82,
+     "15.5": 4,
+     "16.0": 35,
+     "17.0": 1,
+     "18.0": 2,
+     "19.0": 3,
+     "20.0": 1,
+     "21.0": 1,
+     "26.0": 1,
+     "30.0": 6,
+     "32.0": 7,
+     "292.5": 2
+    }
+   },
+   "boxes": 5845,
+   "running_boxes": 1222,
+   "roles": {
+    "h1": 16,
+    "body": 3985,
+    "h3": 371,
+    "h2": 155,
+    "run": 1222,
+    "note": 38,
+    "caption": 58
+   },
+   "containers": 228,
+   "fills_dropped": {
+    "not_rectangle": 88,
+    "same_colour_as_under": 129,
+    "hidden_later": 11
+   },
+   "blocks_split": 953,
+   "lines_joined": 966,
+   "paragraph_cuts": 179,
+   "seconds": 17.0
+  },
+  "2385_2025": {
+   "report": "2385_2025",
+   "version": 1,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2385_2025.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2385_2025_pairs.jsonl",
+   "pairs_sha256": "dcd75dfe9830984541bb7a432ecc5613dc25403cc38f952137d65d1eb19a26b2",
+   "params_sha256": "e3f58cc76cce3285ccec410a577a1a3a4a02c053c4baad8c163a0c781e1c1c6a",
+   "pages": 144,
+   "picture_records": 111,
+   "pages_with_pictures": 41,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 15,
+   "running_keys_exact": 16,
+   "running_keys_check": {
+    "same": true,
+    "keys": 15,
+    "keys_all_dict": 15,
+    "exact_keys": 16,
+    "exact_keys_all_dict": 16
+   },
+   "font": {
+    "body": 10.0,
+    "threshold": 11.5,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 39.5,
+      "max": 39.5,
+      "sizes": {
+       "39.5": 6
+      },
+      "boxes": 6,
+      "hi": null,
+      "lo": 25.14
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 14.0,
+      "max": 16.0,
+      "sizes": {
+       "14.0": 22,
+       "15.0": 12,
+       "16.0": 7
+      },
+      "boxes": 41,
+      "hi": 25.14,
+      "lo": 13.49
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 12.0,
+      "max": 13.0,
+      "sizes": {
+       "12.0": 9,
+       "13.0": 38
+      },
+      "boxes": 47,
+      "hi": 13.49,
+      "lo": 11.5
+     }
+    ],
+    "body_bold_share": 0.002,
+    "size_chars": {
+     "10.0": 15709,
+     "9.0": 2023,
+     "8.0": 1750,
+     "7.0": 1222,
+     "13.0": 482,
+     "12.0": 376,
+     "11.0": 288,
+     "15.0": 151,
+     "9.5": 59,
+     "7.5": 41,
+     "16.0": 29,
+     "10.5": 24,
+     "14.0": 23
+    },
+    "heading_size_boxes": {
+     "11.5": 2,
+     "12.0": 9,
+     "13.0": 38,
+     "14.0": 22,
+     "15.0": 12,
+     "16.0": 7,
+     "17.0": 1,
+     "17.5": 1,
+     "18.0": 1,
+     "22.5": 1,
+     "30.0": 1,
+     "39.5": 6
+    }
+   },
+   "boxes": 1281,
+   "running_boxes": 465,
+   "roles": {
+    "h2": 45,
+    "h3": 83,
+    "body": 610,
+    "h1": 7,
+    "run": 465,
+    "caption": 65,
+    "note": 6
+   },
+   "containers": 59,
+   "fills_dropped": {
+    "not_rectangle": 1066,
+    "page_background": 11,
+    "hidden_later": 20,
+    "picture_tint": 5,
+    "same_colour_as_under": 10
+   },
+   "blocks_split": 184,
+   "lines_joined": 156,
+   "paragraph_cuts": 62,
+   "seconds": 4.1
+  },
+  "2610_2023": {
+   "report": "2610_2023",
+   "version": 1,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2610_2023.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2610_2023_pairs.jsonl",
+   "pairs_sha256": "2ee5488b74970943520c1b5dac4b090fba3a968b7971483be5e9c25c69b04a84",
+   "params_sha256": "e3f58cc76cce3285ccec410a577a1a3a4a02c053c4baad8c163a0c781e1c1c6a",
+   "pages": 153,
+   "picture_records": 110,
+   "pages_with_pictures": 35,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 24,
+   "running_keys_exact": 27,
+   "running_keys_check": {
+    "same": true,
+    "keys": 24,
+    "keys_all_dict": 24,
+    "exact_keys": 27,
+    "exact_keys_all_dict": 27
+   },
+   "font": {
+    "body": 8.0,
+    "threshold": 9.2,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 12.0,
+      "max": 12.0,
+      "sizes": {
+       "12.0": 22
+      },
+      "boxes": 22,
+      "hi": null,
+      "lo": 11.49
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 11.0,
+      "max": 11.0,
+      "sizes": {
+       "11.0": 14
+      },
+      "boxes": 14,
+      "hi": 11.49,
+      "lo": 9.2
+     }
+    ],
+    "body_bold_share": 0.027,
+    "size_chars": {
+     "8.0": 30460,
+     "7.0": 3372,
+     "9.0": 1033,
+     "12.0": 248,
+     "6.5": 161,
+     "11.0": 144,
+     "6.0": 120,
+     "13.0": 42
+    },
+    "heading_size_boxes": {
+     "11.0": 14,
+     "12.0": 22,
+     "19.0": 2,
+     "24.0": 1,
+     "31.0": 1,
+     "72.0": 1
+    }
+   },
+   "boxes": 922,
+   "running_boxes": 100,
+   "roles": {
+    "body": 573,
+    "h1": 27,
+    "run": 100,
+    "h2": 14,
+    "h3": 115,
+    "note": 19,
+    "caption": 74
+   },
+   "containers": 51,
+   "fills_dropped": {
+    "page_background": 2,
+    "not_rectangle": 29,
+    "hidden_later": 34,
+    "same_colour_as_under": 4
+   },
+   "blocks_split": 106,
+   "lines_joined": 782,
+   "paragraph_cuts": 79,
+   "seconds": 9.1
+  },
+  "2610_2024": {
+   "report": "2610_2024",
+   "version": 1,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2610_2024.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2610_2024_pairs.jsonl",
+   "pairs_sha256": "7333d7f05d826c42dfabd828af4364c9d4729b5804ba391bbd65c7a6e75da5e7",
+   "params_sha256": "e3f58cc76cce3285ccec410a577a1a3a4a02c053c4baad8c163a0c781e1c1c6a",
+   "pages": 147,
+   "picture_records": 51,
+   "pages_with_pictures": 25,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 58,
+   "running_keys_exact": 53,
+   "running_keys_check": {
+    "same": true,
+    "keys": 58,
+    "keys_all_dict": 58,
+    "exact_keys": 53,
+    "exact_keys_all_dict": 53
+   },
+   "font": {
+    "body": 8.0,
+    "threshold": 9.2,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 16.0,
+      "max": 17.0,
+      "sizes": {
+       "16.0": 4,
+       "17.0": 7
+      },
+      "boxes": 11,
+      "hi": null,
+      "lo": 12.96
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 10.5,
+      "max": 10.5,
+      "sizes": {
+       "10.5": 5
+      },
+      "boxes": 5,
+      "hi": 12.96,
+      "lo": 10.25
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 10.0,
+      "max": 10.0,
+      "sizes": {
+       "10.0": 26
+      },
+      "boxes": 26,
+      "hi": 10.25,
+      "lo": 9.2
+     }
+    ],
+    "body_bold_share": 0.021,
+    "size_chars": {
+     "8.0": 20615,
+     "7.0": 2326,
+     "6.0": 1450,
+     "10.0": 335,
+     "6.5": 154,
+     "8.5": 110,
+     "16.0": 102,
+     "9.0": 86,
+     "17.0": 32
+    },
+    "heading_size_boxes": {
+     "10.0": 26,
+     "10.5": 5,
+     "11.5": 1,
+     "16.0": 4,
+     "17.0": 7
+    }
+   },
+   "boxes": 854,
+   "running_boxes": 274,
+   "roles": {
+    "run": 274,
+    "body": 446,
+    "h1": 11,
+    "caption": 49,
+    "h3": 62,
+    "h2": 6,
+    "note": 6
+   },
+   "containers": 53,
+   "fills_dropped": {
+    "hidden_later": 5
+   },
+   "blocks_split": 87,
+   "lines_joined": 464,
+   "paragraph_cuts": 81,
+   "seconds": 16.5
+  },
+  "2610_2025": {
+   "report": "2610_2025",
+   "version": 1,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2610_2025.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2610_2025_pairs.jsonl",
+   "pairs_sha256": "a0c4804cab819b53d349f7ae07625c46227333d75c509431aa2c535be5d90d1b",
+   "params_sha256": "e3f58cc76cce3285ccec410a577a1a3a4a02c053c4baad8c163a0c781e1c1c6a",
+   "pages": 150,
+   "picture_records": 150,
+   "pages_with_pictures": 48,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 63,
+   "running_keys_exact": 58,
+   "running_keys_check": {
+    "same": true,
+    "keys": 63,
+    "keys_all_dict": 63,
+    "exact_keys": 58,
+    "exact_keys_all_dict": 58
+   },
+   "font": {
+    "body": 8.0,
+    "threshold": 9.2,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 16.0,
+      "max": 17.0,
+      "sizes": {
+       "16.0": 9,
+       "17.0": 22
+      },
+      "boxes": 31,
+      "hi": null,
+      "lo": 14.97
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 12.0,
+      "max": 14.0,
+      "sizes": {
+       "12.0": 7,
+       "12.5": 3,
+       "14.0": 9
+      },
+      "boxes": 19,
+      "hi": 14.97,
+      "lo": 11.49
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 9.5,
+      "max": 11.0,
+      "sizes": {
+       "9.5": 17,
+       "10.0": 11,
+       "10.5": 5,
+       "11.0": 23
+      },
+      "boxes": 56,
+      "hi": 11.49,
+      "lo": 9.2
+     }
+    ],
+    "body_bold_share": 0.008,
+    "size_chars": {
+     "8.0": 37718,
+     "8.5": 4550,
+     "6.0": 3607,
+     "7.0": 2997,
+     "9.0": 1207,
+     "7.5": 881,
+     "6.5": 615,
+     "10.0": 396,
+     "11.0": 217,
+     "16.0": 212,
+     "17.0": 145,
+     "12.0": 83,
+     "9.5": 73
+    },
+    "heading_size_boxes": {
+     "9.5": 17,
+     "10.0": 11,
+     "10.5": 5,
+     "11.0": 23,
+     "11.5": 1,
+     "12.0": 7,
+     "12.5": 3,
+     "14.0": 9,
+     "14.5": 2,
+     "16.0": 9,
+     "17.0": 22
+    }
+   },
+   "boxes": 1604,
+   "running_boxes": 351,
+   "roles": {
+    "run": 351,
+    "body": 863,
+    "h3": 159,
+    "note": 17,
+    "h1": 31,
+    "caption": 161,
+    "h2": 22
+   },
+   "containers": 127,
+   "fills_dropped": {
+    "same_colour_as_under": 5,
+    "picture_tint": 1,
+    "hidden_later": 4
+   },
+   "blocks_split": 150,
+   "lines_joined": 1255,
+   "paragraph_cuts": 55,
+   "seconds": 24.8
+  },
+  "2882_2023": {
+   "report": "2882_2023",
+   "version": 1,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2882_2023.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2882_2023_pairs.jsonl",
+   "pairs_sha256": "7699452ff8fc8e5be8797e2186a785369307239522c16b276de7d9fbb30e2861",
+   "params_sha256": "e3f58cc76cce3285ccec410a577a1a3a4a02c053c4baad8c163a0c781e1c1c6a",
+   "pages": 213,
+   "picture_records": 409,
+   "pages_with_pictures": 153,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 35,
+   "running_keys_exact": 37,
+   "running_keys_check": {
+    "same": true,
+    "keys": 35,
+    "keys_all_dict": 35,
+    "exact_keys": 37,
+    "exact_keys_all_dict": 37
+   },
+   "font": {
+    "body": 8.5,
+    "threshold": 9.77,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 16.0,
+      "max": 24.0,
+      "sizes": {
+       "16.0": 63,
+       "18.0": 24,
+       "20.0": 5,
+       "24.0": 7
+      },
+      "boxes": 99,
+      "hi": null,
+      "lo": 14.97
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 12.0,
+      "max": 14.0,
+      "sizes": {
+       "12.0": 10,
+       "12.5": 44,
+       "14.0": 14
+      },
+      "boxes": 68,
+      "hi": 14.97,
+      "lo": 11.49
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 10.0,
+      "max": 11.0,
+      "sizes": {
+       "10.0": 240,
+       "10.5": 6,
+       "11.0": 156
+      },
+      "boxes": 402,
+      "hi": 11.49,
+      "lo": 9.77
+     }
+    ],
+    "body_bold_share": 0.784,
+    "size_chars": {
+     "8.5": 121977,
+     "8.0": 10301,
+     "7.0": 6727,
+     "10.0": 2078,
+     "11.0": 1898,
+     "9.0": 1701,
+     "9.5": 1058,
+     "12.5": 593,
+     "6.0": 448,
+     "16.0": 328,
+     "7.5": 271,
+     "18.0": 243
+    },
+    "heading_size_boxes": {
+     "10.0": 240,
+     "10.5": 6,
+     "11.0": 156,
+     "12.0": 10,
+     "12.5": 44,
+     "14.0": 14,
+     "16.0": 63,
+     "18.0": 24,
+     "20.0": 5,
+     "24.0": 7
+    }
+   },
+   "boxes": 7121,
+   "running_boxes": 984,
+   "roles": {
+    "h1": 99,
+    "run": 984,
+    "h2": 68,
+    "body": 4783,
+    "h3": 410,
+    "caption": 710,
+    "note": 67
+   },
+   "containers": 683,
+   "fills_dropped": {
+    "picture_tint": 47,
+    "not_rectangle": 83,
+    "hidden_later": 407,
+    "page_background": 2,
+    "same_colour_as_under": 9
+   },
+   "blocks_split": 1212,
+   "lines_joined": 3884,
+   "paragraph_cuts": 649,
+   "seconds": 9.2
+  },
+  "2882_2024": {
+   "report": "2882_2024",
+   "version": 1,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2882_2024.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2882_2024_pairs.jsonl",
+   "pairs_sha256": "11fd37896b1c6137cf7c9fd49fb0f47e0f396633aa6cc2b2d17429bcd56bf92f",
+   "params_sha256": "e3f58cc76cce3285ccec410a577a1a3a4a02c053c4baad8c163a0c781e1c1c6a",
+   "pages": 233,
+   "picture_records": 428,
+   "pages_with_pictures": 233,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 24,
+   "running_keys_exact": 28,
+   "running_keys_check": {
+    "same": true,
+    "keys": 24,
+    "keys_all_dict": 24,
+    "exact_keys": 28,
+    "exact_keys_all_dict": 28
+   },
+   "font": {
+    "body": 8.0,
+    "threshold": 9.2,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 14.0,
+      "max": 19.5,
+      "sizes": {
+       "14.0": 38,
+       "15.0": 5,
+       "16.0": 12,
+       "18.0": 6,
+       "19.5": 7
+      },
+      "boxes": 68,
+      "hi": null,
+      "lo": 12.96
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 12.0,
+      "max": 12.0,
+      "sizes": {
+       "12.0": 217
+      },
+      "boxes": 217,
+      "hi": 12.96,
+      "lo": 10.95
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 9.5,
+      "max": 10.0,
+      "sizes": {
+       "9.5": 7,
+       "10.0": 193
+      },
+      "boxes": 200,
+      "hi": 10.95,
+      "lo": 9.2
+     }
+    ],
+    "body_bold_share": 0.722,
+    "size_chars": {
+     "8.0": 118423,
+     "8.5": 68749,
+     "7.5": 13701,
+     "10.0": 2503,
+     "12.0": 2430,
+     "2.5": 2358,
+     "9.0": 1219,
+     "7.0": 920,
+     "14.0": 535,
+     "6.5": 460,
+     "4.5": 386
+    },
+    "heading_size_boxes": {
+     "9.5": 7,
+     "10.0": 193,
+     "12.0": 217,
+     "13.0": 1,
+     "14.0": 38,
+     "15.0": 5,
+     "16.0": 12,
+     "18.0": 6,
+     "19.5": 7,
+     "30.5": 1,
+     "60.0": 1
+    }
+   },
+   "boxes": 11958,
+   "running_boxes": 1517,
+   "roles": {
+    "h1": 71,
+    "run": 1517,
+    "body": 9162,
+    "h2": 217,
+    "h3": 294,
+    "caption": 514,
+    "note": 183
+   },
+   "containers": 988,
+   "fills_dropped": {
+    "picture_tint": 73,
+    "not_rectangle": 2492,
+    "hidden_later": 72,
+    "same_colour_as_under": 19
+   },
+   "blocks_split": 1798,
+   "lines_joined": 4766,
+   "paragraph_cuts": 1034,
+   "seconds": 8.7
+  },
+  "2882_2025": {
+   "report": "2882_2025",
+   "version": 1,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2882_2025.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2882_2025_pairs.jsonl",
+   "pairs_sha256": "95d2e217af66808bd8c570c5332057586603c952ef4f3486495038fa8a0ae735",
+   "params_sha256": "e3f58cc76cce3285ccec410a577a1a3a4a02c053c4baad8c163a0c781e1c1c6a",
+   "pages": 213,
+   "picture_records": 154,
+   "pages_with_pictures": 84,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 72,
+   "running_keys_exact": 77,
+   "running_keys_check": {
+    "same": true,
+    "keys": 72,
+    "keys_all_dict": 72,
+    "exact_keys": 77,
+    "exact_keys_all_dict": 77
+   },
+   "font": {
+    "body": 8.5,
+    "threshold": 9.77,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 47.5,
+      "max": 47.5,
+      "sizes": {
+       "47.5": 6
+      },
+      "boxes": 6,
+      "hi": null,
+      "lo": 28.0
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 12.0,
+      "max": 16.5,
+      "sizes": {
+       "12.0": 59,
+       "12.5": 7,
+       "13.0": 17,
+       "13.5": 3,
+       "14.5": 4,
+       "15.5": 23,
+       "16.5": 5
+      },
+      "boxes": 118,
+      "hi": 28.0,
+      "lo": 11.49
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 10.0,
+      "max": 11.0,
+      "sizes": {
+       "10.0": 183,
+       "11.0": 131
+      },
+      "boxes": 314,
+      "hi": 11.49,
+      "lo": 9.77
+     }
+    ],
+    "body_bold_share": 0.017,
+    "size_chars": {
+     "8.5": 55195,
+     "7.5": 5052,
+     "7.0": 3793,
+     "10.0": 3485,
+     "8.0": 2433,
+     "11.0": 1204,
+     "10.5": 1083,
+     "9.0": 742,
+     "12.0": 551,
+     "13.0": 221,
+     "4.5": 200,
+     "14.0": 175,
+     "9.5": 157,
+     "15.5": 118,
+     "13.5": 90
+    },
+    "heading_size_boxes": {
+     "10.0": 183,
+     "11.0": 131,
+     "12.0": 59,
+     "12.5": 7,
+     "13.0": 17,
+     "13.5": 3,
+     "14.0": 2,
+     "14.5": 4,
+     "15.5": 23,
+     "16.5": 5,
+     "20.5": 1,
+     "22.0": 2,
+     "26.5": 2,
+     "28.0": 1,
+     "43.0": 1,
+     "46.0": 1,
+     "47.5": 6
+    }
+   },
+   "boxes": 3209,
+   "running_boxes": 855,
+   "roles": {
+    "h1": 9,
+    "run": 855,
+    "body": 1527,
+    "h3": 433,
+    "h2": 125,
+    "caption": 209,
+    "note": 51
+   },
+   "containers": 219,
+   "fills_dropped": {
+    "not_rectangle": 98,
+    "same_colour_as_under": 9,
+    "picture_tint": 9
+   },
+   "blocks_split": 417,
+   "lines_joined": 1563,
+   "paragraph_cuts": 345,
+   "seconds": 4.6
+  }
+ }
+}

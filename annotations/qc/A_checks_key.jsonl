@@ -1,0 +1,70 @@
+{"annotator": "a1", "batch": 1, "item": "Aa6bb7a08", "crop": "1464_2023_p069_00.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a1", "batch": 1, "item": "Aa3156a27", "crop": "1101_2023_p027_01.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a1", "batch": 1, "item": "A3f00b85b", "crop": "2882_2023_p008_04.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a1", "batch": 1, "item": "Af51c0871", "crop": "1464_2023_p071_02.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a1", "batch": 1, "item": "Af7352cfb", "crop": "3071_2025_p056_05.jpg", "answer": "Not a photo", "pool": "dev"}
+{"annotator": "a1", "batch": 2, "item": "A7b7688b9", "crop": "7723_2025_p046_04.jpg", "answer": "Not a photo", "pool": "dev"}
+{"annotator": "a1", "batch": 2, "item": "Adcadb2b4", "crop": "3362_2024_p017_06.jpg", "answer": "Not a photo", "pool": "dev"}
+{"annotator": "a1", "batch": 2, "item": "A7c8448a5", "crop": "7723_2025_p061_01.jpg", "answer": "Not a photo", "pool": "dev"}
+{"annotator": "a1", "batch": 2, "item": "Ac436f78a", "crop": "2882_2025_p101_00.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a1", "batch": 2, "item": "Aacb2fb61", "crop": "2882_2024_p123_03.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a1", "batch": 3, "item": "A766b0d78", "crop": "2337_2023_p031_00.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a1", "batch": 3, "item": "A4f6a22d7", "crop": "1314_2025_p059_00.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a1", "batch": 3, "item": "Ac08774d0", "crop": "1217_2024_p118_00.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a1", "batch": 3, "item": "Ad52f2295", "crop": "4961_2024_p050_02.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a1", "batch": 3, "item": "A185e2e6b", "crop": "6854_2024_p111_01.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a1", "batch": 4, "item": "Acd741ab4", "crop": "4419_2024_p067_02.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a1", "batch": 4, "item": "A4fb01a14", "crop": "4419_2024_p002_00.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a1", "batch": 4, "item": "Aa3da9efc", "crop": "6605_2024_p015_03.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a1", "batch": 4, "item": "Aa34f7633", "crop": "2748_2025_p091_01.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a1", "batch": 4, "item": "Afe55f3f7", "crop": "6854_2024_p112_01.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a1", "batch": 5, "item": "A8339aade", "crop": "4961_2025_p089_00.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a1", "batch": 5, "item": "A3cd0c381", "crop": "2642_2023_p121_03.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a1", "batch": 5, "item": "A59cb4bb1", "crop": "4707_2023_p009_00.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a1", "batch": 5, "item": "Ac74dc10c", "crop": "3231_2024_p186_02.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a1", "batch": 5, "item": "Aa869ff84", "crop": "9910_2024_p104_01.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a1", "batch": 6, "item": "A91efaf35", "crop": "8473_2024_p110_03.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a1", "batch": 6, "item": "Ad8e2e307", "crop": "2641_2025_p054_02.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a1", "batch": 6, "item": "Ace48bf20", "crop": "6716_2024_p021_02.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a1", "batch": 6, "item": "Ae0198e0a", "crop": "2395_2025_p214_02.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a1", "batch": 6, "item": "A40c3e9d6", "crop": "2332_2023_p084_01.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a2", "batch": 1, "item": "Aa6bb7a08", "crop": "1464_2023_p069_00.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a2", "batch": 1, "item": "A4351da02", "crop": "5009_2024_p063_01.jpg", "answer": "Not a photo", "pool": "dev"}
+{"annotator": "a2", "batch": 1, "item": "A3f00b85b", "crop": "2882_2023_p008_04.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a2", "batch": 1, "item": "Aacb2fb61", "crop": "2882_2024_p123_03.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a2", "batch": 1, "item": "Ac436f78a", "crop": "2882_2025_p101_00.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a2", "batch": 2, "item": "A7c8448a5", "crop": "7723_2025_p061_01.jpg", "answer": "Not a photo", "pool": "dev"}
+{"annotator": "a2", "batch": 2, "item": "Aa3156a27", "crop": "1101_2023_p027_01.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a2", "batch": 2, "item": "Af51c0871", "crop": "1464_2023_p071_02.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a2", "batch": 2, "item": "A7b7688b9", "crop": "7723_2025_p046_04.jpg", "answer": "Not a photo", "pool": "dev"}
+{"annotator": "a2", "batch": 2, "item": "Af7352cfb", "crop": "3071_2025_p056_05.jpg", "answer": "Not a photo", "pool": "dev"}
+{"annotator": "a2", "batch": 3, "item": "Aa34f7633", "crop": "2748_2025_p091_01.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a2", "batch": 3, "item": "A766b0d78", "crop": "2337_2023_p031_00.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a2", "batch": 3, "item": "Aa869ff84", "crop": "9910_2024_p104_01.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a2", "batch": 3, "item": "A8339aade", "crop": "4961_2025_p089_00.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a2", "batch": 3, "item": "Ac74dc10c", "crop": "3231_2024_p186_02.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a2", "batch": 4, "item": "A59cb4bb1", "crop": "4707_2023_p009_00.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a2", "batch": 4, "item": "A4f6a22d7", "crop": "1314_2025_p059_00.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a2", "batch": 4, "item": "A4fb01a14", "crop": "4419_2024_p002_00.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a2", "batch": 4, "item": "Aed249f56", "crop": "3026_2025_p017_00.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a2", "batch": 4, "item": "Ad8e2e307", "crop": "2641_2025_p054_02.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a2", "batch": 5, "item": "A78043778", "crop": "9933_2025_p161_02.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a2", "batch": 5, "item": "Ac08774d0", "crop": "1217_2024_p118_00.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a2", "batch": 5, "item": "Aa3da9efc", "crop": "6605_2024_p015_03.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a2", "batch": 5, "item": "Ad52f2295", "crop": "4961_2024_p050_02.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a2", "batch": 5, "item": "Ae528172d", "crop": "3231_2025_p103_02.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a2", "batch": 6, "item": "Ae0198e0a", "crop": "2395_2025_p214_02.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a2", "batch": 6, "item": "A3cd0c381", "crop": "2642_2023_p121_03.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a2", "batch": 6, "item": "Ace48bf20", "crop": "6716_2024_p021_02.jpg", "answer": "Not a photo", "pool": "test"}
+{"annotator": "a2", "batch": 6, "item": "Afe55f3f7", "crop": "6854_2024_p112_01.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a2", "batch": 6, "item": "A185e2e6b", "crop": "6854_2024_p111_01.jpg", "answer": "Photo", "pool": "test"}
+{"annotator": "a1", "batch": 7, "item": "Aa0ec231d", "crop": "1464_2023_p071_05.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a1", "batch": 7, "item": "A074f2049", "crop": "2501_2025_p079_03.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a1", "batch": 7, "item": "Aac57e9dd", "crop": "2501_2024_p056_00.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a1", "batch": 7, "item": "A3b3c0ea3", "crop": "2610_2025_p049_00.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a1", "batch": 7, "item": "A44bf1024", "crop": "2739_2023_p035_00.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a2", "batch": 7, "item": "Aa0ec231d", "crop": "1464_2023_p071_05.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a2", "batch": 7, "item": "A074f2049", "crop": "2501_2025_p079_03.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a2", "batch": 7, "item": "Aac57e9dd", "crop": "2501_2024_p056_00.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a2", "batch": 7, "item": "A3b3c0ea3", "crop": "2610_2025_p049_00.jpg", "answer": "Photo", "pool": "dev"}
+{"annotator": "a2", "batch": 7, "item": "A44bf1024", "crop": "2739_2023_p035_00.jpg", "answer": "Photo", "pool": "dev"}

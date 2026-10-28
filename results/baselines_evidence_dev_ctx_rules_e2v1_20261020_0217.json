@@ -1,0 +1,1420 @@
+{
+ "meta": {
+  "date": "2026-10-20T02:17:01+08:00",
+  "command": "python src/baselines_evidence.py --r-items dev --labels annotations/dev/R.jsonl --context rules --only e1 e2 --prompt direct_zeroshot_v1 --tag dev_ctx_rules_e2v1",
+  "git": {
+   "commit": "50537a35631212015efd258071a36e1a64d63f2b",
+   "uncommitted_changes": true
+  },
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "packages": {
+   "torch": "2.14.1+cu130",
+   "transformers": "5.20.1",
+   "pillow": "13.0.0",
+   "numpy": "2.4.6",
+   "pyyaml": "6.0.3"
+  },
+  "config_file": "configs\\default.yaml",
+  "config": "# 所有參數放這裡（PLAN v2.0）。標「初值」的門檻只能在開發集上調，11/2 凍結後另存 configs/frozen.yaml。\nseed: 2026\n\npaths:\n  raw: data/raw\n  catalog: data/catalog.csv\n  index: data/index\n  synthetic: data/synthetic\n  extract: work/extract\n  page_graph: work/page_graph\n  logo_refs: work/logo_refs\n  context: work/context\n  evidence: work/evidence\n  features: work/features\n  reuse: work/reuse\n  prompts: configs/prompts\n  annotations: annotations\n  results: results\n  reports: reports\n\ndata:\n  years: [2023, 2024, 2025]          # 報告年度（報告涵蓋的會計年度）\n  n_firms: 150\n  n_dev: 30                          # 以公司為單位\n  dev_must_include: [\"1101\", \"1707\"] # 台泥、葡萄王\n\nextract:\n  crop_long_side: 1024\n  jpg_quality: 90\n\npage_graph:\n  container_min_area: 0.02           # 色塊容器面積下限（占頁面比例）\n  container_max_area: 0.90\n  heading_levels: 3                  # 章、節、小標題\n  # 以下是 page_graph.py 用的初值（10/18 晚上加；只在開發集上看 HTML 調）\n  container_rect_fill: 0.90          # 線段／曲線圍成的形狀：多邊形面積 ≥ 外框的這個比例才算矩形（圓角矩形算，圓形不算）\n  colour_tolerance: 0.02             # 色塊顏色（乘上不透明度）跟底下顏色每個 RGB 通道都差不到這個值 → 只是重刷底色，不算容器\n  inside_container: 0.75             # 文字框、照片有這個比例以上在色塊裡，才算在這個容器裡\n  heading_min_ratio: 1.15            # 字級 ≥ 內文 × 這個值，才可能是標題\n  heading_min_pages: 3               # v2：一個字級至少出現在幾個不同頁的短文字框，才算一種標題字級（v1 是 heading_min_boxes: 3 個框）\n  heading_max_chars: 50              # 標題最多幾個字（不含空白）\n  split_size_jump: 0.20              # 同一個 MuPDF 區塊裡，相鄰兩行字級差超過 20% 就切開（標題和內文被放在同一區塊）\n  column_gap: 3                      # 分欄：兩群文字框的 x 範圍之間至少要空這麼多 pt\n  sparse_max_chars: 20               # --sparse-stats：一頁不超過這麼多字（不含空白）算「幾乎沒字」\n  # v2（10/18 晚上，審查後加；初值，只在開發集上看）\n  slot_tolerance: 4                  # 導覽列：同一段字在很多頁的「同一個位置」（左上角 x、y 差 ≤ 這麼多 pt）\n  repeat_heading_ratio: 1.5          # 重複出現的字 ≥ 內文 × 這個值、不在選單裡 → 當標題，不當導覽列\n  repeat_heading_max_share: 0.25     # …而且出現的頁數 ≤ 全本頁數的這個比例（超過的是頁首的報告名稱等）\n  caption_max_lines: 3               # 圖說型最多幾行\n  picture_unit_max_area: 0.6         # 閱讀順序：圖片 ≤ 頁面這個比例才排進順序（更大的是背景）\n  garbled_box_share: 0.5             # 文字框裡亂碼字 ≥ 這個比例 → 角色 garbled，不當標題\n  panel_area: 0.8                    # 色塊 ≥ 頁面這個比例（或包住整頁所有文字框）→ 標 panel（整頁大底板）\n\nlogo_refs:\n  min_pages: 3                       # 出現幾頁以上的小圖算候選\n  min_short_side_pt: 10               # 10/18 決定 5：20 → 10 pt（每個提議 Eden 都會確認）\n  vector: true                       # 10/18 決定 10：向量畫的 logo 也當候選\n  vector_band: 0.15                  # 內頁只看頁首、頁尾各 15% 高的帶狀區\n  vector_tolerance: 6                # 向量圖形分群的間距（pt）：字形 logo 的字要連在一起\n  vector_min_items: 3                # 一群至少幾條路徑\n  vector_max_long_frac: 0.5          # 長邊不超過頁寬的一半\n  vector_render_px: 600              # 截圖長邊（像素）\n  use_cover: true\n  # 以下 10/18 晚上 logo_refs.py 加的；標「初值」的只在開發集上調\n  cover_min_short_side_pt: 8         # 封面、封底的小圖：PLAN 沒設尺寸門檻；20 pt 會漏掉真的 logo（5519、6693、8070，審查 10/18），改 8 pt\n  whatif_min_short_side_pt: 10       # 只供比較，不影響輸出；10/18 決定 5 已經把正式門檻改成 10 pt，所以現在不會多出候選\n  shared_scope: dev                  # 算「幾家公司也有」只用開發集報告（測試集的圖不拿來調門檻）；--all 要不要改用全部 450 本等 Eden 決定\n  text_on_top_share: 0.5             # 一半以上的位置上面疊了文字的圖是底圖（頁籤、標題底色），不是 logo\n  ocr: true                          # 候選跑 PaddleOCR（.venv_ocr），讀到的字對得上公司名稱就算符合提議條件\n  ocr_lang: chinese_cht\n  ocr_min_score: 0.5                 # OCR 信心分數低於這個值的字不用\n  review_glob: annotations/logo_refs/review*.csv   # Eden 在確認頁勾選後匯出的 CSV；只有確認過的圖才是參考圖\n  use_back_cover: true               # 封底（最後一頁）的小圖也算候選\n  min_px: 16                         # 內嵌圖檔短邊至少幾像素（更小的是項目符號、細線，SuperPoint 也抓不到特徵點）\n  max_area_frac: 0.10                # 頁面上畫出來的面積超過頁面 10% 的不算小圖（整頁背景、封面大圖）\n  edge_frac: 0.12                    # 離頁緣不超過頁面短邊的 12% 算「靠邊」\n  tile_gap_pt: 1.5                   # 跟同頁其他圖片邊對邊貼齊（間距 <= 這個值）的是大圖切成的碎片\n  shared_min_firms: 3                # 同一張圖出現在 >= 3 家公司的報告裡：共用圖示（GRI、SDG、獎項），不是公司 logo\n  lookalike_dhash_bits: 26           # 256 位元 dHash 相差 <= 26 位元（約 10%）、長寬比差 <= 10%、平均顏色差 <= 30 算「看起來同一張」\n  lookalike_aspect_tol: 0.10\n  lookalike_colour_tol: 30\n  shared_dhash_bits: 32              # 初值：算「別家公司也有」時放寬到 32 位元（各家的 SDG 圖示版本略有不同）；每張候選「別家最像的差幾位元」記在結果檔 nearest_other_firm_bits\n  ref_long_side: 1024               # 存下來的參考圖長邊上限（像素）\n  min_contrast: 48                   # 灰階第 2～98 百分位差 < 48 的是色塊、陰影、漸層，不是 logo\n  max_refs_per_firm: 5\n  select_min_score: 0.5              # 初值：logo 分數 >= 這個值，而且符合提議條件（多頁、跨年或名稱對得上）才自動提議；提議還要 Eden 確認\n  weights: {small: 1.0, edge: 1.0, repeat: 1.0, cover: 1.0, cross_year: 2.0, aspect: 0.5, alpha: 1.0, flat: 1.0}\n\nphoto_filter:\n  model: ViT-L-14\n  pretrained: openai\n  exclude_first_last_page: true\n  photo_prompts: [\"a photograph of a real scene\", \"a photograph of people\"]\n  nonphoto_prompts: [\"an illustration\", \"a chart or infographic\", \"a logo or icon\",\n                     \"a scanned certificate or document\", \"an abstract graphic design\"]\n  photo_threshold: 0.1               # 10/19 用標註 A 開發集 100 張（a1）定：加權準確率 0.5 → 85.5%、0.1 → 97.1%（results/photo_threshold_dev_20261019_1352.json）；a2 交回後再確認，11/2 凍結\n  vlm_threshold: 0.98                # 10/19：OpenCLIP 分數 ≥ photo_threshold「或」視覺語言模型說是照片 ≥ 這個值，就算照片（開發集 149 張加權準確率 93.7%，只用 OpenCLIP 91.4%；results/photo_threshold_dev_20261019_1749.json）\n  exclude_image_only_reports: true   # 整本轉成圖片的報告（results/download_check_*.json 的 image_only）\n  exclude_vector_shading: true       # PyMuPDF 把向量漸層當成圖片回報的位置（LOG 2026-10-18 晚上）\n  batch_size: 64\n  load_workers: 8                    # 讀裁切圖的執行緒數\n\ntiles:                               # 10/18 決定 16：切成小塊的照片（tile_groups.py）\n  gap_pt: 1.5                        # 同一頁兩張圖相對的邊相距 ≤ 這麼多 pt 算貼在一起\n  min_shared_edge: 0.5               # 共用的邊至少占較短那邊的這個比例\n  max_overlap: 0.1                   # 兩張圖重疊不超過較小那張面積的這個比例（疊在一起的不算拼塊）\n  seam_zoom: 2.0                     # 看接縫時頁面的解析度（每 pt 幾個像素）\n  seam_min_std: 2.0                  # 初值：緊貼接縫的兩排像素，明暗變化（標準差，灰階）都至少這麼大（白邊、分隔線不算）\n  seam_max_std_ratio: 1.5            # 初值：兩排的變化大小差不超過 1.5 倍\n  seam_min_corr: 0.9                 # 初值：兩排的相關係數 ≥ 0.9 才算畫面連續（同一張圖切開）；寧可漏併，不要把不同照片併在一起\n  decide_share: 0.02                 # 開發集「給模型判斷的圖」裡屬於「畫面連續」的組的比例 ≥ 2% 就寫 tile_merge.py 合併\n\ncontext_link:\n  model: logistic_regression\n  max_body_blocks: 2\n  baselines: [nearest_paragraph, same_column_nearest, caption_only, section_heading_only, rules_v1]\n\nevidence:\n  llm: Qwen/Qwen2.5-7B-Instruct      # 開工時確認可用，記錄 revision\n  vlm: Qwen/Qwen2.5-VL-7B-Instruct   # 或 Qwen3-VL-8B\n  temperature: 0\n  ocr: paddleocr_chinese_cht\n  depiction_threshold: 0.5           # 10/19 開發集調後仍是 0.5（各題 p(是) 取最大值；results/tune_evidence_dev_20261019_2002.json）\n  topical_threshold: 0.6             # 10/19 開發集調（R 開發集 100 張，gate v4；results/tune_evidence_dev_20261019_2002.json）\n  ocr_match_threshold: 0.7           # 初值：字元二元組重疊\n  logo_min_inliers: 40               # 10/19 開發集調：R 開發集照片上找到 logo 的 9 張，目測對的內點 41–190、錯的 16–38（初值 15）；樣本小，R 開發集標完再看\n  years_roc_offset: 1911\n  baselines: [chinese_clip_vitl14, vlm_direct_zeroshot, vlm_direct_fewshot]\n  # 以下 10/18 baselines_evidence.py 加的（版本取自 results/models_20261018_1442.json）\n  vlm_revision: cc594898137f460bfe9f0759e9844b3ce807cfb5\n  llm_revision: a09a35458c702b33eeacc393d103063234e8bc28   # Qwen2.5-7B-Instruct（results/models_20261018_1442.json）\n  vlm_max_pixels: 1003520            # 照片送進視覺語言模型前最多這麼多像素（1280 × 28 × 28）\n  cnclip: OFA-Sys/chinese-clip-vit-large-patch14\n  cnclip_revision: 660941af70c6ff89ce658a1735404c0f3e536c38\n  context_max_chars: 900             # 規則版上下文（圖上文字、圖說、小標題、標題、內文 2 段）最多幾個字\n  e1_thresholds: null                # E1 的兩個門檻：等標註 R 開發集調；沒定之前用試跑照片相似度的三分位數（只是讓流程跑通）\n\nreuse:\n  global_models: [dinov2_vitb14, sscd_disc_mixup]\n  topk: 10\n  years_back: [1]\n  use_flip: true\n  matcher: superpoint_lightglue\n  ransac: magsac\n  min_inliers: 25                    # 初值\n  min_coverage: 0.30                 # 初值\n  stock_topk_other_firms: 5\n\nsynthetic:\n  n_pos: 1000\n  n_neg: 5000\n  crop_keep_area: [0.5, 0.9]\n  brightness_contrast: 0.30\n  saturation: 0.50\n  hue_deg: 10\n  overlay_text_area: [0.10, 0.30]\n  jpeg_quality: [50, 90]\n  collage_area: [0.40, 0.70]\n  # 以下 10/18 make_synthetic.py 加的（初值）\n  source: photo_filter_keep          # 原圖：照片過濾留下的照片（目前是初值門檻 0.5 的結果）\n  p_transform: {crop: 0.6, flip: 0.3, color: 0.6, text: 0.3, collage: 0.2, jpeg: 0.6}   # 每個正例各變換的機率；至少一種\n  crop_aspect: [0.75, 1.33]          # 裁切框的長寬比相對原圖的變化\n  text_opacity: [0.6, 0.9]           # 壓字的底色不透明度\n  neg_max_sscd: 0.5                  # 負例兩張的 SSCD 餘弦相似度要 < 這個值（太像的可能真的是同一張圖庫照）\n\nevaluation:\n  bootstrap_unit: firm\n  bootstrap_n: 2000\n  ci: 0.95\n",
+  "data_sha256": {
+   "D:\\accounting\\esg_reuse_kit\\work\\photo_filter.csv": "3f6f6e206ee31a03d68bcd2313518dbc3b7201ec8dc427ade840bfe268f4fe5c",
+   "D:\\accounting\\esg_reuse_kit\\configs\\prompts\\direct_zeroshot_v1.txt": "e1545e32dd4579844f06951e52d345ddaf9a0856fa3dd983fdbf75e18477f955",
+   "annotations\\dev\\R.jsonl": "63e024a7d3cb2163c1a0bdbff705525702da3a5200c8c3840269089cbaf980f1"
+  }
+ },
+ "tag": "dev_ctx_rules_e2v1",
+ "photos": 103,
+ "crops": "annotations/dev/R_items.jsonl (labelled in annotations/dev/R.jsonl)",
+ "context": "extract_pairs rule-based (L5): overlay text, caption, local heading, heading, 2 paragraphs",
+ "context_name": "rules",
+ "empty_context": 4,
+ "e1": {
+  "model": "OFA-Sys/chinese-clip-vit-large-patch14",
+  "revision": "660941af70c6ff89ce658a1735404c0f3e536c38",
+  "new": 0,
+  "seconds": 0.0,
+  "text": "plain context, first 52 tokens",
+  "thresholds_from": "terciles of this run (placeholder until annotation R dev)",
+  "thresholds": [
+   0.2778,
+   0.3351
+  ],
+  "sim_min_median_max": [
+   0.1776,
+   0.3032,
+   0.4298
+  ],
+  "levels": {
+   "unrelated": 32,
+   "topical": 37,
+   "direct": 34
+  }
+ },
+ "e2": {
+  "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+  "revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
+  "prompt": "configs/prompts/direct_zeroshot_v1.txt",
+  "prompt_sha256": "e1545e32dd4579844f06951e52d345ddaf9a0856fa3dd983fdbf75e18477f955",
+  "max_pixels": 1003520,
+  "new": 103,
+  "seconds": 36.1,
+  "seconds_per_photo": 0.14,
+  "peak_gpu_gb": 17.3,
+  "few_shot": null,
+  "levels": {
+   "topical": 54,
+   "unrelated": 33,
+   "direct": 16
+  },
+  "letter_mass_min": 0.9988,
+  "top_tokens": {
+   "B": 54,
+   "C": 33,
+   "A": 16
+  }
+ },
+ "per_photo": [
+  {
+   "crop": "2739_2024_p066_01.jpg",
+   "context_chars": 119,
+   "e1_sim": 0.2592,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.2207,
+    "topical": 0.5293,
+    "unrelated": 0.25
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "5009_2024_p098_03.jpg",
+   "context_chars": 170,
+   "e1_sim": 0.2658,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.3072,
+    "topical": 0.5065,
+    "unrelated": 0.1863
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "5009_2025_p120_03.jpg",
+   "context_chars": 122,
+   "e1_sim": 0.3161,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.2353,
+    "topical": 0.4981,
+    "unrelated": 0.2666
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "2882_2025_p097_00.jpg",
+   "context_chars": 201,
+   "e1_sim": 0.3485,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.1258,
+    "topical": 0.6391,
+    "unrelated": 0.2351
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "4540_2024_p108_04.jpg",
+   "context_chars": 147,
+   "e1_sim": 0.343,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.1681,
+    "topical": 0.3141,
+    "unrelated": 0.5178
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "2102_2023_p067_02.jpg",
+   "context_chars": 416,
+   "e1_sim": 0.2466,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.0396,
+    "topical": 0.2583,
+    "unrelated": 0.7021
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "3015_2025_p132_05.jpg",
+   "context_chars": 174,
+   "e1_sim": 0.2676,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.25,
+    "topical": 0.5293,
+    "unrelated": 0.2207
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "8070_2024_p061_02.jpg",
+   "context_chars": 282,
+   "e1_sim": 0.3673,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.6638,
+    "topical": 0.3135,
+    "unrelated": 0.0227
+   },
+   "e2_choice": "direct",
+   "e2_letter_mass": 0.9996
+  },
+  {
+   "crop": "3015_2024_p115_01.jpg",
+   "context_chars": 102,
+   "e1_sim": 0.2397,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.081,
+    "topical": 0.3204,
+    "unrelated": 0.5986
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "4540_2023_p098_01.jpg",
+   "context_chars": 230,
+   "e1_sim": 0.3231,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.4133,
+    "topical": 0.4683,
+    "unrelated": 0.1184
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "1101_2023_p091_02.jpg",
+   "context_chars": 145,
+   "e1_sim": 0.3286,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.5682,
+    "topical": 0.3446,
+    "unrelated": 0.0871
+   },
+   "e2_choice": "direct",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "2385_2024_p109_40.jpg",
+   "context_chars": 314,
+   "e1_sim": 0.3171,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.1452,
+    "topical": 0.5066,
+    "unrelated": 0.3482
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9992
+  },
+  {
+   "crop": "7723_2024_p078_00.jpg",
+   "context_chars": 112,
+   "e1_sim": 0.3831,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.4408,
+    "topical": 0.4995,
+    "unrelated": 0.0597
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9996
+  },
+  {
+   "crop": "1455_2023_p009_01.jpg",
+   "context_chars": 102,
+   "e1_sim": 0.2728,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.0473,
+    "topical": 0.1136,
+    "unrelated": 0.8391
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "2501_2023_p081_00.jpg",
+   "context_chars": 103,
+   "e1_sim": 0.291,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.4302,
+    "topical": 0.4302,
+    "unrelated": 0.1397
+   },
+   "e2_choice": "direct",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "5009_2025_p137_03.jpg",
+   "context_chars": 74,
+   "e1_sim": 0.3082,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.0155,
+    "topical": 0.0226,
+    "unrelated": 0.9618
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9996
+  },
+  {
+   "crop": "3015_2023_p110_00.jpg",
+   "context_chars": 55,
+   "e1_sim": 0.3019,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.2738,
+    "topical": 0.5796,
+    "unrelated": 0.1466
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "5519_2023_p065_01.jpg",
+   "context_chars": 168,
+   "e1_sim": 0.3243,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.2644,
+    "topical": 0.436,
+    "unrelated": 0.2996
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "2610_2025_p043_01.jpg",
+   "context_chars": 158,
+   "e1_sim": 0.3703,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.4069,
+    "topical": 0.5224,
+    "unrelated": 0.0707
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "1101_2025_p191_00.jpg",
+   "context_chars": 253,
+   "e1_sim": 0.3149,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.622,
+    "topical": 0.2938,
+    "unrelated": 0.0842
+   },
+   "e2_choice": "direct",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "5519_2025_p085_03.jpg",
+   "context_chars": 34,
+   "e1_sim": 0.3554,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.3598,
+    "topical": 0.5234,
+    "unrelated": 0.1168
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "8289_2025_p079_02.jpg",
+   "context_chars": 130,
+   "e1_sim": 0.3414,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.1778,
+    "topical": 0.6207,
+    "unrelated": 0.2015
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "1101_2025_p184_00.jpg",
+   "context_chars": 371,
+   "e1_sim": 0.4298,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.3613,
+    "topical": 0.5956,
+    "unrelated": 0.0431
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "2610_2023_p048_01.jpg",
+   "context_chars": 160,
+   "e1_sim": 0.2357,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.3044,
+    "topical": 0.5687,
+    "unrelated": 0.1269
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "1101_2023_p090_00.jpg",
+   "context_chars": 309,
+   "e1_sim": 0.3484,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.2197,
+    "topical": 0.6766,
+    "unrelated": 0.1038
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9992
+  },
+  {
+   "crop": "1455_2024_p051_07.jpg",
+   "context_chars": 58,
+   "e1_sim": 0.3987,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.3628,
+    "topical": 0.4658,
+    "unrelated": 0.1714
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "8289_2025_p056_03.jpg",
+   "context_chars": 322,
+   "e1_sim": 0.3446,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.1115,
+    "topical": 0.4995,
+    "unrelated": 0.389
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "1101_2025_p042_04.jpg",
+   "context_chars": 396,
+   "e1_sim": 0.2472,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.2058,
+    "topical": 0.6339,
+    "unrelated": 0.1603
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9992
+  },
+  {
+   "crop": "4105_2023_p075_05.jpg",
+   "context_chars": 230,
+   "e1_sim": 0.3746,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.1092,
+    "topical": 0.6287,
+    "unrelated": 0.2621
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "2102_2024_p058_02.jpg",
+   "context_chars": 0,
+   "e1_sim": 0.2435,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.0173,
+    "topical": 0.0367,
+    "unrelated": 0.946
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9996
+  },
+  {
+   "crop": "2739_2024_p066_05.jpg",
+   "context_chars": 128,
+   "e1_sim": 0.3505,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.06,
+    "topical": 0.1121,
+    "unrelated": 0.828
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "2739_2023_p059_02.jpg",
+   "context_chars": 151,
+   "e1_sim": 0.2925,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.1115,
+    "topical": 0.389,
+    "unrelated": 0.4995
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "3015_2023_p121_02.jpg",
+   "context_chars": 33,
+   "e1_sim": 0.3794,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.2119,
+    "topical": 0.5761,
+    "unrelated": 0.2119
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "1707_2024_p113_00.jpg",
+   "context_chars": 132,
+   "e1_sim": 0.2778,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.6037,
+    "topical": 0.3662,
+    "unrelated": 0.0301
+   },
+   "e2_choice": "direct",
+   "e2_letter_mass": 0.9997
+  },
+  {
+   "crop": "1101_2023_p105_03.jpg",
+   "context_chars": 158,
+   "e1_sim": 0.2447,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.25,
+    "topical": 0.5293,
+    "unrelated": 0.2207
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "8426_2023_p040_16.jpg",
+   "context_chars": 0,
+   "e1_sim": 0.2457,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.0137,
+    "topical": 0.0289,
+    "unrelated": 0.9574
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "1707_2025_p112_02.jpg",
+   "context_chars": 766,
+   "e1_sim": 0.2676,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.0559,
+    "topical": 0.5307,
+    "unrelated": 0.4133
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "4906_2025_p139_02.jpg",
+   "context_chars": 399,
+   "e1_sim": 0.3825,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.5234,
+    "topical": 0.3598,
+    "unrelated": 0.1168
+   },
+   "e2_choice": "direct",
+   "e2_letter_mass": 0.9997
+  },
+  {
+   "crop": "2610_2025_p047_01.jpg",
+   "context_chars": 140,
+   "e1_sim": 0.292,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.0085,
+    "topical": 0.0096,
+    "unrelated": 0.9819
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9997
+  },
+  {
+   "crop": "3230_2023_p069_00.jpg",
+   "context_chars": 84,
+   "e1_sim": 0.2778,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.122,
+    "topical": 0.3315,
+    "unrelated": 0.5465
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "1101_2025_p043_01.jpg",
+   "context_chars": 351,
+   "e1_sim": 0.2395,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.0471,
+    "topical": 0.4467,
+    "unrelated": 0.5062
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9992
+  },
+  {
+   "crop": "1455_2023_p056_00.jpg",
+   "context_chars": 38,
+   "e1_sim": 0.2711,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.0824,
+    "topical": 0.7818,
+    "unrelated": 0.1358
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "2739_2023_p044_02.jpg",
+   "context_chars": 160,
+   "e1_sim": 0.2999,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.0927,
+    "topical": 0.2224,
+    "unrelated": 0.6849
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "4105_2023_p075_02.jpg",
+   "context_chars": 230,
+   "e1_sim": 0.3432,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.0794,
+    "topical": 0.4031,
+    "unrelated": 0.5176
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "4105_2024_p147_00.jpg",
+   "context_chars": 379,
+   "e1_sim": 0.3964,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.3702,
+    "topical": 0.4754,
+    "unrelated": 0.1543
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "2610_2025_p039_01.jpg",
+   "context_chars": 163,
+   "e1_sim": 0.4022,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.4753,
+    "topical": 0.3266,
+    "unrelated": 0.1981
+   },
+   "e2_choice": "direct",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "3015_2023_p121_03.jpg",
+   "context_chars": 33,
+   "e1_sim": 0.3533,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.2878,
+    "topical": 0.5377,
+    "unrelated": 0.1746
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "2528_2023_p099_02.jpg",
+   "context_chars": 116,
+   "e1_sim": 0.3441,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.5433,
+    "topical": 0.3734,
+    "unrelated": 0.0833
+   },
+   "e2_choice": "direct",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "1101_2023_p124_01.jpg",
+   "context_chars": 96,
+   "e1_sim": 0.3551,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.206,
+    "topical": 0.4942,
+    "unrelated": 0.2998
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "1707_2024_p113_03.jpg",
+   "context_chars": 134,
+   "e1_sim": 0.1864,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.0066,
+    "topical": 0.0096,
+    "unrelated": 0.9837
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9997
+  },
+  {
+   "crop": "2882_2024_p072_04.jpg",
+   "context_chars": 123,
+   "e1_sim": 0.4035,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.4519,
+    "topical": 0.2741,
+    "unrelated": 0.2741
+   },
+   "e2_choice": "direct",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "1101_2024_p012_00.jpg",
+   "context_chars": 176,
+   "e1_sim": 0.3214,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.4683,
+    "topical": 0.4133,
+    "unrelated": 0.1184
+   },
+   "e2_choice": "direct",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "2739_2024_p056_04.jpg",
+   "context_chars": 125,
+   "e1_sim": 0.2877,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.0671,
+    "topical": 0.4373,
+    "unrelated": 0.4956
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "5519_2024_p085_03.jpg",
+   "context_chars": 96,
+   "e1_sim": 0.2879,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.1732,
+    "topical": 0.6045,
+    "unrelated": 0.2224
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "3230_2024_p019_19.jpg",
+   "context_chars": 0,
+   "e1_sim": 0.2597,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.0138,
+    "topical": 0.0201,
+    "unrelated": 0.9662
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "2501_2024_p108_00.jpg",
+   "context_chars": 179,
+   "e1_sim": 0.35,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.3416,
+    "topical": 0.497,
+    "unrelated": 0.1614
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "2882_2023_p005_07.jpg",
+   "context_chars": 246,
+   "e1_sim": 0.3091,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.1864,
+    "topical": 0.5742,
+    "unrelated": 0.2394
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "1101_2025_p018_01.jpg",
+   "context_chars": 457,
+   "e1_sim": 0.3689,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.2993,
+    "topical": 0.5593,
+    "unrelated": 0.1414
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "6693_2024_p100_00.jpg",
+   "context_chars": 325,
+   "e1_sim": 0.2125,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.3748,
+    "topical": 0.4247,
+    "unrelated": 0.2006
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "2501_2023_p105_02.jpg",
+   "context_chars": 94,
+   "e1_sim": 0.2489,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.4995,
+    "topical": 0.389,
+    "unrelated": 0.1115
+   },
+   "e2_choice": "direct",
+   "e2_letter_mass": 0.9997
+  },
+  {
+   "crop": "1707_2023_p073_02.jpg",
+   "context_chars": 158,
+   "e1_sim": 0.2814,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.0842,
+    "topical": 0.2938,
+    "unrelated": 0.622
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "1101_2025_p042_03.jpg",
+   "context_chars": 501,
+   "e1_sim": 0.2758,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.1918,
+    "topical": 0.5908,
+    "unrelated": 0.2174
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9991
+  },
+  {
+   "crop": "8070_2024_p090_01.jpg",
+   "context_chars": 282,
+   "e1_sim": 0.1776,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.0637,
+    "topical": 0.2518,
+    "unrelated": 0.6845
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9992
+  },
+  {
+   "crop": "5519_2025_p091_04.jpg",
+   "context_chars": 260,
+   "e1_sim": 0.2708,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.0501,
+    "topical": 0.475,
+    "unrelated": 0.475
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9992
+  },
+  {
+   "crop": "7723_2025_p102_01.jpg",
+   "context_chars": 114,
+   "e1_sim": 0.3435,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.1004,
+    "topical": 0.4498,
+    "unrelated": 0.4498
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9992
+  },
+  {
+   "crop": "1101_2024_p023_01.jpg",
+   "context_chars": 319,
+   "e1_sim": 0.3282,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.2878,
+    "topical": 0.5377,
+    "unrelated": 0.1746
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "2882_2023_p005_05.jpg",
+   "context_chars": 250,
+   "e1_sim": 0.337,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.3998,
+    "topical": 0.4531,
+    "unrelated": 0.1471
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "4540_2023_p077_03.jpg",
+   "context_chars": 152,
+   "e1_sim": 0.3505,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.1122,
+    "topical": 0.4439,
+    "unrelated": 0.4439
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "2739_2023_p053_01.jpg",
+   "context_chars": 102,
+   "e1_sim": 0.3122,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.1714,
+    "topical": 0.4658,
+    "unrelated": 0.3628
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "8070_2024_p089_00.jpg",
+   "context_chars": 32,
+   "e1_sim": 0.19,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.6818,
+    "topical": 0.2842,
+    "unrelated": 0.0339
+   },
+   "e2_choice": "direct",
+   "e2_letter_mass": 0.9997
+  },
+  {
+   "crop": "3015_2023_p051_00.jpg",
+   "context_chars": 76,
+   "e1_sim": 0.3738,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.1941,
+    "topical": 0.7677,
+    "unrelated": 0.0382
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9996
+  },
+  {
+   "crop": "2882_2024_p124_02.jpg",
+   "context_chars": 128,
+   "e1_sim": 0.2778,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.2135,
+    "topical": 0.5123,
+    "unrelated": 0.2742
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "7723_2023_p102_02.jpg",
+   "context_chars": 173,
+   "e1_sim": 0.2889,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.3363,
+    "topical": 0.5545,
+    "unrelated": 0.1092
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "4540_2023_p075_01.jpg",
+   "context_chars": 203,
+   "e1_sim": 0.3612,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.3546,
+    "topical": 0.4018,
+    "unrelated": 0.2437
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "2501_2024_p110_04.jpg",
+   "context_chars": 140,
+   "e1_sim": 0.326,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.1008,
+    "topical": 0.2418,
+    "unrelated": 0.6574
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9992
+  },
+  {
+   "crop": "1101_2023_p081_02.jpg",
+   "context_chars": 97,
+   "e1_sim": 0.2885,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.09,
+    "topical": 0.2447,
+    "unrelated": 0.6652
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "2645_2025_p092_00.jpg",
+   "context_chars": 177,
+   "e1_sim": 0.3562,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.2499,
+    "topical": 0.4669,
+    "unrelated": 0.2832
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9992
+  },
+  {
+   "crop": "2882_2023_p085_01.jpg",
+   "context_chars": 187,
+   "e1_sim": 0.2971,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.4683,
+    "topical": 0.4133,
+    "unrelated": 0.1184
+   },
+   "e2_choice": "direct",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "6693_2024_p083_00.jpg",
+   "context_chars": 215,
+   "e1_sim": 0.2615,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.0301,
+    "topical": 0.2854,
+    "unrelated": 0.6846
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "7723_2024_p090_05.jpg",
+   "context_chars": 23,
+   "e1_sim": 0.2253,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.4069,
+    "topical": 0.461,
+    "unrelated": 0.1321
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "5519_2025_p085_00.jpg",
+   "context_chars": 54,
+   "e1_sim": 0.3873,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.5121,
+    "topical": 0.3989,
+    "unrelated": 0.089
+   },
+   "e2_choice": "direct",
+   "e2_letter_mass": 0.9996
+  },
+  {
+   "crop": "2739_2025_p070_01.jpg",
+   "context_chars": 137,
+   "e1_sim": 0.3312,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.2675,
+    "topical": 0.3891,
+    "unrelated": 0.3434
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "7723_2023_p099_01.jpg",
+   "context_chars": 340,
+   "e1_sim": 0.292,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.3702,
+    "topical": 0.4754,
+    "unrelated": 0.1543
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "2610_2025_p011_03.jpg",
+   "context_chars": 109,
+   "e1_sim": 0.2457,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.1861,
+    "topical": 0.1643,
+    "unrelated": 0.6496
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9992
+  },
+  {
+   "crop": "2385_2025_p128_04.jpg",
+   "context_chars": 259,
+   "e1_sim": 0.3342,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.389,
+    "topical": 0.4995,
+    "unrelated": 0.1115
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "1707_2023_p099_05.jpg",
+   "context_chars": 111,
+   "e1_sim": 0.3255,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.1245,
+    "topical": 0.3833,
+    "unrelated": 0.4922
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9992
+  },
+  {
+   "crop": "2645_2025_p049_00.jpg",
+   "context_chars": 189,
+   "e1_sim": 0.2282,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.0497,
+    "topical": 0.1734,
+    "unrelated": 0.777
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "2645_2025_p018_00.jpg",
+   "context_chars": 210,
+   "e1_sim": 0.2965,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.2686,
+    "topical": 0.5685,
+    "unrelated": 0.1629
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "3230_2025_p063_07.jpg",
+   "context_chars": 64,
+   "e1_sim": 0.2864,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.081,
+    "topical": 0.3204,
+    "unrelated": 0.5986
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9988
+  },
+  {
+   "crop": "1101_2023_p147_01.jpg",
+   "context_chars": 363,
+   "e1_sim": 0.2786,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.1321,
+    "topical": 0.4069,
+    "unrelated": 0.461
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9992
+  },
+  {
+   "crop": "1707_2023_p099_03.jpg",
+   "context_chars": 121,
+   "e1_sim": 0.3282,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.4373,
+    "topical": 0.4373,
+    "unrelated": 0.1253
+   },
+   "e2_choice": "direct",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "2882_2024_p098_03.jpg",
+   "context_chars": 186,
+   "e1_sim": 0.3032,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.2499,
+    "topical": 0.4669,
+    "unrelated": 0.2832
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9993
+  },
+  {
+   "crop": "2528_2023_p100_01.jpg",
+   "context_chars": 236,
+   "e1_sim": 0.2875,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.4335,
+    "topical": 0.4912,
+    "unrelated": 0.0753
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9996
+  },
+  {
+   "crop": "1464_2023_p077_00.jpg",
+   "context_chars": 97,
+   "e1_sim": 0.2485,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.0046,
+    "topical": 0.0124,
+    "unrelated": 0.9831
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9998
+  },
+  {
+   "crop": "1455_2024_p050_03.jpg",
+   "context_chars": 104,
+   "e1_sim": 0.2661,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.1414,
+    "topical": 0.2993,
+    "unrelated": 0.5593
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9992
+  },
+  {
+   "crop": "1707_2025_p112_04.jpg",
+   "context_chars": 775,
+   "e1_sim": 0.3141,
+   "e1_level": "topical",
+   "e2_p": {
+    "direct": 0.0339,
+    "topical": 0.195,
+    "unrelated": 0.7711
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9992
+  },
+  {
+   "crop": "2610_2025_p073_00.jpg",
+   "context_chars": 464,
+   "e1_sim": 0.2703,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.1004,
+    "topical": 0.4498,
+    "unrelated": 0.4498
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9992
+  },
+  {
+   "crop": "6016_2025_p099_01.jpg",
+   "context_chars": 397,
+   "e1_sim": 0.3614,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.4191,
+    "topical": 0.4749,
+    "unrelated": 0.106
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9995
+  },
+  {
+   "crop": "2528_2024_p073_02.jpg",
+   "context_chars": 107,
+   "e1_sim": 0.2503,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.0707,
+    "topical": 0.1695,
+    "unrelated": 0.7598
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9994
+  },
+  {
+   "crop": "2739_2025_p002_00.jpg",
+   "context_chars": 0,
+   "e1_sim": 0.2252,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.0135,
+    "topical": 0.0368,
+    "unrelated": 0.9496
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9996
+  },
+  {
+   "crop": "2385_2023_p098_01.jpg",
+   "context_chars": 129,
+   "e1_sim": 0.3821,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.2499,
+    "topical": 0.4669,
+    "unrelated": 0.2832
+   },
+   "e2_choice": "topical",
+   "e2_letter_mass": 0.9992
+  },
+  {
+   "crop": "4906_2025_p137_00.jpg",
+   "context_chars": 76,
+   "e1_sim": 0.3437,
+   "e1_level": "direct",
+   "e2_p": {
+    "direct": 0.5578,
+    "topical": 0.3834,
+    "unrelated": 0.0588
+   },
+   "e2_choice": "direct",
+   "e2_letter_mass": 0.9996
+  },
+  {
+   "crop": "4540_2023_p071_01.jpg",
+   "context_chars": 100,
+   "e1_sim": 0.2525,
+   "e1_level": "unrelated",
+   "e2_p": {
+    "direct": 0.0059,
+    "topical": 0.0085,
+    "unrelated": 0.9856
+   },
+   "e2_choice": "unrelated",
+   "e2_letter_mass": 0.9998
+  }
+ ],
+ "e1_e2_same_level": 41,
+ "labels": "outputs only; scored by tune_evidence.py / evaluate.py against annotation R"
+}

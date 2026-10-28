@@ -1,0 +1,109 @@
+{
+ "set": 2,
+ "annotator": "a2",
+ "score": 20,
+ "of": 20,
+ "need": 18,
+ "answers": [
+  {
+   "id": "Qad61cb",
+   "answer": "Photo",
+   "correct": true
+  },
+  {
+   "id": "Qebbb32",
+   "answer": "Not a photo",
+   "correct": true
+  },
+  {
+   "id": "Q479fb8",
+   "answer": "Photo",
+   "correct": true
+  },
+  {
+   "id": "Qf810b1",
+   "answer": "Not a photo",
+   "correct": true
+  },
+  {
+   "id": "Qf98754",
+   "answer": "Not a photo",
+   "correct": true
+  },
+  {
+   "id": "Q20e49b",
+   "answer": "Not a photo",
+   "correct": true
+  },
+  {
+   "id": "Qdcb245",
+   "answer": "Photo",
+   "correct": true
+  },
+  {
+   "id": "Qf3344a",
+   "answer": "Photo",
+   "correct": true
+  },
+  {
+   "id": "Q8c1310",
+   "answer": "Photo",
+   "correct": true
+  },
+  {
+   "id": "Qadba34",
+   "answer": "Photo",
+   "correct": true
+  },
+  {
+   "id": "Qf17311",
+   "answer": "Photo",
+   "correct": true
+  },
+  {
+   "id": "Q667e50",
+   "answer": "Photo",
+   "correct": true
+  },
+  {
+   "id": "Q585924",
+   "answer": "Photo",
+   "correct": true
+  },
+  {
+   "id": "Q8cb796",
+   "answer": "Photo",
+   "correct": true
+  },
+  {
+   "id": "Q3c69b0",
+   "answer": "Not a photo",
+   "correct": true
+  },
+  {
+   "id": "Qf062c8",
+   "answer": "Photo",
+   "correct": true
+  },
+  {
+   "id": "Qc965ff",
+   "answer": "Photo",
+   "correct": true
+  },
+  {
+   "id": "Q817d04",
+   "answer": "Photo",
+   "correct": true
+  },
+  {
+   "id": "Q36a14a",
+   "answer": "Photo",
+   "correct": true
+  },
+  {
+   "id": "Q12ab4c",
+   "answer": "Not a photo",
+   "correct": true
+  }
+ ]
+}

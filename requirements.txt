@@ -1,0 +1,38 @@
+# Python 3.10 以上。torch 請照 https://pytorch.org 的指令裝對應 CUDA 的版本
+# （Windows 用 pip 直接裝會拿到 CPU 版），裝好再裝這個檔。setup_local.ps1 會自動做。
+
+# 抽取、資料、報告
+pymupdf==1.28.2           # 10/18 雲端和本機重跑兩本試跑報告：張數、圖說、分組跟試跑逐筆相同
+pillow==13.0.0            # dHash 分組會用到，固定版本
+numpy
+pandas
+pyarrow
+pyyaml
+tqdm
+matplotlib
+requests                  # 下載報告書（ESG InfoHub）
+beautifulsoup4
+
+# 比對
+torch
+torchvision
+opencv-python>=4.8        # cv2.USAC_MAGSAC
+scikit-image              # SSIM
+scikit-learn              # 邏輯迴歸、kappa
+scipy
+imagehash                 # pHash / dHash 比較方法
+open_clip_torch           # 照片過濾
+lightglue @ git+https://github.com/cvg/LightGlue.git   # SuperPoint + LightGlue（沒有 git 時 setup_local.ps1 改用 zip 安裝）
+faiss-cpu                 # 跨公司圖庫照的近鄰搜尋
+statsmodels               # McNemar 檢定
+
+# 語言模型與視覺語言模型（Qwen 系列）、中文 CLIP
+transformers              # 中文 CLIP 也用它載入（OFA-Sys/chinese-clip-vit-large-patch14）
+accelerate
+qwen-vl-utils
+# 不用 cn_clip 套件：它要求 lmdb==1.3.0，Windows Python 3.11 沒有 wheel，會讓整個安裝失敗
+# vllm                    # 選用：批次推論較快（Linux 或 WSL）
+# OCR：PaddleOCR 裝在另一個環境 .venv_ocr（pip install paddlepaddle paddleocr），避免 PaddleX 固定的套件版本弄壞這裡
+# DINOv2 用 torch.hub 載入 facebookresearch/dinov2；SSCD 的 TorchScript 權重放 work/models/（check_models.py 會下載）
+
+# 標註工具建議另開虛擬環境：pip install label-studio

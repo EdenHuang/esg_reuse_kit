@@ -1,0 +1,16 @@
+# Rebuilt locally from the public filings; never committed (the reports and their images belong to the firms)
+data/raw/
+data/raw_pilot/
+data/synthetic/
+work/
+reports/
+*.pdf
+
+# Environments and caches
+.venv/
+.venv_ocr/
+.venv_ls/
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/

@@ -1,0 +1,534 @@
+{
+ "confirmed_by": "Eden",
+ "page": "A_confirm_answers_v3",
+ "answers": [
+  {
+   "cand": "Q7822c2",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q7eb504",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q7884b5",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q412d07",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q7526ac",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q84b961",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qa6c7df",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qe503df",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qb91584",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qc991fc",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q2258c9",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qbb3d0a",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qad61cb",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qdcb245",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q9d78dc",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qc965ff",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qa985d8",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q036334",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q5dc640",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q817d04",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q667e50",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qf062c8",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q98c862",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q4781b5",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q3ce9c1",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q52d77c",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q4a226f",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q6384ad",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q47ce7d",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q889dc1",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q755dac",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q1c80bb",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q17204d",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q98833b",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q5783ab",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Qf8fca4",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q109428",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q62703e",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q1d0617",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Qd393a9",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q463103",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q67099c",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Qf810b1",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q3c08a0",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q6db127",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Qf4d74d",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q20e49b",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Qebbb32",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Qf98754",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q12ab4c",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Qc861d7",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q3c69b0",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Qb818d2",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q965a34",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Qebba7b",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q2ad421",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q7f7c5b",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Qbd6b05",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q3b904d",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q944822",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q0612d4",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q87359b",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q15c9c4",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qf12dd2",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q1b2473",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qf3344a",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q479fb8",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qaa2bd8",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qfec0c3",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qc5b5dd",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q55f444",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q8c1310",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q451448",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qf17311",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q8cb796",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qadba34",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q954e21",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q36a14a",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q8d92aa",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q585924",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q8242f1",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qa2247d",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qfa086c",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q21a591",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qd8ac88",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qff8a0d",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q5b6c1e",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q951f52",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qbbd246",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qcac3c1",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q233b5a",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qea3ec9",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q9e21fb",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qbd2f22",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q27fed2",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q134923",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q0571bc",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qac1b65",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q3e54a0",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q40deeb",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qf7d600",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qc034ad",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q804589",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q1d73db",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q3b9a35",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q4d3076",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q7b175b",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q092a5c",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qb38c6d",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qf11e71",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q6b668c",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q561159",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q314f96",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qf5061a",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q60344e",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Qdd94ec",
+   "choice": "Photo"
+  },
+  {
+   "cand": "Q12bc18",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q6f2031",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Qee8f21",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Qc5aceb",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q085ac4",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q538dce",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q0ec532",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q65c51a",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Qfce07a",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q5661ec",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Qbc4124",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Qe07093",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Qe0252f",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Qe9699b",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q058a87",
+   "choice": "Not a photo"
+  },
+  {
+   "cand": "Q64d308",
+   "choice": "Not a photo"
+  }
+ ]
+}

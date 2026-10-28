@@ -1,0 +1,40 @@
+{"set": 1, "cand": "Qb818d2", "crop": "6016_2023_p078_01.jpg", "kind": "confident_nonphoto", "answer": "Not a photo", "reason": "chart"}
+{"set": 1, "cand": "Q3c08a0", "crop": "3230_2025_p043_07.jpg", "kind": "confident_nonphoto", "answer": "Not a photo", "reason": "design"}
+{"set": 1, "cand": "Qa985d8", "crop": "1455_2024_p052_03.jpg", "kind": "confident_photo", "answer": "Photo", "reason": "photo_real"}
+{"set": 1, "cand": "Q5dc640", "crop": "5519_2025_p073_05.jpg", "kind": "confident_photo", "answer": "Photo", "reason": "photo_real"}
+{"set": 1, "cand": "Q965a34", "crop": "7723_2025_p002_26.jpg", "kind": "confident_nonphoto", "answer": "Not a photo", "reason": "design"}
+{"set": 1, "cand": "Q6db127", "crop": "4105_2025_p010_01.jpg", "kind": "confident_nonphoto", "answer": "Not a photo", "reason": "logo"}
+{"set": 1, "cand": "Qf4d74d", "crop": "1707_2025_p153_02.jpg", "kind": "confident_nonphoto", "answer": "Not a photo", "reason": "scan"}
+{"set": 1, "cand": "Qc861d7", "crop": "2385_2024_p109_22.jpg", "kind": "confident_nonphoto", "answer": "Not a photo", "reason": "scan"}
+{"set": 1, "cand": "Q9d78dc", "crop": "2528_2024_p079_06.jpg", "kind": "confident_photo", "answer": "Photo", "reason": "photo_real"}
+{"set": 1, "cand": "Q4781b5", "crop": "5519_2024_p079_04.jpg", "kind": "confident_photo", "answer": "Photo", "reason": "photo_real"}
+{"set": 1, "cand": "Q55f444", "crop": "2739_2024_p022_02.jpg", "kind": "near_threshold", "answer": "Not a photo", "reason": "design"}
+{"set": 1, "cand": "Q451448", "crop": "2645_2024_p087_00.jpg", "kind": "near_threshold", "answer": "Photo", "reason": "photo_real"}
+{"set": 1, "cand": "Q036334", "crop": "8070_2025_p097_00.jpg", "kind": "confident_photo", "answer": "Photo", "reason": "photo_real"}
+{"set": 1, "cand": "Qc5b5dd", "crop": "4906_2024_p131_05.jpg", "kind": "near_threshold", "answer": "Photo", "reason": "photo_real"}
+{"set": 1, "cand": "Qaa2bd8", "crop": "1101_2025_p171_01.jpg", "kind": "near_threshold", "answer": "Photo", "reason": "photo_real"}
+{"set": 1, "cand": "Q1b2473", "crop": "1101_2023_p134_00.jpg", "kind": "near_threshold", "answer": "Photo", "reason": "photo_real"}
+{"set": 1, "cand": "Q954e21", "crop": "2102_2023_p063_00.jpg", "kind": "near_threshold", "answer": "Photo", "reason": "photo_real"}
+{"set": 1, "cand": "Q8d92aa", "crop": "8289_2025_p085_03.jpg", "kind": "near_threshold", "answer": "Photo", "reason": "photo_real"}
+{"set": 1, "cand": "Qfec0c3", "crop": "2739_2024_p062_05.jpg", "kind": "near_threshold", "answer": "Photo", "reason": "photo_real"}
+{"set": 1, "cand": "Q98c862", "crop": "2739_2025_p069_06.jpg", "kind": "confident_photo", "answer": "Photo", "reason": "photo_real"}
+{"set": 2, "cand": "Qad61cb", "crop": "2501_2024_p098_01.jpg", "kind": "confident_photo", "answer": "Photo", "reason": "photo_real"}
+{"set": 2, "cand": "Qebbb32", "crop": "3071_2025_p035_03.jpg", "kind": "confident_nonphoto", "answer": "Not a photo", "reason": "chart"}
+{"set": 2, "cand": "Q479fb8", "crop": "1101_2023_p066_02.jpg", "kind": "near_threshold", "answer": "Photo", "reason": "photo_real"}
+{"set": 2, "cand": "Qf810b1", "crop": "2739_2023_p061_05.jpg", "kind": "confident_nonphoto", "answer": "Not a photo", "reason": "chart"}
+{"set": 2, "cand": "Qf98754", "crop": "3362_2024_p017_14.jpg", "kind": "confident_nonphoto", "answer": "Not a photo", "reason": "design"}
+{"set": 2, "cand": "Q20e49b", "crop": "7723_2025_p090_11.jpg", "kind": "confident_nonphoto", "answer": "Not a photo", "reason": "illustration"}
+{"set": 2, "cand": "Qdcb245", "crop": "2739_2023_p056_01.jpg", "kind": "confident_photo", "answer": "Photo", "reason": "photo_real"}
+{"set": 2, "cand": "Qf3344a", "crop": "6693_2024_p093_01.jpg", "kind": "near_threshold", "answer": "Photo", "reason": "photo_real"}
+{"set": 2, "cand": "Q8c1310", "crop": "2882_2025_p099_00.jpg", "kind": "near_threshold", "answer": "Photo", "reason": "photo_real"}
+{"set": 2, "cand": "Qadba34", "crop": "1707_2023_p099_00.jpg", "kind": "near_threshold", "answer": "Photo", "reason": "photo_real"}
+{"set": 2, "cand": "Qf17311", "crop": "2645_2025_p103_01.jpg", "kind": "near_threshold", "answer": "Photo", "reason": "photo_real"}
+{"set": 2, "cand": "Q667e50", "crop": "5519_2025_p073_01.jpg", "kind": "confident_photo", "answer": "Photo", "reason": "photo_real"}
+{"set": 2, "cand": "Q585924", "crop": "2645_2024_p085_01.jpg", "kind": "near_threshold", "answer": "Photo", "reason": "photo_real"}
+{"set": 2, "cand": "Q8cb796", "crop": "3015_2024_p128_03.jpg", "kind": "near_threshold", "answer": "Photo", "reason": "photo_real"}
+{"set": 2, "cand": "Q3c69b0", "crop": "7723_2025_p011_02.jpg", "kind": "confident_nonphoto", "answer": "Not a photo", "reason": "illustration"}
+{"set": 2, "cand": "Qf062c8", "crop": "2610_2025_p080_00.jpg", "kind": "confident_photo", "answer": "Photo", "reason": "photo_real"}
+{"set": 2, "cand": "Qc965ff", "crop": "2610_2024_p110_06.jpg", "kind": "confident_photo", "answer": "Photo", "reason": "photo_real"}
+{"set": 2, "cand": "Q817d04", "crop": "2882_2025_p102_01.jpg", "kind": "confident_photo", "answer": "Photo", "reason": "photo_real"}
+{"set": 2, "cand": "Q36a14a", "crop": "8070_2023_p067_03.jpg", "kind": "near_threshold", "answer": "Photo", "reason": "photo_real"}
+{"set": 2, "cand": "Q12ab4c", "crop": "5519_2025_p014_00.jpg", "kind": "confident_nonphoto", "answer": "Not a photo", "reason": "logo"}

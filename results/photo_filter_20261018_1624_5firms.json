@@ -1,0 +1,675 @@
+{
+ "meta": {
+  "date": "2026-10-18T16:25:07+08:00",
+  "command": "python src/photo_filter.py --firms 1101 1707 4934 2882 2610",
+  "git": {
+   "commit": "3a09c7bff64256eb75632205f7e5dfbb5ef2f9cf",
+   "uncommitted_changes": true
+  },
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "packages": {
+   "pymupdf": "1.28.2",
+   "pillow": "13.0.0",
+   "numpy": "2.4.6",
+   "pyyaml": "6.0.3",
+   "torch": "2.14.1+cu130",
+   "open_clip_torch": "3.3.0",
+   "torchvision": "0.29.1+cu130"
+  },
+  "config_file": "configs\\default.yaml",
+  "config": "# 所有參數放這裡（PLAN v2.0）。標「初值」的門檻只能在開發集上調，11/2 凍結後另存 configs/frozen.yaml。\nseed: 2026\n\npaths:\n  raw: data/raw\n  catalog: data/catalog.csv\n  index: data/index\n  synthetic: data/synthetic\n  extract: work/extract\n  page_graph: work/page_graph\n  logo_refs: work/logo_refs\n  context: work/context\n  evidence: work/evidence\n  features: work/features\n  reuse: work/reuse\n  prompts: configs/prompts\n  annotations: annotations\n  results: results\n  reports: reports\n\ndata:\n  years: [2023, 2024, 2025]          # 報告年度（報告涵蓋的會計年度）\n  n_firms: 150\n  n_dev: 30                          # 以公司為單位\n  dev_must_include: [\"1101\", \"1707\"] # 台泥、葡萄王\n\nextract:\n  crop_long_side: 1024\n  jpg_quality: 90\n\npage_graph:\n  container_min_area: 0.02           # 色塊容器面積下限（占頁面比例）\n  container_max_area: 0.90\n  heading_levels: 3                  # 章、節、小標題\n\nlogo_refs:\n  min_pages: 3                       # 出現幾頁以上的小圖算候選\n  min_short_side_pt: 20\n  use_cover: true\n\nphoto_filter:\n  model: ViT-L-14\n  pretrained: openai\n  exclude_first_last_page: true\n  photo_prompts: [\"a photograph of a real scene\", \"a photograph of people\"]\n  nonphoto_prompts: [\"an illustration\", \"a chart or infographic\", \"a logo or icon\",\n                     \"a scanned certificate or document\", \"an abstract graphic design\"]\n  photo_threshold: 0.5               # 初值：照片類提示詞的機率加總 ≥ 這個值算照片；用標註 A 開發集 100 張決定\n  exclude_image_only_reports: true   # 整本轉成圖片的報告（results/download_check_*.json 的 image_only）\n  exclude_vector_shading: true       # PyMuPDF 把向量漸層當成圖片回報的位置（LOG 2026-10-18 晚上）\n  batch_size: 64\n  load_workers: 8                    # 讀裁切圖的執行緒數\n\ncontext_link:\n  model: logistic_regression\n  max_body_blocks: 2\n  baselines: [nearest_paragraph, same_column_nearest, caption_only, section_heading_only, rules_v1]\n\nevidence:\n  llm: Qwen/Qwen2.5-7B-Instruct      # 開工時確認可用，記錄 revision\n  vlm: Qwen/Qwen2.5-VL-7B-Instruct   # 或 Qwen3-VL-8B\n  temperature: 0\n  ocr: paddleocr_chinese_cht\n  depiction_threshold: 0.5           # 初值\n  topical_threshold: 0.5             # 初值\n  ocr_match_threshold: 0.7           # 初值：字元二元組重疊\n  logo_min_inliers: 15               # 初值\n  years_roc_offset: 1911\n  baselines: [chinese_clip_vitl14, vlm_direct_zeroshot, vlm_direct_fewshot]\n\nreuse:\n  global_models: [dinov2_vitb14, sscd_disc_mixup]\n  topk: 10\n  years_back: [1]\n  use_flip: true\n  matcher: superpoint_lightglue\n  ransac: magsac\n  min_inliers: 25                    # 初值\n  min_coverage: 0.30                 # 初值\n  stock_topk_other_firms: 5\n\nsynthetic:\n  n_pos: 1000\n  n_neg: 5000\n  crop_keep_area: [0.5, 0.9]\n  brightness_contrast: 0.30\n  saturation: 0.50\n  hue_deg: 10\n  overlay_text_area: [0.10, 0.30]\n  jpeg_quality: [50, 90]\n  collage_area: [0.40, 0.70]\n\nevaluation:\n  bootstrap_unit: firm\n  bootstrap_n: 2000\n  ci: 0.95\n",
+  "data_sha256": {
+   "data/catalog.csv": "62c48866537324a53b2d5de29b716d4b9ec2b7af32a70c968eb92fcbf1d4eabd",
+   "results\\download_check_20261018_1603.json": "616f0e6023ccfcc827dd2ce0d2c294eb97f39279bdffd0016e0d4e779636a739",
+   "work\\extract\\1101_2023_pairs.jsonl": "8b3f7ad2df1bf170e93125eaa60000f89d092137cebc2e8551aefb7f15f03c98",
+   "work\\extract\\1101_2024_pairs.jsonl": "dcb97251a7ded4c49fdfe4b7d1cca128021e89dbec8c8e1a46787d4b4af21436",
+   "work\\extract\\1101_2025_pairs.jsonl": "924873d20cabbfe24cdaf919dd1352475fba598d16a750810595f378316e0448",
+   "work\\extract\\1707_2023_pairs.jsonl": "77e56f8c323477dd629a61ad63c3fe7a5a1dc79da4d8f531200eeb30b6a558fa",
+   "work\\extract\\1707_2024_pairs.jsonl": "586289d047543d6222502cecd244c8550204aaaaa6fe46fe55db553ab880be62",
+   "work\\extract\\1707_2025_pairs.jsonl": "65a27772bc03161e0e6e3cedd8d50d59815d4752c88258734d6e3283ed7982cd",
+   "work\\extract\\2610_2023_pairs.jsonl": "1b2ef8e7ba4ac1c41bad3c905e239c3cfb74ab0c76362924ec7bfa1c2c4074fe",
+   "work\\extract\\2610_2024_pairs.jsonl": "360d064623270726ee5460cfb0aac9a20a4312e4908e1d28513ec71716dc590e",
+   "work\\extract\\2610_2025_pairs.jsonl": "0cce22069ba558712048b9f64f0dfe9b565d8bdc994a21e8e424cc4fa8c947eb",
+   "work\\extract\\2882_2023_pairs.jsonl": "826754fa581caa94c9e74167e02b53d66aab2b1331f5db38ceef8694c09bbbde",
+   "work\\extract\\2882_2024_pairs.jsonl": "9c6f5f52264bbe0123fe96653cc6626ab5c7e6a931fa15f343eed1586ffbf5eb",
+   "work\\extract\\2882_2025_pairs.jsonl": "4ca09e8b84a0161c2f9fb53cd4fba22522e197221ba8158ea33128bb727fcab0",
+   "work\\extract\\4934_2023_pairs.jsonl": "38c23a6d418960c4fe2f8656c25157b62ad0ba6e5244b211439690a14f041a44",
+   "work\\extract\\4934_2024_pairs.jsonl": "c32410144a889db2334ff1816ea801f155d4c4559bf17f9726771d7e076029e7",
+   "work\\extract\\4934_2025_pairs.jsonl": "6219f9dc08cab9d60ef078621b05d6343b2598f470e530d0fd4d248326f6febd",
+   "work\\photo_filter.csv": "6a2bd2cdeedd99e96b90a30aa951964c9c5478637b6056bf3b2adba9fb76ae8f"
+  }
+ },
+ "tag": "5firms",
+ "model": {
+  "model": "ViT-L-14",
+  "pretrained": "openai",
+  "hf_hub": "timm/vit_large_patch14_clip_224.openai",
+  "hf_revision": "18d0535469bb561bf468d76c1d73aa35156c922b",
+  "logit_scale": 100.0,
+  "device": "cuda"
+ },
+ "photo_filter": {
+  "photo_prompts": [
+   "a photograph of a real scene",
+   "a photograph of people"
+  ],
+  "nonphoto_prompts": [
+   "an illustration",
+   "a chart or infographic",
+   "a logo or icon",
+   "a scanned certificate or document",
+   "an abstract graphic design"
+  ],
+  "photo_threshold": 0.5
+ },
+ "prompts_sha256": "d9ee2df0b0c3804300599f457ece690c440fccefaacf06daecc02f0809f1e603",
+ "download_check": "results\\download_check_20261018_1603.json",
+ "csv": "work\\photo_filter.csv",
+ "image_only_reports": [
+  "4934_2023",
+  "4934_2025"
+ ],
+ "n_image_only_reports": 2,
+ "vector_mismatch_pages": {},
+ "seconds": {
+  "vector": 21,
+  "clip_and_score": 28
+ },
+ "crops_encoded_this_run": 3774,
+ "totals": {
+  "crops": 3774,
+  "image_only_report": 495,
+  "cover_page": 33,
+  "vector_shading": 674,
+  "layout_repeat": 320,
+  "duplicate": 67,
+  "nonphoto": 1805,
+  "photos": 380,
+  "candidates": 2185
+ },
+ "per_report": {
+  "1101_2023": {
+   "crops": 425,
+   "image_only_report": 0,
+   "cover_page": 5,
+   "vector_shading": 11,
+   "layout_repeat": 16,
+   "duplicate": 15,
+   "nonphoto": 295,
+   "photos": 83,
+   "candidates": 378
+  },
+  "1101_2024": {
+   "crops": 166,
+   "image_only_report": 0,
+   "cover_page": 2,
+   "vector_shading": 7,
+   "layout_repeat": 8,
+   "duplicate": 2,
+   "nonphoto": 101,
+   "photos": 46,
+   "candidates": 147
+  },
+  "1101_2025": {
+   "crops": 289,
+   "image_only_report": 0,
+   "cover_page": 1,
+   "vector_shading": 9,
+   "layout_repeat": 9,
+   "duplicate": 1,
+   "nonphoto": 219,
+   "photos": 50,
+   "candidates": 269
+  },
+  "1707_2023": {
+   "crops": 129,
+   "image_only_report": 0,
+   "cover_page": 2,
+   "vector_shading": 11,
+   "layout_repeat": 0,
+   "duplicate": 2,
+   "nonphoto": 97,
+   "photos": 17,
+   "candidates": 114
+  },
+  "1707_2024": {
+   "crops": 140,
+   "image_only_report": 0,
+   "cover_page": 2,
+   "vector_shading": 11,
+   "layout_repeat": 15,
+   "duplicate": 3,
+   "nonphoto": 93,
+   "photos": 16,
+   "candidates": 109
+  },
+  "1707_2025": {
+   "crops": 123,
+   "image_only_report": 0,
+   "cover_page": 4,
+   "vector_shading": 7,
+   "layout_repeat": 14,
+   "duplicate": 4,
+   "nonphoto": 81,
+   "photos": 13,
+   "candidates": 94
+  },
+  "2610_2023": {
+   "crops": 185,
+   "image_only_report": 0,
+   "cover_page": 5,
+   "vector_shading": 72,
+   "layout_repeat": 0,
+   "duplicate": 1,
+   "nonphoto": 74,
+   "photos": 33,
+   "candidates": 107
+  },
+  "2610_2024": {
+   "crops": 71,
+   "image_only_report": 0,
+   "cover_page": 2,
+   "vector_shading": 20,
+   "layout_repeat": 0,
+   "duplicate": 2,
+   "nonphoto": 38,
+   "photos": 9,
+   "candidates": 47
+  },
+  "2610_2025": {
+   "crops": 312,
+   "image_only_report": 0,
+   "cover_page": 2,
+   "vector_shading": 161,
+   "layout_repeat": 0,
+   "duplicate": 2,
+   "nonphoto": 103,
+   "photos": 44,
+   "candidates": 147
+  },
+  "2882_2023": {
+   "crops": 692,
+   "image_only_report": 0,
+   "cover_page": 2,
+   "vector_shading": 283,
+   "layout_repeat": 26,
+   "duplicate": 21,
+   "nonphoto": 331,
+   "photos": 29,
+   "candidates": 360
+  },
+  "2882_2024": {
+   "crops": 450,
+   "image_only_report": 0,
+   "cover_page": 2,
+   "vector_shading": 22,
+   "layout_repeat": 226,
+   "duplicate": 5,
+   "nonphoto": 175,
+   "photos": 20,
+   "candidates": 195
+  },
+  "2882_2025": {
+   "crops": 172,
+   "image_only_report": 0,
+   "cover_page": 2,
+   "vector_shading": 18,
+   "layout_repeat": 3,
+   "duplicate": 3,
+   "nonphoto": 129,
+   "photos": 17,
+   "candidates": 146
+  },
+  "4934_2023": {
+   "crops": 357,
+   "image_only_report": 357,
+   "cover_page": 0,
+   "vector_shading": 0,
+   "layout_repeat": 0,
+   "duplicate": 0,
+   "nonphoto": 0,
+   "photos": 0,
+   "candidates": 0
+  },
+  "4934_2024": {
+   "crops": 125,
+   "image_only_report": 0,
+   "cover_page": 2,
+   "vector_shading": 42,
+   "layout_repeat": 3,
+   "duplicate": 6,
+   "nonphoto": 69,
+   "photos": 3,
+   "candidates": 72
+  },
+  "4934_2025": {
+   "crops": 138,
+   "image_only_report": 138,
+   "cover_page": 0,
+   "vector_shading": 0,
+   "layout_repeat": 0,
+   "duplicate": 0,
+   "nonphoto": 0,
+   "photos": 0,
+   "candidates": 0
+  }
+ },
+ "per_split": {
+  "dev": {
+   "crops": 3774,
+   "image_only_report": 495,
+   "cover_page": 33,
+   "vector_shading": 674,
+   "layout_repeat": 320,
+   "duplicate": 67,
+   "nonphoto": 1805,
+   "photos": 380,
+   "candidates": 2185
+  }
+ },
+ "histogram": {
+  "lo": [
+   0.0,
+   0.1,
+   0.2,
+   0.3,
+   0.4,
+   0.5,
+   0.6,
+   0.7,
+   0.8,
+   0.9
+  ],
+  "counts": [
+   1275,
+   208,
+   135,
+   99,
+   88,
+   89,
+   70,
+   74,
+   97,
+   50
+  ]
+ },
+ "samples": {
+  "photo": [
+   "1707_2023_p098_00.jpg",
+   "1101_2023_p153_00.jpg",
+   "1101_2023_p024_02.jpg",
+   "1101_2025_p181_05.jpg",
+   "2882_2024_p004_02.jpg",
+   "2610_2025_p114_04.jpg",
+   "2610_2025_p113_03.jpg",
+   "2610_2023_p122_03.jpg",
+   "2882_2024_p119_03.jpg",
+   "2882_2025_p095_03.jpg",
+   "1101_2023_p141_02.jpg",
+   "2610_2025_p047_11.jpg",
+   "1101_2024_p159_00.jpg",
+   "2610_2023_p119_08.jpg",
+   "2610_2025_p114_07.jpg",
+   "1101_2023_p141_00.jpg",
+   "2610_2025_p116_05.jpg",
+   "2882_2024_p119_05.jpg",
+   "2610_2024_p051_01.jpg",
+   "1101_2025_p148_00.jpg",
+   "1101_2023_p119_03.jpg",
+   "1707_2025_p104_04.jpg",
+   "2882_2024_p054_03.jpg",
+   "1101_2023_p154_02.jpg",
+   "2610_2025_p114_06.jpg",
+   "1101_2025_p169_00.jpg",
+   "2610_2024_p068_01.jpg",
+   "1707_2024_p114_02.jpg",
+   "1707_2024_p105_04.jpg",
+   "1101_2023_p150_04.jpg"
+  ],
+  "nonphoto": [
+   "2610_2025_p067_04.jpg",
+   "2882_2025_p068_01.jpg",
+   "1101_2025_p013_01.jpg",
+   "1707_2024_p105_02.jpg",
+   "1101_2023_p022_03.jpg",
+   "1101_2023_p119_05.jpg",
+   "1707_2024_p131_04.jpg",
+   "1101_2023_p094_05.jpg",
+   "1101_2023_p076_04.jpg",
+   "2882_2025_p122_03.jpg",
+   "1707_2023_p142_01.jpg",
+   "2882_2023_p105_02.jpg",
+   "1707_2024_p039_00.jpg",
+   "2882_2024_p173_02.jpg",
+   "1101_2023_p038_00.jpg",
+   "2610_2025_p048_06.jpg",
+   "2610_2024_p050_00.jpg",
+   "1707_2023_p093_01.jpg",
+   "2882_2023_p153_01.jpg",
+   "1707_2023_p013_01.jpg",
+   "2610_2023_p049_01.jpg",
+   "1707_2023_p088_00.jpg",
+   "1101_2023_p132_02.jpg",
+   "2610_2025_p013_00.jpg",
+   "2610_2023_p125_02.jpg",
+   "2882_2023_p029_02.jpg",
+   "2882_2023_p078_03.jpg",
+   "2882_2025_p065_01.jpg",
+   "1101_2024_p135_00.jpg",
+   "1101_2024_p024_00.jpg"
+  ],
+  "near_above": [
+   "1101_2023_p085_05.jpg",
+   "1101_2025_p129_00.jpg",
+   "1707_2023_p109_00.jpg",
+   "1101_2023_p107_01.jpg",
+   "2882_2024_p090_01.jpg",
+   "1707_2024_p114_03.jpg",
+   "1101_2024_p027_00.jpg",
+   "2610_2025_p054_05.jpg",
+   "1707_2024_p113_00.jpg",
+   "2882_2025_p066_01.jpg",
+   "1101_2025_p166_00.jpg",
+   "1101_2023_p083_01.jpg",
+   "1101_2024_p026_01.jpg",
+   "2610_2025_p047_08.jpg",
+   "1101_2025_p187_01.jpg"
+  ],
+  "near_below": [
+   "1101_2023_p084_03.jpg",
+   "2882_2023_p082_06.jpg",
+   "2610_2024_p110_05.jpg",
+   "1707_2025_p116_04.jpg",
+   "1101_2025_p190_02.jpg",
+   "1101_2025_p018_01.jpg",
+   "2610_2025_p119_03.jpg",
+   "1707_2023_p100_02.jpg",
+   "2882_2024_p072_04.jpg",
+   "2610_2025_p082_03.jpg",
+   "2610_2024_p110_02.jpg",
+   "1101_2025_p141_00.jpg",
+   "2882_2024_p121_01.jpg",
+   "2610_2024_p082_01.jpg",
+   "1101_2025_p180_01.jpg"
+  ],
+  "by_bin": [
+   [
+    "0.0–0.1（1275 張）",
+    [
+     "1101_2024_p267_01.jpg",
+     "2610_2025_p048_08.jpg",
+     "2882_2024_p079_01.jpg",
+     "2882_2024_p112_01.jpg",
+     "1101_2024_p113_00.jpg",
+     "1707_2024_p061_00.jpg"
+    ]
+   ],
+   [
+    "0.1–0.2（208 張）",
+    [
+     "2610_2025_p115_04.jpg",
+     "2882_2023_p024_01.jpg",
+     "2610_2025_p039_04.jpg",
+     "1707_2024_p060_00.jpg",
+     "4934_2024_p066_01.jpg",
+     "2610_2025_p048_04.jpg"
+    ]
+   ],
+   [
+    "0.2–0.3（135 張）",
+    [
+     "2882_2025_p003_01.jpg",
+     "2882_2024_p061_01.jpg",
+     "1707_2023_p073_01.jpg",
+     "1101_2023_p011_01.jpg",
+     "1101_2023_p122_01.jpg",
+     "1101_2024_p020_01.jpg"
+    ]
+   ],
+   [
+    "0.3–0.4（99 張）",
+    [
+     "1101_2025_p013_00.jpg",
+     "1101_2023_p096_00.jpg",
+     "1707_2023_p099_03.jpg",
+     "1101_2023_p024_05.jpg",
+     "2882_2023_p073_04.jpg",
+     "2610_2023_p042_03.jpg"
+    ]
+   ],
+   [
+    "0.4–0.5（88 張）",
+    [
+     "4934_2024_p089_00.jpg",
+     "1101_2025_p180_01.jpg",
+     "1101_2024_p161_01.jpg",
+     "2610_2023_p004_01.jpg",
+     "1101_2025_p039_02.jpg",
+     "1101_2025_p190_02.jpg"
+    ]
+   ],
+   [
+    "0.5–0.6（89 張）",
+    [
+     "1707_2023_p093_00.jpg",
+     "1707_2024_p077_00.jpg",
+     "2610_2025_p048_01.jpg",
+     "2882_2024_p119_05.jpg",
+     "1101_2023_p107_01.jpg",
+     "1101_2025_p191_01.jpg"
+    ]
+   ],
+   [
+    "0.6–0.7（70 張）",
+    [
+     "1101_2023_p139_03.jpg",
+     "2882_2024_p124_04.jpg",
+     "1707_2024_p113_02.jpg",
+     "1707_2024_p104_02.jpg",
+     "2882_2023_p067_10.jpg",
+     "1101_2024_p124_00.jpg"
+    ]
+   ],
+   [
+    "0.7–0.8（74 張）",
+    [
+     "2882_2025_p102_01.jpg",
+     "1101_2025_p181_02.jpg",
+     "1101_2023_p081_02.jpg",
+     "1707_2023_p108_03.jpg",
+     "1707_2023_p108_02.jpg",
+     "2610_2025_p118_04.jpg"
+    ]
+   ],
+   [
+    "0.8–0.9（97 張）",
+    [
+     "2610_2023_p085_01.jpg",
+     "1101_2023_p118_03.jpg",
+     "2610_2023_p024_00.jpg",
+     "2610_2025_p073_02.jpg",
+     "2610_2025_p043_02.jpg",
+     "2610_2023_p124_05.jpg"
+    ]
+   ],
+   [
+    "0.9–1.0（50 張）",
+    [
+     "1101_2023_p153_02.jpg",
+     "1707_2025_p112_03.jpg",
+     "2610_2024_p110_06.jpg",
+     "2882_2023_p067_07.jpg",
+     "2610_2023_p124_02.jpg",
+     "1707_2024_p113_05.jpg"
+    ]
+   ]
+  ],
+  "by_prompt": [
+   [
+    "a photograph of a real scene",
+    [
+     "2882_2024_p119_02.jpg",
+     "1101_2025_p038_01.jpg",
+     "2610_2023_p120_05.jpg",
+     "2610_2025_p054_06.jpg",
+     "2882_2024_p056_01.jpg",
+     "2882_2024_p073_01.jpg"
+    ]
+   ],
+   [
+    "a photograph of people",
+    [
+     "1101_2023_p034_00.jpg",
+     "2882_2023_p067_10.jpg",
+     "1707_2023_p108_05.jpg",
+     "1101_2024_p185_00.jpg",
+     "1101_2023_p127_03.jpg",
+     "2882_2025_p101_00.jpg"
+    ]
+   ],
+   [
+    "an illustration",
+    [
+     "1101_2025_p168_01.jpg",
+     "2882_2025_p073_06.jpg",
+     "1707_2023_p112_02.jpg",
+     "1101_2023_p091_02.jpg",
+     "1707_2024_p044_00.jpg",
+     "1101_2025_p176_00.jpg"
+    ]
+   ],
+   [
+    "a chart or infographic",
+    [
+     "2882_2023_p073_03.jpg",
+     "2882_2023_p131_03.jpg",
+     "1101_2023_p139_00.jpg",
+     "2882_2023_p143_01.jpg",
+     "1707_2023_p018_00.jpg",
+     "1101_2023_p113_00.jpg"
+    ]
+   ],
+   [
+    "a logo or icon",
+    [
+     "2882_2023_p108_02.jpg",
+     "2882_2023_p134_02.jpg",
+     "1707_2025_p095_00.jpg",
+     "2882_2023_p017_02.jpg",
+     "2610_2024_p110_04.jpg",
+     "2882_2024_p098_04.jpg"
+    ]
+   ],
+   [
+    "a scanned certificate or document",
+    [
+     "2882_2023_p212_07.jpg",
+     "2610_2025_p039_03.jpg",
+     "2882_2024_p179_06.jpg",
+     "2882_2025_p101_02.jpg",
+     "1707_2025_p106_00.jpg",
+     "2610_2023_p085_02.jpg"
+    ]
+   ],
+   [
+    "an abstract graphic design",
+    [
+     "1101_2025_p030_02.jpg",
+     "1101_2025_p170_04.jpg",
+     "1101_2025_p131_00.jpg",
+     "1101_2023_p020_02.jpg",
+     "1101_2023_p067_01.jpg",
+     "1101_2025_p002_00.jpg"
+    ]
+   ]
+  ],
+  "excluded": [
+   [
+    "image_only_report",
+    [
+     "4934_2023_p089_02.jpg",
+     "4934_2025_p095_00.jpg",
+     "4934_2023_p085_09.jpg",
+     "4934_2025_p135_00.jpg",
+     "4934_2023_p061_00.jpg",
+     "4934_2025_p055_00.jpg",
+     "4934_2023_p074_03.jpg",
+     "4934_2025_p118_00.jpg",
+     "4934_2023_p070_02.jpg",
+     "4934_2023_p046_08.jpg",
+     "4934_2025_p115_00.jpg",
+     "4934_2023_p025_01.jpg"
+    ]
+   ],
+   [
+    "cover_page",
+    [
+     "2610_2023_p001_00.jpg",
+     "4934_2024_p001_00.jpg",
+     "1707_2025_p001_02.jpg",
+     "4934_2024_p141_00.jpg",
+     "2610_2025_p150_00.jpg",
+     "2882_2023_p213_00.jpg",
+     "1707_2025_p155_00.jpg",
+     "2882_2023_p001_00.jpg",
+     "1707_2025_p001_01.jpg",
+     "2610_2023_p001_01.jpg",
+     "2610_2024_p001_00.jpg",
+     "1101_2023_p001_01.jpg"
+    ]
+   ],
+   [
+    "vector_shading",
+    [
+     "2610_2025_p138_00.jpg",
+     "2882_2023_p010_01.jpg",
+     "2882_2023_p114_00.jpg",
+     "2610_2023_p068_00.jpg",
+     "2882_2023_p098_00.jpg",
+     "2882_2023_p159_00.jpg",
+     "2610_2025_p108_00.jpg",
+     "2882_2023_p111_00.jpg",
+     "2610_2025_p039_00.jpg",
+     "2882_2023_p088_00.jpg",
+     "2882_2023_p131_01.jpg",
+     "2610_2023_p012_00.jpg"
+    ]
+   ],
+   [
+    "layout_repeat",
+    [
+     "2882_2024_p050_00.jpg",
+     "2882_2024_p174_00.jpg",
+     "2882_2024_p106_00.jpg",
+     "1707_2025_p008_00.jpg",
+     "2882_2024_p013_00.jpg",
+     "2882_2024_p128_00.jpg",
+     "2882_2023_p090_00.jpg",
+     "2882_2024_p149_00.jpg",
+     "1101_2023_p063_00.jpg",
+     "1707_2024_p134_00.jpg",
+     "1101_2023_p044_00.jpg",
+     "2882_2024_p150_00.jpg"
+    ]
+   ],
+   [
+    "duplicate",
+    [
+     "1101_2023_p104_00.jpg",
+     "1707_2025_p059_04.jpg",
+     "2610_2025_p109_01.jpg",
+     "1101_2024_p005_00.jpg",
+     "2882_2023_p060_01.jpg",
+     "1101_2023_p006_00.jpg",
+     "2882_2023_p148_07.jpg",
+     "2882_2023_p035_01.jpg",
+     "1101_2025_p002_01.jpg",
+     "2882_2023_p117_01.jpg",
+     "2882_2025_p161_00.jpg",
+     "2882_2023_p067_15.jpg"
+    ]
+   ]
+  ]
+ }
+}

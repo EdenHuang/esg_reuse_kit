@@ -1,0 +1,2366 @@
+{
+ "meta": {
+  "date": "2026-10-20T02:13:40+08:00",
+  "command": "python src/evaluate.py --split dev --pred module2@rules=work/eval/dev_rules/module2.jsonl E1@rules=work/eval/dev_rules/E1.jsonl E2@rules=work/eval/dev_rules/E2.jsonl E3@rules=work/eval/dev_rules/E3.jsonl module2@gold=work/eval/dev_gold/module2.jsonl E1@gold=work/eval/dev_gold/E1.jsonl E2@gold=work/eval/dev_gold/E2.jsonl E3@gold=work/eval/dev_gold/E3.jsonl module2@M_lr=work/eval/dev_M_lr/module2.jsonl E1@M_lr=work/eval/dev_M_lr/E1.jsonl E2@M_lr=work/eval/dev_M_lr/E2.jsonl E3@M_lr=work/eval/dev_M_lr/E3.jsonl module2@L1_nearest=work/eval/dev_L1_nearest/module2.jsonl E1@L1_nearest=work/eval/dev_L1_nearest/E1.jsonl E2@L1_nearest=work/eval/dev_L1_nearest/E2.jsonl E3@L1_nearest=work/eval/dev_L1_nearest/E3.jsonl module2@L2_column=work/eval/dev_L2_column/module2.jsonl E1@L2_column=work/eval/dev_L2_column/E1.jsonl E2@L2_column=work/eval/dev_L2_column/E2.jsonl E3@L2_column=work/eval/dev_L2_column/E3.jsonl module2@L3_caption=work/eval/dev_L3_caption/module2.jsonl E1@L3_caption=work/eval/dev_L3_caption/E1.jsonl E2@L3_caption=work/eval/dev_L3_caption/E2.jsonl E3@L3_caption=work/eval/dev_L3_caption/E3.jsonl module2@L4_heading=work/eval/dev_L4_heading/module2.jsonl E1@L4_heading=work/eval/dev_L4_heading/E1.jsonl E2@L4_heading=work/eval/dev_L4_heading/E2.jsonl E3@L4_heading=work/eval/dev_L4_heading/E3.jsonl --ref module2@rules --tag contexts",
+  "git": {
+   "commit": "50537a35631212015efd258071a36e1a64d63f2b",
+   "uncommitted_changes": true
+  },
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "packages": {
+   "pymupdf": "1.28.2",
+   "pillow": "13.0.0",
+   "numpy": "2.4.6",
+   "pyyaml": "6.0.3"
+  },
+  "config_file": "configs\\default.yaml",
+  "config": "# 所有參數放這裡（PLAN v2.0）。標「初值」的門檻只能在開發集上調，11/2 凍結後另存 configs/frozen.yaml。\nseed: 2026\n\npaths:\n  raw: data/raw\n  catalog: data/catalog.csv\n  index: data/index\n  synthetic: data/synthetic\n  extract: work/extract\n  page_graph: work/page_graph\n  logo_refs: work/logo_refs\n  context: work/context\n  evidence: work/evidence\n  features: work/features\n  reuse: work/reuse\n  prompts: configs/prompts\n  annotations: annotations\n  results: results\n  reports: reports\n\ndata:\n  years: [2023, 2024, 2025]          # 報告年度（報告涵蓋的會計年度）\n  n_firms: 150\n  n_dev: 30                          # 以公司為單位\n  dev_must_include: [\"1101\", \"1707\"] # 台泥、葡萄王\n\nextract:\n  crop_long_side: 1024\n  jpg_quality: 90\n\npage_graph:\n  container_min_area: 0.02           # 色塊容器面積下限（占頁面比例）\n  container_max_area: 0.90\n  heading_levels: 3                  # 章、節、小標題\n  # 以下是 page_graph.py 用的初值（10/18 晚上加；只在開發集上看 HTML 調）\n  container_rect_fill: 0.90          # 線段／曲線圍成的形狀：多邊形面積 ≥ 外框的這個比例才算矩形（圓角矩形算，圓形不算）\n  colour_tolerance: 0.02             # 色塊顏色（乘上不透明度）跟底下顏色每個 RGB 通道都差不到這個值 → 只是重刷底色，不算容器\n  inside_container: 0.75             # 文字框、照片有這個比例以上在色塊裡，才算在這個容器裡\n  heading_min_ratio: 1.15            # 字級 ≥ 內文 × 這個值，才可能是標題\n  heading_min_pages: 3               # v2：一個字級至少出現在幾個不同頁的短文字框，才算一種標題字級（v1 是 heading_min_boxes: 3 個框）\n  heading_max_chars: 50              # 標題最多幾個字（不含空白）\n  split_size_jump: 0.20              # 同一個 MuPDF 區塊裡，相鄰兩行字級差超過 20% 就切開（標題和內文被放在同一區塊）\n  column_gap: 3                      # 分欄：兩群文字框的 x 範圍之間至少要空這麼多 pt\n  sparse_max_chars: 20               # --sparse-stats：一頁不超過這麼多字（不含空白）算「幾乎沒字」\n  # v2（10/18 晚上，審查後加；初值，只在開發集上看）\n  slot_tolerance: 4                  # 導覽列：同一段字在很多頁的「同一個位置」（左上角 x、y 差 ≤ 這麼多 pt）\n  repeat_heading_ratio: 1.5          # 重複出現的字 ≥ 內文 × 這個值、不在選單裡 → 當標題，不當導覽列\n  repeat_heading_max_share: 0.25     # …而且出現的頁數 ≤ 全本頁數的這個比例（超過的是頁首的報告名稱等）\n  caption_max_lines: 3               # 圖說型最多幾行\n  picture_unit_max_area: 0.6         # 閱讀順序：圖片 ≤ 頁面這個比例才排進順序（更大的是背景）\n  garbled_box_share: 0.5             # 文字框裡亂碼字 ≥ 這個比例 → 角色 garbled，不當標題\n  panel_area: 0.8                    # 色塊 ≥ 頁面這個比例（或包住整頁所有文字框）→ 標 panel（整頁大底板）\n\nlogo_refs:\n  min_pages: 3                       # 出現幾頁以上的小圖算候選\n  min_short_side_pt: 10               # 10/18 決定 5：20 → 10 pt（每個提議 Eden 都會確認）\n  vector: true                       # 10/18 決定 10：向量畫的 logo 也當候選\n  vector_band: 0.15                  # 內頁只看頁首、頁尾各 15% 高的帶狀區\n  vector_tolerance: 6                # 向量圖形分群的間距（pt）：字形 logo 的字要連在一起\n  vector_min_items: 3                # 一群至少幾條路徑\n  vector_max_long_frac: 0.5          # 長邊不超過頁寬的一半\n  vector_render_px: 600              # 截圖長邊（像素）\n  use_cover: true\n  # 以下 10/18 晚上 logo_refs.py 加的；標「初值」的只在開發集上調\n  cover_min_short_side_pt: 8         # 封面、封底的小圖：PLAN 沒設尺寸門檻；20 pt 會漏掉真的 logo（5519、6693、8070，審查 10/18），改 8 pt\n  whatif_min_short_side_pt: 10       # 只供比較，不影響輸出；10/18 決定 5 已經把正式門檻改成 10 pt，所以現在不會多出候選\n  shared_scope: dev                  # 算「幾家公司也有」只用開發集報告（測試集的圖不拿來調門檻）；--all 要不要改用全部 450 本等 Eden 決定\n  text_on_top_share: 0.5             # 一半以上的位置上面疊了文字的圖是底圖（頁籤、標題底色），不是 logo\n  ocr: true                          # 候選跑 PaddleOCR（.venv_ocr），讀到的字對得上公司名稱就算符合提議條件\n  ocr_lang: chinese_cht\n  ocr_min_score: 0.5                 # OCR 信心分數低於這個值的字不用\n  review_glob: annotations/logo_refs/review*.csv   # Eden 在確認頁勾選後匯出的 CSV；只有確認過的圖才是參考圖\n  use_back_cover: true               # 封底（最後一頁）的小圖也算候選\n  min_px: 16                         # 內嵌圖檔短邊至少幾像素（更小的是項目符號、細線，SuperPoint 也抓不到特徵點）\n  max_area_frac: 0.10                # 頁面上畫出來的面積超過頁面 10% 的不算小圖（整頁背景、封面大圖）\n  edge_frac: 0.12                    # 離頁緣不超過頁面短邊的 12% 算「靠邊」\n  tile_gap_pt: 1.5                   # 跟同頁其他圖片邊對邊貼齊（間距 <= 這個值）的是大圖切成的碎片\n  shared_min_firms: 3                # 同一張圖出現在 >= 3 家公司的報告裡：共用圖示（GRI、SDG、獎項），不是公司 logo\n  lookalike_dhash_bits: 26           # 256 位元 dHash 相差 <= 26 位元（約 10%）、長寬比差 <= 10%、平均顏色差 <= 30 算「看起來同一張」\n  lookalike_aspect_tol: 0.10\n  lookalike_colour_tol: 30\n  shared_dhash_bits: 32              # 初值：算「別家公司也有」時放寬到 32 位元（各家的 SDG 圖示版本略有不同）；每張候選「別家最像的差幾位元」記在結果檔 nearest_other_firm_bits\n  ref_long_side: 1024               # 存下來的參考圖長邊上限（像素）\n  min_contrast: 48                   # 灰階第 2～98 百分位差 < 48 的是色塊、陰影、漸層，不是 logo\n  max_refs_per_firm: 5\n  select_min_score: 0.5              # 初值：logo 分數 >= 這個值，而且符合提議條件（多頁、跨年或名稱對得上）才自動提議；提議還要 Eden 確認\n  weights: {small: 1.0, edge: 1.0, repeat: 1.0, cover: 1.0, cross_year: 2.0, aspect: 0.5, alpha: 1.0, flat: 1.0}\n\nphoto_filter:\n  model: ViT-L-14\n  pretrained: openai\n  exclude_first_last_page: true\n  photo_prompts: [\"a photograph of a real scene\", \"a photograph of people\"]\n  nonphoto_prompts: [\"an illustration\", \"a chart or infographic\", \"a logo or icon\",\n                     \"a scanned certificate or document\", \"an abstract graphic design\"]\n  photo_threshold: 0.1               # 10/19 用標註 A 開發集 100 張（a1）定：加權準確率 0.5 → 85.5%、0.1 → 97.1%（results/photo_threshold_dev_20261019_1352.json）；a2 交回後再確認，11/2 凍結\n  vlm_threshold: 0.98                # 10/19：OpenCLIP 分數 ≥ photo_threshold「或」視覺語言模型說是照片 ≥ 這個值，就算照片（開發集 149 張加權準確率 93.7%，只用 OpenCLIP 91.4%；results/photo_threshold_dev_20261019_1749.json）\n  exclude_image_only_reports: true   # 整本轉成圖片的報告（results/download_check_*.json 的 image_only）\n  exclude_vector_shading: true       # PyMuPDF 把向量漸層當成圖片回報的位置（LOG 2026-10-18 晚上）\n  batch_size: 64\n  load_workers: 8                    # 讀裁切圖的執行緒數\n\ntiles:                               # 10/18 決定 16：切成小塊的照片（tile_groups.py）\n  gap_pt: 1.5                        # 同一頁兩張圖相對的邊相距 ≤ 這麼多 pt 算貼在一起\n  min_shared_edge: 0.5               # 共用的邊至少占較短那邊的這個比例\n  max_overlap: 0.1                   # 兩張圖重疊不超過較小那張面積的這個比例（疊在一起的不算拼塊）\n  seam_zoom: 2.0                     # 看接縫時頁面的解析度（每 pt 幾個像素）\n  seam_min_std: 2.0                  # 初值：緊貼接縫的兩排像素，明暗變化（標準差，灰階）都至少這麼大（白邊、分隔線不算）\n  seam_max_std_ratio: 1.5            # 初值：兩排的變化大小差不超過 1.5 倍\n  seam_min_corr: 0.9                 # 初值：兩排的相關係數 ≥ 0.9 才算畫面連續（同一張圖切開）；寧可漏併，不要把不同照片併在一起\n  decide_share: 0.02                 # 開發集「給模型判斷的圖」裡屬於「畫面連續」的組的比例 ≥ 2% 就寫 tile_merge.py 合併\n\ncontext_link:\n  model: logistic_regression\n  max_body_blocks: 2\n  baselines: [nearest_paragraph, same_column_nearest, caption_only, section_heading_only, rules_v1]\n\nevidence:\n  llm: Qwen/Qwen2.5-7B-Instruct      # 開工時確認可用，記錄 revision\n  vlm: Qwen/Qwen2.5-VL-7B-Instruct   # 或 Qwen3-VL-8B\n  temperature: 0\n  ocr: paddleocr_chinese_cht\n  depiction_threshold: 0.5           # 10/19 開發集調後仍是 0.5（各題 p(是) 取最大值；results/tune_evidence_dev_20261019_2002.json）\n  topical_threshold: 0.6             # 10/19 開發集調（R 開發集 100 張，gate v4；results/tune_evidence_dev_20261019_2002.json）\n  ocr_match_threshold: 0.7           # 初值：字元二元組重疊\n  logo_min_inliers: 40               # 10/19 開發集調：R 開發集照片上找到 logo 的 9 張，目測對的內點 41–190、錯的 16–38（初值 15）；樣本小，R 開發集標完再看\n  years_roc_offset: 1911\n  baselines: [chinese_clip_vitl14, vlm_direct_zeroshot, vlm_direct_fewshot]\n  # 以下 10/18 baselines_evidence.py 加的（版本取自 results/models_20261018_1442.json）\n  vlm_revision: cc594898137f460bfe9f0759e9844b3ce807cfb5\n  llm_revision: a09a35458c702b33eeacc393d103063234e8bc28   # Qwen2.5-7B-Instruct（results/models_20261018_1442.json）\n  vlm_max_pixels: 1003520            # 照片送進視覺語言模型前最多這麼多像素（1280 × 28 × 28）\n  cnclip: OFA-Sys/chinese-clip-vit-large-patch14\n  cnclip_revision: 660941af70c6ff89ce658a1735404c0f3e536c38\n  context_max_chars: 900             # 規則版上下文（圖上文字、圖說、小標題、標題、內文 2 段）最多幾個字\n  e1_thresholds: null                # E1 的兩個門檻：等標註 R 開發集調；沒定之前用試跑照片相似度的三分位數（只是讓流程跑通）\n\nreuse:\n  global_models: [dinov2_vitb14, sscd_disc_mixup]\n  topk: 10\n  years_back: [1]\n  use_flip: true\n  matcher: superpoint_lightglue\n  ransac: magsac\n  min_inliers: 25                    # 初值\n  min_coverage: 0.30                 # 初值\n  stock_topk_other_firms: 5\n\nsynthetic:\n  n_pos: 1000\n  n_neg: 5000\n  crop_keep_area: [0.5, 0.9]\n  brightness_contrast: 0.30\n  saturation: 0.50\n  hue_deg: 10\n  overlay_text_area: [0.10, 0.30]\n  jpeg_quality: [50, 90]\n  collage_area: [0.40, 0.70]\n  # 以下 10/18 make_synthetic.py 加的（初值）\n  source: photo_filter_keep          # 原圖：照片過濾留下的照片（目前是初值門檻 0.5 的結果）\n  p_transform: {crop: 0.6, flip: 0.3, color: 0.6, text: 0.3, collage: 0.2, jpeg: 0.6}   # 每個正例各變換的機率；至少一種\n  crop_aspect: [0.75, 1.33]          # 裁切框的長寬比相對原圖的變化\n  text_opacity: [0.6, 0.9]           # 壓字的底色不透明度\n  neg_max_sscd: 0.5                  # 負例兩張的 SSCD 餘弦相似度要 < 這個值（太像的可能真的是同一張圖庫照）\n\nevaluation:\n  bootstrap_unit: firm\n  bootstrap_n: 2000\n  ci: 0.95\n",
+  "data_sha256": {
+   "D:\\accounting\\esg_reuse_kit\\annotations\\dev\\R.jsonl": "63e024a7d3cb2163c1a0bdbff705525702da3a5200c8c3840269089cbaf980f1",
+   "work\\eval\\dev_rules\\module2.jsonl": "37e384c75b22bfc3b1f4f01af0a894ce902f511a16b1f1988e8da071b03babba",
+   "work\\eval\\dev_rules\\E1.jsonl": "3d25447ceb9ae8c3dae01e869102b947169322afe711b23e3be0aa50fc0ae52d",
+   "work\\eval\\dev_rules\\E2.jsonl": "6dbdd2b7f90c7c85459987451a1611d39cbbb037fb78720367c8207e86b2be11",
+   "work\\eval\\dev_rules\\E3.jsonl": "d499a499619c5a8e5cf8935fbc85c275d38b347aed04d6d77fc5ba8c60bcd832",
+   "work\\eval\\dev_gold\\module2.jsonl": "9a32b8d0055b1595908aceb690edddb627ca4b6bb1bd4febda5fbb5653a205bc",
+   "work\\eval\\dev_gold\\E1.jsonl": "24a02839d37a6276b0a79e2932381aab7bea69e25f23de2f8e3de68151159bd9",
+   "work\\eval\\dev_gold\\E2.jsonl": "e6a9ae1d06f3fb90b89890df1ca1673dea50efec67f5f6a3f2b4f1afb0b314be",
+   "work\\eval\\dev_gold\\E3.jsonl": "c78de0fed24066cf07185066b1fc053855b08e72345a4b74707f85ddd2c88576",
+   "work\\eval\\dev_M_lr\\module2.jsonl": "997e65df752bdbba40298337d876cc0efcf8b9407c03d7037fb603e722891e8e",
+   "work\\eval\\dev_M_lr\\E1.jsonl": "4138d15959488258fec166787180bf5359409ad5e7de882ec92bbbc82379a43d",
+   "work\\eval\\dev_M_lr\\E2.jsonl": "693ad442f7c6099aaf5702d0f9edd1d76eddfe2ee5969f4d0e083d67d5970f56",
+   "work\\eval\\dev_M_lr\\E3.jsonl": "ca88af9b1ca96b38ceabb4bd16c362d16619e7a898880abcce2be624128bacfe",
+   "work\\eval\\dev_L1_nearest\\module2.jsonl": "77ce1f2c6c2c4a6226422d9f11cd1c6bc10fa8596c4ca715826aa22d36819ba3",
+   "work\\eval\\dev_L1_nearest\\E1.jsonl": "2a9d90a5c8f103ecdea287ced71631705017d553c4bdbd2cb8a60887de2ba122",
+   "work\\eval\\dev_L1_nearest\\E2.jsonl": "83ea91c5f694132e2b521c6734f82a37cb1c43e7520cbc552df2b48a91773055",
+   "work\\eval\\dev_L1_nearest\\E3.jsonl": "c20a863363e3715495e531ae768b574e3f0c334ca7575fe3841fa0b6749f976f",
+   "work\\eval\\dev_L2_column\\module2.jsonl": "930ed2e6b24460c5f9201708eed84814fd2de12a4bd968461ade849fc3c177a5",
+   "work\\eval\\dev_L2_column\\E1.jsonl": "25164579a0e5d8752f5e454327f1701a346b7715ace127085641c5578ef426a2",
+   "work\\eval\\dev_L2_column\\E2.jsonl": "1a0d06603f1202dba75e9559631470930deff5378de3708901f5990af7ad121a",
+   "work\\eval\\dev_L2_column\\E3.jsonl": "7748a32557a8a3bb26b523174df498811499207e3f719db1d6ad1402fff6db47",
+   "work\\eval\\dev_L3_caption\\module2.jsonl": "6accc30f7990cad5521470d6b47b854a1d324182c8f8d5fc0a33327f1d9a61cc",
+   "work\\eval\\dev_L3_caption\\E1.jsonl": "796fd4b66aceb90a67ba3a5ab2d48801d7bafd5202d7275454927bd6a566d1d9",
+   "work\\eval\\dev_L3_caption\\E2.jsonl": "88416f9d339e294994cffe97e466f0d183e6449caf728bb6456a10bf38360a01",
+   "work\\eval\\dev_L3_caption\\E3.jsonl": "abc8c64d19f72cfcde7800a2309f6c4769027d00a537f5cf2e3786caf91e24d2",
+   "work\\eval\\dev_L4_heading\\module2.jsonl": "df05a4854a930bad188ed52c060bcb682f86f1e747c0e8999e06dd7a5748734f",
+   "work\\eval\\dev_L4_heading\\E1.jsonl": "2bab656819626b7568e20180405283425e0b6653e10fb2478fdbe4e20669c66b",
+   "work\\eval\\dev_L4_heading\\E2.jsonl": "40c5268311e4d64f0766ea49121b0f4bb5ce32ecb5d7dde34765835e756bbe23",
+   "work\\eval\\dev_L4_heading\\E3.jsonl": "ebf6bfe6ce6e8af3d55ddad985fe4422f56d432e05a4e0e8abb10c0e8d471c31"
+  }
+ },
+ "split": "dev",
+ "labels_file": "D:\\accounting\\esg_reuse_kit\\annotations\\dev\\R.jsonl",
+ "photos_labelled": 103,
+ "firms": 25,
+ "labels": {
+  "direct": 90,
+  "unrelated": 5,
+  "topical": 8
+ },
+ "labels4": {
+  "證據": 24,
+  "示意": 66,
+  "無關": 5,
+  "包裝": 8
+ },
+ "bootstrap": {
+  "resamples": 2000,
+  "unit": "firm",
+  "seed": 2026,
+  "interval": "95% percentile"
+ },
+ "methods": {
+  "module2@rules": {
+   "photos": 103,
+   "macro_f1": 0.4146,
+   "accuracy": 0.6796,
+   "direct_f1": 0.8228,
+   "kappa_w": 0.2552,
+   "macro_f1_4": 0.4271,
+   "accuracy_4": 0.5922,
+   "anchor_f1": 0.6829,
+   "share_bias_4": {
+    "證據": -0.1359,
+    "示意": -0.0777,
+    "包裝": 0.0874,
+    "無關": 0.1262
+   },
+   "per_level": {
+    "direct": {
+     "precision": 0.9559,
+     "recall": 0.7222,
+     "f1": 0.8228
+    },
+    "topical": {
+     "precision": 0.1176,
+     "recall": 0.25,
+     "f1": 0.16
+    },
+    "unrelated": {
+     "precision": 0.1667,
+     "recall": 0.6,
+     "f1": 0.2609
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "direct": 65,
+     "unrelated": 11,
+     "topical": 14
+    },
+    "topical": {
+     "unrelated": 4,
+     "topical": 2,
+     "direct": 2
+    },
+    "unrelated": {
+     "unrelated": 3,
+     "topical": 1,
+     "direct": 1
+    }
+   },
+   "confusion4_label_by_model": {
+    "證據": {
+     "證據": 9,
+     "示意": 9,
+     "無關": 3,
+     "包裝": 3
+    },
+    "示意": {
+     "示意": 47,
+     "無關": 8,
+     "包裝": 11
+    },
+    "包裝": {
+     "無關": 4,
+     "包裝": 2,
+     "示意": 1,
+     "證據": 1
+    },
+    "無關": {
+     "無關": 3,
+     "包裝": 1,
+     "示意": 1
+    }
+   },
+   "file": "work/eval/dev_rules/module2.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.2944,
+     0.544
+    ],
+    "accuracy": [
+     0.5841,
+     0.7607
+    ],
+    "direct_f1": [
+     0.7556,
+     0.8767
+    ],
+    "kappa_w": [
+     0.1053,
+     0.4189
+    ],
+    "macro_f1_4": [
+     0.2925,
+     0.5577
+    ],
+    "anchor_f1": [
+     0.3571,
+     0.8936
+    ]
+   }
+  },
+  "E1@rules": {
+   "photos": 103,
+   "macro_f1": 0.363,
+   "accuracy": 0.7282,
+   "direct_f1": 0.8538,
+   "kappa_w": 0.1608,
+   "per_level": {
+    "direct": {
+     "precision": 0.9012,
+     "recall": 0.8111,
+     "f1": 0.8538
+    },
+    "topical": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0
+    },
+    "unrelated": {
+     "precision": 0.1667,
+     "recall": 0.4,
+     "f1": 0.2353
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "topical": 9,
+     "direct": 73,
+     "unrelated": 8
+    },
+    "topical": {
+     "unrelated": 2,
+     "direct": 6
+    },
+    "unrelated": {
+     "direct": 2,
+     "topical": 1,
+     "unrelated": 2
+    }
+   },
+   "file": "work/eval/dev_rules/E1.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.2775,
+     0.4477
+    ],
+    "accuracy": [
+     0.6353,
+     0.8049
+    ],
+    "direct_f1": [
+     0.7904,
+     0.9017
+    ],
+    "kappa_w": [
+     -0.0231,
+     0.3309
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.0516,
+    "diff_ci": [
+     -0.2007,
+     0.058
+    ],
+    "share_not_better": 0.764,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 15,
+     "only_method_right": 18,
+     "p": 0.7283
+    }
+   }
+  },
+  "E2@rules": {
+   "photos": 103,
+   "macro_f1": 0.1671,
+   "accuracy": 0.1553,
+   "direct_f1": 0.1633,
+   "kappa_w": 0.0612,
+   "per_level": {
+    "direct": {
+     "precision": 1.0,
+     "recall": 0.0889,
+     "f1": 0.1633
+    },
+    "topical": {
+     "precision": 0.0615,
+     "recall": 0.5,
+     "f1": 0.1096
+    },
+    "unrelated": {
+     "precision": 0.1333,
+     "recall": 0.8,
+     "f1": 0.2286
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "topical": 60,
+     "unrelated": 22,
+     "direct": 8
+    },
+    "topical": {
+     "unrelated": 4,
+     "topical": 4
+    },
+    "unrelated": {
+     "unrelated": 4,
+     "topical": 1
+    }
+   },
+   "file": "work/eval/dev_rules/E2.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.082,
+     0.2462
+    ],
+    "accuracy": [
+     0.0808,
+     0.2326
+    ],
+    "direct_f1": [
+     0.0449,
+     0.2752
+    ],
+    "kappa_w": [
+     0.0183,
+     0.1119
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.2475,
+    "diff_ci": [
+     -0.3543,
+     -0.145
+    ],
+    "share_not_better": 1.0,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 58,
+     "only_method_right": 4,
+     "p": 0.0
+    }
+   }
+  },
+  "E3@rules": {
+   "photos": 103,
+   "macro_f1": 0.1409,
+   "accuracy": 0.1456,
+   "direct_f1": 0.1616,
+   "kappa_w": 0.0213,
+   "per_level": {
+    "direct": {
+     "precision": 0.8889,
+     "recall": 0.0889,
+     "f1": 0.1616
+    },
+    "topical": {
+     "precision": 0.0769,
+     "recall": 0.375,
+     "f1": 0.1277
+    },
+    "unrelated": {
+     "precision": 0.0727,
+     "recall": 0.8,
+     "f1": 0.1333
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "unrelated": 47,
+     "topical": 35,
+     "direct": 8
+    },
+    "topical": {
+     "unrelated": 4,
+     "topical": 3,
+     "direct": 1
+    },
+    "unrelated": {
+     "unrelated": 4,
+     "topical": 1
+    }
+   },
+   "file": "work/eval/dev_rules/E3.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.0673,
+     0.2257
+    ],
+    "accuracy": [
+     0.0796,
+     0.2283
+    ],
+    "direct_f1": [
+     0.0684,
+     0.274
+    ],
+    "kappa_w": [
+     -0.0178,
+     0.0606
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.2737,
+    "diff_ci": [
+     -0.3652,
+     -0.1777
+    ],
+    "share_not_better": 1.0,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 59,
+     "only_method_right": 4,
+     "p": 0.0
+    }
+   }
+  },
+  "module2@gold": {
+   "photos": 103,
+   "macro_f1": 0.4937,
+   "accuracy": 0.699,
+   "direct_f1": 0.8312,
+   "kappa_w": 0.374,
+   "macro_f1_4": 0.4986,
+   "accuracy_4": 0.6214,
+   "anchor_f1": 0.6667,
+   "share_bias_4": {
+    "證據": -0.1262,
+    "示意": -0.1262,
+    "包裝": 0.1553,
+    "無關": 0.0971
+   },
+   "per_level": {
+    "direct": {
+     "precision": 1.0,
+     "recall": 0.7111,
+     "f1": 0.8312
+    },
+    "topical": {
+     "precision": 0.1667,
+     "recall": 0.5,
+     "f1": 0.25
+    },
+    "unrelated": {
+     "precision": 0.2667,
+     "recall": 0.8,
+     "f1": 0.4
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "direct": 64,
+     "topical": 19,
+     "unrelated": 7
+    },
+    "topical": {
+     "unrelated": 4,
+     "topical": 4
+    },
+    "unrelated": {
+     "unrelated": 4,
+     "topical": 1
+    }
+   },
+   "confusion4_label_by_model": {
+    "證據": {
+     "證據": 10,
+     "示意": 7,
+     "包裝": 6,
+     "無關": 1
+    },
+    "示意": {
+     "包裝": 13,
+     "示意": 46,
+     "無關": 6,
+     "證據": 1
+    },
+    "包裝": {
+     "無關": 4,
+     "包裝": 4
+    },
+    "無關": {
+     "無關": 4,
+     "包裝": 1
+    }
+   },
+   "file": "work/eval/dev_gold/module2.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.3173,
+     0.648
+    ],
+    "accuracy": [
+     0.575,
+     0.8061
+    ],
+    "direct_f1": [
+     0.7361,
+     0.9051
+    ],
+    "kappa_w": [
+     0.1735,
+     0.592
+    ],
+    "macro_f1_4": [
+     0.3455,
+     0.6336
+    ],
+    "anchor_f1": [
+     0.3478,
+     0.878
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": 0.0791,
+    "diff_ci": [
+     -0.0339,
+     0.1961
+    ],
+    "share_not_better": 0.101,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 13,
+     "only_method_right": 15,
+     "p": 0.8506
+    }
+   }
+  },
+  "E1@gold": {
+   "photos": 103,
+   "macro_f1": 0.6222,
+   "accuracy": 0.9029,
+   "direct_f1": 0.9667,
+   "kappa_w": 0.6277,
+   "per_level": {
+    "direct": {
+     "precision": 0.9667,
+     "recall": 0.9667,
+     "f1": 0.9667
+    },
+    "topical": {
+     "precision": 0.5,
+     "recall": 0.5,
+     "f1": 0.5
+    },
+    "unrelated": {
+     "precision": 0.4,
+     "recall": 0.4,
+     "f1": 0.4
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "direct": 87,
+     "topical": 2,
+     "unrelated": 1
+    },
+    "topical": {
+     "direct": 2,
+     "unrelated": 2,
+     "topical": 4
+    },
+    "unrelated": {
+     "direct": 1,
+     "topical": 2,
+     "unrelated": 2
+    }
+   },
+   "file": "work/eval/dev_gold/E1.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.4206,
+     0.7729
+    ],
+    "accuracy": [
+     0.839,
+     0.9545
+    ],
+    "direct_f1": [
+     0.9371,
+     0.9895
+    ],
+    "kappa_w": [
+     0.3746,
+     0.8023
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": 0.2076,
+    "diff_ci": [
+     -0.0642,
+     0.422
+    ],
+    "share_not_better": 0.0665,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 6,
+     "only_method_right": 28,
+     "p": 0.0002
+    }
+   }
+  },
+  "E2@gold": {
+   "photos": 103,
+   "macro_f1": 0.2371,
+   "accuracy": 0.1553,
+   "direct_f1": 0.1443,
+   "kappa_w": 0.098,
+   "per_level": {
+    "direct": {
+     "precision": 1.0,
+     "recall": 0.0778,
+     "f1": 0.1443
+    },
+    "topical": {
+     "precision": 0.05,
+     "recall": 0.5,
+     "f1": 0.0909
+    },
+    "unrelated": {
+     "precision": 0.3125,
+     "recall": 1.0,
+     "f1": 0.4762
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "topical": 76,
+     "unrelated": 7,
+     "direct": 7
+    },
+    "topical": {
+     "unrelated": 4,
+     "topical": 4
+    },
+    "unrelated": {
+     "unrelated": 5
+    }
+   },
+   "file": "work/eval/dev_gold/E2.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.1003,
+     0.3393
+    ],
+    "accuracy": [
+     0.0841,
+     0.2371
+    ],
+    "direct_f1": [
+     0.0606,
+     0.2203
+    ],
+    "kappa_w": [
+     0.0232,
+     0.1885
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.1775,
+    "diff_ci": [
+     -0.2834,
+     -0.083
+    ],
+    "share_not_better": 1.0,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 59,
+     "only_method_right": 4,
+     "p": 0.0
+    }
+   }
+  },
+  "E3@gold": {
+   "photos": 103,
+   "macro_f1": 0.1816,
+   "accuracy": 0.165,
+   "direct_f1": 0.1633,
+   "kappa_w": 0.0652,
+   "per_level": {
+    "direct": {
+     "precision": 1.0,
+     "recall": 0.0889,
+     "f1": 0.1633
+    },
+    "topical": {
+     "precision": 0.0735,
+     "recall": 0.625,
+     "f1": 0.1316
+    },
+    "unrelated": {
+     "precision": 0.1481,
+     "recall": 0.8,
+     "f1": 0.25
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "topical": 62,
+     "unrelated": 20,
+     "direct": 8
+    },
+    "topical": {
+     "unrelated": 3,
+     "topical": 5
+    },
+    "unrelated": {
+     "unrelated": 4,
+     "topical": 1
+    }
+   },
+   "file": "work/eval/dev_gold/E3.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.098,
+     0.2567
+    ],
+    "accuracy": [
+     0.1064,
+     0.2292
+    ],
+    "direct_f1": [
+     0.0759,
+     0.25
+    ],
+    "kappa_w": [
+     0.0197,
+     0.12
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.233,
+    "diff_ci": [
+     -0.3331,
+     -0.144
+    ],
+    "share_not_better": 1.0,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 58,
+     "only_method_right": 4,
+     "p": 0.0
+    }
+   }
+  },
+  "module2@M_lr": {
+   "photos": 103,
+   "macro_f1": 0.4088,
+   "accuracy": 0.6311,
+   "direct_f1": 0.7763,
+   "kappa_w": 0.2098,
+   "macro_f1_4": 0.4281,
+   "accuracy_4": 0.5534,
+   "anchor_f1": 0.7143,
+   "share_bias_4": {
+    "證據": -0.1165,
+    "示意": -0.1553,
+    "包裝": 0.1359,
+    "無關": 0.1359
+   },
+   "per_level": {
+    "direct": {
+     "precision": 0.9516,
+     "recall": 0.6556,
+     "f1": 0.7763
+    },
+    "topical": {
+     "precision": 0.1364,
+     "recall": 0.375,
+     "f1": 0.2
+    },
+    "unrelated": {
+     "precision": 0.1579,
+     "recall": 0.6,
+     "f1": 0.25
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "direct": 59,
+     "unrelated": 13,
+     "topical": 18
+    },
+    "topical": {
+     "unrelated": 3,
+     "topical": 3,
+     "direct": 2
+    },
+    "unrelated": {
+     "unrelated": 3,
+     "topical": 1,
+     "direct": 1
+    }
+   },
+   "confusion4_label_by_model": {
+    "證據": {
+     "證據": 10,
+     "示意": 8,
+     "包裝": 5,
+     "無關": 1
+    },
+    "示意": {
+     "示意": 41,
+     "無關": 12,
+     "包裝": 13
+    },
+    "包裝": {
+     "無關": 3,
+     "包裝": 3,
+     "示意": 1,
+     "證據": 1
+    },
+    "無關": {
+     "無關": 3,
+     "包裝": 1,
+     "證據": 1
+    }
+   },
+   "file": "work/eval/dev_M_lr/module2.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.285,
+     0.538
+    ],
+    "accuracy": [
+     0.495,
+     0.7611
+    ],
+    "direct_f1": [
+     0.6581,
+     0.876
+    ],
+    "kappa_w": [
+     0.0652,
+     0.3751
+    ],
+    "macro_f1_4": [
+     0.2868,
+     0.5587
+    ],
+    "anchor_f1": [
+     0.4211,
+     0.9091
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.0058,
+    "diff_ci": [
+     -0.0787,
+     0.0852
+    ],
+    "share_not_better": 0.558,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 19,
+     "only_method_right": 13,
+     "p": 0.3771
+    }
+   }
+  },
+  "E1@M_lr": {
+   "photos": 103,
+   "macro_f1": 0.4175,
+   "accuracy": 0.7184,
+   "direct_f1": 0.8434,
+   "kappa_w": 0.1734,
+   "per_level": {
+    "direct": {
+     "precision": 0.9211,
+     "recall": 0.7778,
+     "f1": 0.8434
+    },
+    "topical": {
+     "precision": 0.2222,
+     "recall": 0.25,
+     "f1": 0.2353
+    },
+    "unrelated": {
+     "precision": 0.1111,
+     "recall": 0.4,
+     "f1": 0.1739
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "direct": 70,
+     "unrelated": 14,
+     "topical": 6
+    },
+    "topical": {
+     "unrelated": 2,
+     "direct": 4,
+     "topical": 2
+    },
+    "unrelated": {
+     "direct": 2,
+     "topical": 1,
+     "unrelated": 2
+    }
+   },
+   "file": "work/eval/dev_M_lr/E1.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.3049,
+     0.5438
+    ],
+    "accuracy": [
+     0.6289,
+     0.8058
+    ],
+    "direct_f1": [
+     0.7792,
+     0.9029
+    ],
+    "kappa_w": [
+     0.0158,
+     0.3797
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": 0.0029,
+    "diff_ci": [
+     -0.1818,
+     0.1589
+    ],
+    "share_not_better": 0.472,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 21,
+     "only_method_right": 23,
+     "p": 0.8804
+    }
+   }
+  },
+  "E2@M_lr": {
+   "photos": 103,
+   "macro_f1": 0.1169,
+   "accuracy": 0.0971,
+   "direct_f1": 0.0645,
+   "kappa_w": 0.0353,
+   "per_level": {
+    "direct": {
+     "precision": 1.0,
+     "recall": 0.0333,
+     "f1": 0.0645
+    },
+    "topical": {
+     "precision": 0.0548,
+     "recall": 0.5,
+     "f1": 0.0988
+    },
+    "unrelated": {
+     "precision": 0.1111,
+     "recall": 0.6,
+     "f1": 0.1875
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "topical": 67,
+     "unrelated": 20,
+     "direct": 3
+    },
+    "topical": {
+     "unrelated": 4,
+     "topical": 4
+    },
+    "unrelated": {
+     "topical": 2,
+     "unrelated": 3
+    }
+   },
+   "file": "work/eval/dev_M_lr/E2.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.0445,
+     0.184
+    ],
+    "accuracy": [
+     0.0421,
+     0.1545
+    ],
+    "direct_f1": [
+     0.0,
+     0.1266
+    ],
+    "kappa_w": [
+     0.0,
+     0.0784
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.2977,
+    "diff_ci": [
+     -0.4366,
+     -0.1883
+    ],
+    "share_not_better": 1.0,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 62,
+     "only_method_right": 3,
+     "p": 0.0
+    }
+   }
+  },
+  "E3@M_lr": {
+   "photos": 103,
+   "macro_f1": 0.1734,
+   "accuracy": 0.1748,
+   "direct_f1": 0.198,
+   "kappa_w": 0.0561,
+   "per_level": {
+    "direct": {
+     "precision": 0.9091,
+     "recall": 0.1111,
+     "f1": 0.198
+    },
+    "topical": {
+     "precision": 0.0577,
+     "recall": 0.375,
+     "f1": 0.1
+    },
+    "unrelated": {
+     "precision": 0.125,
+     "recall": 1.0,
+     "f1": 0.2222
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "topical": 49,
+     "unrelated": 31,
+     "direct": 10
+    },
+    "topical": {
+     "unrelated": 4,
+     "topical": 3,
+     "direct": 1
+    },
+    "unrelated": {
+     "unrelated": 5
+    }
+   },
+   "file": "work/eval/dev_M_lr/E3.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.0783,
+     0.2771
+    ],
+    "accuracy": [
+     0.0952,
+     0.2683
+    ],
+    "direct_f1": [
+     0.1087,
+     0.2857
+    ],
+    "kappa_w": [
+     -0.0089,
+     0.1399
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.2412,
+    "diff_ci": [
+     -0.3399,
+     -0.1444
+    ],
+    "share_not_better": 1.0,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 57,
+     "only_method_right": 4,
+     "p": 0.0
+    }
+   }
+  },
+  "module2@L1_nearest": {
+   "photos": 103,
+   "macro_f1": 0.3435,
+   "accuracy": 0.466,
+   "direct_f1": 0.6212,
+   "kappa_w": 0.1674,
+   "macro_f1_4": 0.3426,
+   "accuracy_4": 0.4078,
+   "anchor_f1": 0.6829,
+   "share_bias_4": {
+    "證據": -0.165,
+    "示意": -0.301,
+    "包裝": 0.2816,
+    "無關": 0.1845
+   },
+   "per_level": {
+    "direct": {
+     "precision": 0.9762,
+     "recall": 0.4556,
+     "f1": 0.6212
+    },
+    "topical": {
+     "precision": 0.0811,
+     "recall": 0.375,
+     "f1": 0.1333
+    },
+    "unrelated": {
+     "precision": 0.1667,
+     "recall": 0.8,
+     "f1": 0.2759
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "direct": 41,
+     "topical": 33,
+     "unrelated": 16
+    },
+    "topical": {
+     "unrelated": 4,
+     "topical": 3,
+     "direct": 1
+    },
+    "unrelated": {
+     "unrelated": 4,
+     "topical": 1
+    }
+   },
+   "confusion4_label_by_model": {
+    "證據": {
+     "證據": 6,
+     "示意": 6,
+     "包裝": 8,
+     "無關": 4
+    },
+    "示意": {
+     "包裝": 25,
+     "無關": 12,
+     "示意": 29
+    },
+    "包裝": {
+     "無關": 4,
+     "包裝": 3,
+     "證據": 1
+    },
+    "無關": {
+     "無關": 4,
+     "包裝": 1
+    }
+   },
+   "file": "work/eval/dev_L1_nearest/module2.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.2388,
+     0.4366
+    ],
+    "accuracy": [
+     0.3548,
+     0.5769
+    ],
+    "direct_f1": [
+     0.5,
+     0.7299
+    ],
+    "kappa_w": [
+     0.07,
+     0.2879
+    ],
+    "macro_f1_4": [
+     0.2334,
+     0.447
+    ],
+    "anchor_f1": [
+     0.3571,
+     0.8936
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.0711,
+    "diff_ci": [
+     -0.1852,
+     0.0306
+    ],
+    "share_not_better": 0.913,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 29,
+     "only_method_right": 7,
+     "p": 0.0003
+    }
+   }
+  },
+  "E1@L1_nearest": {
+   "photos": 103,
+   "macro_f1": 0.5243,
+   "accuracy": 0.7282,
+   "direct_f1": 0.8323,
+   "kappa_w": 0.3105,
+   "per_level": {
+    "direct": {
+     "precision": 0.9437,
+     "recall": 0.7444,
+     "f1": 0.8323
+    },
+    "topical": {
+     "precision": 0.2105,
+     "recall": 0.5,
+     "f1": 0.2963
+    },
+    "unrelated": {
+     "precision": 0.3077,
+     "recall": 0.8,
+     "f1": 0.4444
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "direct": 67,
+     "unrelated": 9,
+     "topical": 14
+    },
+    "topical": {
+     "topical": 4,
+     "direct": 4
+    },
+    "unrelated": {
+     "unrelated": 4,
+     "topical": 1
+    }
+   },
+   "file": "work/eval/dev_L1_nearest/E1.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.3549,
+     0.6673
+    ],
+    "accuracy": [
+     0.625,
+     0.8273
+    ],
+    "direct_f1": [
+     0.7518,
+     0.9
+    ],
+    "kappa_w": [
+     0.0749,
+     0.5256
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": 0.1097,
+    "diff_ci": [
+     -0.0401,
+     0.2426
+    ],
+    "share_not_better": 0.0785,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 17,
+     "only_method_right": 18,
+     "p": 1.0
+    }
+   }
+  },
+  "E2@L1_nearest": {
+   "photos": 103,
+   "macro_f1": 0.1459,
+   "accuracy": 0.1262,
+   "direct_f1": 0.125,
+   "kappa_w": 0.0678,
+   "per_level": {
+    "direct": {
+     "precision": 1.0,
+     "recall": 0.0667,
+     "f1": 0.125
+    },
+    "topical": {
+     "precision": 0.0317,
+     "recall": 0.25,
+     "f1": 0.0563
+    },
+    "unrelated": {
+     "precision": 0.1471,
+     "recall": 1.0,
+     "f1": 0.2564
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "topical": 61,
+     "unrelated": 23,
+     "direct": 6
+    },
+    "topical": {
+     "unrelated": 6,
+     "topical": 2
+    },
+    "unrelated": {
+     "unrelated": 5
+    }
+   },
+   "file": "work/eval/dev_L1_nearest/E2.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.0626,
+     0.2294
+    ],
+    "accuracy": [
+     0.0566,
+     0.2
+    ],
+    "direct_f1": [
+     0.0227,
+     0.22
+    ],
+    "kappa_w": [
+     0.0156,
+     0.1327
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.2687,
+    "diff_ci": [
+     -0.3986,
+     -0.1587
+    ],
+    "share_not_better": 1.0,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 59,
+     "only_method_right": 3,
+     "p": 0.0
+    }
+   }
+  },
+  "E3@L1_nearest": {
+   "photos": 103,
+   "macro_f1": 0.1408,
+   "accuracy": 0.1456,
+   "direct_f1": 0.1633,
+   "kappa_w": 0.0545,
+   "per_level": {
+    "direct": {
+     "precision": 1.0,
+     "recall": 0.0889,
+     "f1": 0.1633
+    },
+    "topical": {
+     "precision": 0.0435,
+     "recall": 0.25,
+     "f1": 0.0741
+    },
+    "unrelated": {
+     "precision": 0.102,
+     "recall": 1.0,
+     "f1": 0.1852
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "topical": 44,
+     "unrelated": 38,
+     "direct": 8
+    },
+    "topical": {
+     "unrelated": 6,
+     "topical": 2
+    },
+    "unrelated": {
+     "unrelated": 5
+    }
+   },
+   "file": "work/eval/dev_L1_nearest/E3.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.0751,
+     0.2254
+    ],
+    "accuracy": [
+     0.0864,
+     0.2203
+    ],
+    "direct_f1": [
+     0.0759,
+     0.2321
+    ],
+    "kappa_w": [
+     0.0152,
+     0.1064
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.2738,
+    "diff_ci": [
+     -0.3948,
+     -0.1615
+    ],
+    "share_not_better": 1.0,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 58,
+     "only_method_right": 4,
+     "p": 0.0
+    }
+   }
+  },
+  "module2@L2_column": {
+   "photos": 103,
+   "macro_f1": 0.2566,
+   "accuracy": 0.3592,
+   "direct_f1": 0.5161,
+   "kappa_w": 0.0776,
+   "macro_f1_4": 0.2471,
+   "accuracy_4": 0.301,
+   "anchor_f1": 0.6829,
+   "share_bias_4": {
+    "證據": -0.1748,
+    "示意": -0.3689,
+    "包裝": 0.2913,
+    "無關": 0.2524
+   },
+   "per_level": {
+    "direct": {
+     "precision": 0.9412,
+     "recall": 0.3556,
+     "f1": 0.5161
+    },
+    "topical": {
+     "precision": 0.0526,
+     "recall": 0.25,
+     "f1": 0.087
+    },
+    "unrelated": {
+     "precision": 0.0968,
+     "recall": 0.6,
+     "f1": 0.1667
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "direct": 32,
+     "topical": 35,
+     "unrelated": 23
+    },
+    "topical": {
+     "unrelated": 5,
+     "topical": 2,
+     "direct": 1
+    },
+    "unrelated": {
+     "unrelated": 3,
+     "topical": 1,
+     "direct": 1
+    }
+   },
+   "confusion4_label_by_model": {
+    "證據": {
+     "證據": 4,
+     "示意": 6,
+     "包裝": 9,
+     "無關": 5
+    },
+    "示意": {
+     "包裝": 26,
+     "示意": 22,
+     "無關": 18
+    },
+    "包裝": {
+     "無關": 5,
+     "包裝": 2,
+     "證據": 1
+    },
+    "無關": {
+     "無關": 3,
+     "包裝": 1,
+     "證據": 1
+    }
+   },
+   "file": "work/eval/dev_L2_column/module2.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.1886,
+     0.3256
+    ],
+    "accuracy": [
+     0.2745,
+     0.4396
+    ],
+    "direct_f1": [
+     0.4038,
+     0.6034
+    ],
+    "kappa_w": [
+     0.0113,
+     0.1509
+    ],
+    "macro_f1_4": [
+     0.1722,
+     0.32
+    ],
+    "anchor_f1": [
+     0.3571,
+     0.8936
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.158,
+    "diff_ci": [
+     -0.264,
+     -0.0613
+    ],
+    "share_not_better": 0.9995,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 37,
+     "only_method_right": 5,
+     "p": 0.0
+    }
+   }
+  },
+  "E1@L2_column": {
+   "photos": 103,
+   "macro_f1": 0.3939,
+   "accuracy": 0.6408,
+   "direct_f1": 0.7771,
+   "kappa_w": 0.1322,
+   "per_level": {
+    "direct": {
+     "precision": 0.9104,
+     "recall": 0.6778,
+     "f1": 0.7771
+    },
+    "topical": {
+     "precision": 0.1538,
+     "recall": 0.25,
+     "f1": 0.1905
+    },
+    "unrelated": {
+     "precision": 0.1304,
+     "recall": 0.6,
+     "f1": 0.2143
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "topical": 9,
+     "unrelated": 20,
+     "direct": 61
+    },
+    "topical": {
+     "topical": 2,
+     "direct": 6
+    },
+    "unrelated": {
+     "topical": 2,
+     "unrelated": 3
+    }
+   },
+   "file": "work/eval/dev_L2_column/E1.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.2768,
+     0.5099
+    ],
+    "accuracy": [
+     0.5446,
+     0.7383
+    ],
+    "direct_f1": [
+     0.701,
+     0.8495
+    ],
+    "kappa_w": [
+     -0.0327,
+     0.3233
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.0207,
+    "diff_ci": [
+     -0.1493,
+     0.111
+    ],
+    "share_not_better": 0.6445,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 21,
+     "only_method_right": 14,
+     "p": 0.3105
+    }
+   }
+  },
+  "E2@L2_column": {
+   "photos": 103,
+   "macro_f1": 0.1237,
+   "accuracy": 0.1068,
+   "direct_f1": 0.0851,
+   "kappa_w": 0.0568,
+   "per_level": {
+    "direct": {
+     "precision": 1.0,
+     "recall": 0.0444,
+     "f1": 0.0851
+    },
+    "topical": {
+     "precision": 0.0333,
+     "recall": 0.25,
+     "f1": 0.0588
+    },
+    "unrelated": {
+     "precision": 0.1282,
+     "recall": 1.0,
+     "f1": 0.2273
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "topical": 58,
+     "unrelated": 28,
+     "direct": 4
+    },
+    "topical": {
+     "unrelated": 6,
+     "topical": 2
+    },
+    "unrelated": {
+     "unrelated": 5
+    }
+   },
+   "file": "work/eval/dev_L2_column/E2.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.0486,
+     0.199
+    ],
+    "accuracy": [
+     0.044,
+     0.1789
+    ],
+    "direct_f1": [
+     0.0,
+     0.1569
+    ],
+    "kappa_w": [
+     0.0129,
+     0.1101
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.2909,
+    "diff_ci": [
+     -0.4206,
+     -0.1787
+    ],
+    "share_not_better": 1.0,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 61,
+     "only_method_right": 3,
+     "p": 0.0
+    }
+   }
+  },
+  "E3@L2_column": {
+   "photos": 103,
+   "macro_f1": 0.1462,
+   "accuracy": 0.1456,
+   "direct_f1": 0.1443,
+   "kappa_w": 0.0523,
+   "per_level": {
+    "direct": {
+     "precision": 1.0,
+     "recall": 0.0778,
+     "f1": 0.1443
+    },
+    "topical": {
+     "precision": 0.0638,
+     "recall": 0.375,
+     "f1": 0.1091
+    },
+    "unrelated": {
+     "precision": 0.102,
+     "recall": 1.0,
+     "f1": 0.1852
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "topical": 44,
+     "unrelated": 39,
+     "direct": 7
+    },
+    "topical": {
+     "unrelated": 5,
+     "topical": 3
+    },
+    "unrelated": {
+     "unrelated": 5
+    }
+   },
+   "file": "work/eval/dev_L2_column/E3.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.0798,
+     0.2283
+    ],
+    "accuracy": [
+     0.0882,
+     0.2198
+    ],
+    "direct_f1": [
+     0.0526,
+     0.2167
+    ],
+    "kappa_w": [
+     0.0136,
+     0.1025
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.2684,
+    "diff_ci": [
+     -0.3982,
+     -0.1545
+    ],
+    "share_not_better": 1.0,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 58,
+     "only_method_right": 3,
+     "p": 0.0
+    }
+   }
+  },
+  "module2@L3_caption": {
+   "photos": 103,
+   "macro_f1": 0.1823,
+   "accuracy": 0.2039,
+   "direct_f1": 0.283,
+   "kappa_w": 0.0465,
+   "macro_f1_4": 0.1836,
+   "accuracy_4": 0.1845,
+   "anchor_f1": 0.6829,
+   "share_bias_4": {
+    "證據": -0.1942,
+    "示意": -0.5243,
+    "包裝": 0.4757,
+    "無關": 0.2427
+   },
+   "per_level": {
+    "direct": {
+     "precision": 0.9375,
+     "recall": 0.1667,
+     "f1": 0.283
+    },
+    "topical": {
+     "precision": 0.0526,
+     "recall": 0.375,
+     "f1": 0.0923
+    },
+    "unrelated": {
+     "precision": 0.1,
+     "recall": 0.6,
+     "f1": 0.1714
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "direct": 15,
+     "topical": 53,
+     "unrelated": 22
+    },
+    "topical": {
+     "unrelated": 5,
+     "topical": 3
+    },
+    "unrelated": {
+     "unrelated": 3,
+     "topical": 1,
+     "direct": 1
+    }
+   },
+   "confusion4_label_by_model": {
+    "證據": {
+     "證據": 3,
+     "包裝": 14,
+     "無關": 5,
+     "示意": 2
+    },
+    "示意": {
+     "包裝": 39,
+     "無關": 17,
+     "示意": 10
+    },
+    "包裝": {
+     "無關": 5,
+     "包裝": 3
+    },
+    "無關": {
+     "無關": 3,
+     "包裝": 1,
+     "證據": 1
+    }
+   },
+   "file": "work/eval/dev_L3_caption/module2.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.0978,
+     0.2559
+    ],
+    "accuracy": [
+     0.1176,
+     0.2883
+    ],
+    "direct_f1": [
+     0.1509,
+     0.4074
+    ],
+    "kappa_w": [
+     0.0025,
+     0.0974
+    ],
+    "macro_f1_4": [
+     0.0969,
+     0.2618
+    ],
+    "anchor_f1": [
+     0.3571,
+     0.8936
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.2323,
+    "diff_ci": [
+     -0.323,
+     -0.1606
+    ],
+    "share_not_better": 1.0,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 53,
+     "only_method_right": 5,
+     "p": 0.0
+    }
+   }
+  },
+  "E1@L3_caption": {
+   "photos": 103,
+   "macro_f1": 0.3702,
+   "accuracy": 0.6311,
+   "direct_f1": 0.7821,
+   "kappa_w": 0.1237,
+   "per_level": {
+    "direct": {
+     "precision": 0.9242,
+     "recall": 0.6778,
+     "f1": 0.7821
+    },
+    "topical": {
+     "precision": 0.1538,
+     "recall": 0.25,
+     "f1": 0.1905
+    },
+    "unrelated": {
+     "precision": 0.0833,
+     "recall": 0.4,
+     "f1": 0.1379
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "direct": 61,
+     "unrelated": 19,
+     "topical": 10
+    },
+    "topical": {
+     "topical": 2,
+     "unrelated": 3,
+     "direct": 3
+    },
+    "unrelated": {
+     "direct": 2,
+     "topical": 1,
+     "unrelated": 2
+    }
+   },
+   "file": "work/eval/dev_L3_caption/E1.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.2685,
+     0.4867
+    ],
+    "accuracy": [
+     0.5055,
+     0.7526
+    ],
+    "direct_f1": [
+     0.6792,
+     0.8706
+    ],
+    "kappa_w": [
+     -0.0046,
+     0.3151
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.0444,
+    "diff_ci": [
+     -0.1899,
+     0.0863
+    ],
+    "share_not_better": 0.737,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 27,
+     "only_method_right": 21,
+     "p": 0.4709
+    }
+   }
+  },
+  "E2@L3_caption": {
+   "photos": 103,
+   "macro_f1": 0.1226,
+   "accuracy": 0.1068,
+   "direct_f1": 0.0645,
+   "kappa_w": 0.0154,
+   "per_level": {
+    "direct": {
+     "precision": 1.0,
+     "recall": 0.0333,
+     "f1": 0.0645
+    },
+    "topical": {
+     "precision": 0.1176,
+     "recall": 0.5,
+     "f1": 0.1905
+    },
+    "unrelated": {
+     "precision": 0.0606,
+     "recall": 0.8,
+     "f1": 0.1127
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "topical": 29,
+     "unrelated": 58,
+     "direct": 3
+    },
+    "topical": {
+     "unrelated": 4,
+     "topical": 4
+    },
+    "unrelated": {
+     "unrelated": 4,
+     "topical": 1
+    }
+   },
+   "file": "work/eval/dev_L3_caption/E2.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.0478,
+     0.1909
+    ],
+    "accuracy": [
+     0.0417,
+     0.1735
+    ],
+    "direct_f1": [
+     0.0,
+     0.1151
+    ],
+    "kappa_w": [
+     -0.0046,
+     0.0421
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.292,
+    "diff_ci": [
+     -0.3932,
+     -0.1956
+    ],
+    "share_not_better": 1.0,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 63,
+     "only_method_right": 4,
+     "p": 0.0
+    }
+   }
+  },
+  "E3@L3_caption": {
+   "photos": 103,
+   "macro_f1": 0.1151,
+   "accuracy": 0.1262,
+   "direct_f1": 0.1429,
+   "kappa_w": 0.0147,
+   "per_level": {
+    "direct": {
+     "precision": 0.875,
+     "recall": 0.0778,
+     "f1": 0.1429
+    },
+    "topical": {
+     "precision": 0.0625,
+     "recall": 0.125,
+     "f1": 0.0833
+    },
+    "unrelated": {
+     "precision": 0.0633,
+     "recall": 1.0,
+     "f1": 0.119
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "topical": 15,
+     "unrelated": 68,
+     "direct": 7
+    },
+    "topical": {
+     "unrelated": 6,
+     "direct": 1,
+     "topical": 1
+    },
+    "unrelated": {
+     "unrelated": 5
+    }
+   },
+   "file": "work/eval/dev_L3_caption/E3.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.056,
+     0.18
+    ],
+    "accuracy": [
+     0.0685,
+     0.1954
+    ],
+    "direct_f1": [
+     0.0594,
+     0.2342
+    ],
+    "kappa_w": [
+     -0.0153,
+     0.0531
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.2995,
+    "diff_ci": [
+     -0.4226,
+     -0.2
+    ],
+    "share_not_better": 1.0,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 60,
+     "only_method_right": 4,
+     "p": 0.0
+    }
+   }
+  },
+  "module2@L4_heading": {
+   "photos": 103,
+   "macro_f1": 0.1867,
+   "accuracy": 0.2039,
+   "direct_f1": 0.2524,
+   "kappa_w": 0.0491,
+   "macro_f1_4": 0.1738,
+   "accuracy_4": 0.1845,
+   "anchor_f1": 0.6829,
+   "share_bias_4": {
+    "證據": -0.2136,
+    "示意": -0.534,
+    "包裝": 0.4466,
+    "無關": 0.301
+   },
+   "per_level": {
+    "direct": {
+     "precision": 1.0,
+     "recall": 0.1444,
+     "f1": 0.2524
+    },
+    "topical": {
+     "precision": 0.0926,
+     "recall": 0.625,
+     "f1": 0.1613
+    },
+    "unrelated": {
+     "precision": 0.0833,
+     "recall": 0.6,
+     "f1": 0.1463
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "unrelated": 30,
+     "topical": 47,
+     "direct": 13
+    },
+    "topical": {
+     "unrelated": 3,
+     "topical": 5
+    },
+    "unrelated": {
+     "unrelated": 3,
+     "topical": 2
+    }
+   },
+   "confusion4_label_by_model": {
+    "證據": {
+     "無關": 4,
+     "包裝": 16,
+     "證據": 2,
+     "示意": 2
+    },
+    "示意": {
+     "包裝": 31,
+     "示意": 9,
+     "無關": 26
+    },
+    "包裝": {
+     "無關": 3,
+     "包裝": 5
+    },
+    "無關": {
+     "無關": 3,
+     "包裝": 2
+    }
+   },
+   "file": "work/eval/dev_L4_heading/module2.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.1155,
+     0.2684
+    ],
+    "accuracy": [
+     0.1446,
+     0.2737
+    ],
+    "direct_f1": [
+     0.1667,
+     0.3333
+    ],
+    "kappa_w": [
+     0.0103,
+     0.0974
+    ],
+    "macro_f1_4": [
+     0.0972,
+     0.2613
+    ],
+    "anchor_f1": [
+     0.3571,
+     0.8936
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.2279,
+    "diff_ci": [
+     -0.3283,
+     -0.1336
+    ],
+    "share_not_better": 1.0,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 56,
+     "only_method_right": 7,
+     "p": 0.0
+    }
+   }
+  },
+  "E1@L4_heading": {
+   "photos": 103,
+   "macro_f1": 0.3738,
+   "accuracy": 0.6796,
+   "direct_f1": 0.8121,
+   "kappa_w": 0.1119,
+   "per_level": {
+    "direct": {
+     "precision": 0.8933,
+     "recall": 0.7444,
+     "f1": 0.8121
+    },
+    "topical": {
+     "precision": 0.0667,
+     "recall": 0.125,
+     "f1": 0.087
+    },
+    "unrelated": {
+     "precision": 0.1538,
+     "recall": 0.4,
+     "f1": 0.2222
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "direct": 67,
+     "topical": 13,
+     "unrelated": 10
+    },
+    "topical": {
+     "topical": 1,
+     "direct": 6,
+     "unrelated": 1
+    },
+    "unrelated": {
+     "topical": 1,
+     "direct": 2,
+     "unrelated": 2
+    }
+   },
+   "file": "work/eval/dev_L4_heading/E1.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.2686,
+     0.4675
+    ],
+    "accuracy": [
+     0.5814,
+     0.7586
+    ],
+    "direct_f1": [
+     0.7317,
+     0.8671
+    ],
+    "kappa_w": [
+     -0.0455,
+     0.2535
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.0408,
+    "diff_ci": [
+     -0.2064,
+     0.0878
+    ],
+    "share_not_better": 0.716,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 21,
+     "only_method_right": 18,
+     "p": 0.7493
+    }
+   }
+  },
+  "E2@L4_heading": {
+   "photos": 103,
+   "macro_f1": 0.1478,
+   "accuracy": 0.1262,
+   "direct_f1": 0.0851,
+   "kappa_w": 0.0512,
+   "per_level": {
+    "direct": {
+     "precision": 1.0,
+     "recall": 0.0444,
+     "f1": 0.0851
+    },
+    "topical": {
+     "precision": 0.0725,
+     "recall": 0.625,
+     "f1": 0.1299
+    },
+    "unrelated": {
+     "precision": 0.1333,
+     "recall": 0.8,
+     "f1": 0.2286
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "topical": 63,
+     "unrelated": 23,
+     "direct": 4
+    },
+    "topical": {
+     "unrelated": 3,
+     "topical": 5
+    },
+    "unrelated": {
+     "unrelated": 4,
+     "topical": 1
+    }
+   },
+   "file": "work/eval/dev_L4_heading/E2.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.0684,
+     0.234
+    ],
+    "accuracy": [
+     0.063,
+     0.2105
+    ],
+    "direct_f1": [
+     0.0189,
+     0.1702
+    ],
+    "kappa_w": [
+     0.0143,
+     0.0956
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.2668,
+    "diff_ci": [
+     -0.3651,
+     -0.1642
+    ],
+    "share_not_better": 1.0,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 61,
+     "only_method_right": 3,
+     "p": 0.0
+    }
+   }
+  },
+  "E3@L4_heading": {
+   "photos": 103,
+   "macro_f1": 0.1356,
+   "accuracy": 0.1359,
+   "direct_f1": 0.1633,
+   "kappa_w": 0.0405,
+   "per_level": {
+    "direct": {
+     "precision": 1.0,
+     "recall": 0.0889,
+     "f1": 0.1633
+    },
+    "topical": {
+     "precision": 0.0484,
+     "recall": 0.375,
+     "f1": 0.0857
+    },
+    "unrelated": {
+     "precision": 0.0909,
+     "recall": 0.6,
+     "f1": 0.1579
+    }
+   },
+   "confusion_label_by_model": {
+    "direct": {
+     "topical": 57,
+     "direct": 8,
+     "unrelated": 25
+    },
+    "topical": {
+     "unrelated": 5,
+     "topical": 3
+    },
+    "unrelated": {
+     "unrelated": 3,
+     "topical": 2
+    }
+   },
+   "file": "work/eval/dev_L4_heading/E3.jsonl",
+   "ci": {
+    "macro_f1": [
+     0.0626,
+     0.2183
+    ],
+    "accuracy": [
+     0.0755,
+     0.2115
+    ],
+    "direct_f1": [
+     0.0789,
+     0.26
+    ],
+    "kappa_w": [
+     0.0067,
+     0.0832
+    ]
+   },
+   "vs_ref": {
+    "ref": "module2@rules",
+    "macro_f1_diff": -0.279,
+    "diff_ci": [
+     -0.3596,
+     -0.1998
+    ],
+    "share_not_better": 1.0,
+    "mcnemar_direct_vs_rest": {
+     "only_ref_right": 59,
+     "only_method_right": 5,
+     "p": 0.0
+    }
+   }
+  }
+ }
+}

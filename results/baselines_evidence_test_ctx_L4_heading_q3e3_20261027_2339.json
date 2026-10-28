@@ -1,0 +1,4533 @@
+{
+ "meta": {
+  "date": "2026-10-27T23:39:35+08:00",
+  "command": "python src/baselines_evidence.py --r-items test --labels annotations/test/R.jsonl --context work/context/L4_heading_test340.jsonl --only e3 --tag test_ctx_L4_heading_q3e3",
+  "git": {
+   "commit": "f70ca115daa4be6c87679d097ebb78e9cfb974d0",
+   "uncommitted_changes": false
+  },
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "packages": {
+   "torch": "2.14.1+cu130",
+   "transformers": "5.20.1",
+   "pillow": "13.0.0",
+   "numpy": "2.4.6",
+   "pyyaml": "6.0.3"
+  },
+  "config_file": "configs\\default.yaml",
+  "config": "# 所有參數放這裡（PLAN v2.0）。標「初值」的門檻只能在開發集上調，11/2 凍結後另存 configs/frozen.yaml。\nseed: 2026\n\npaths:\n  raw: data/raw\n  catalog: data/catalog.csv\n  index: data/index\n  synthetic: data/synthetic\n  extract: work/extract\n  page_graph: work/page_graph\n  logo_refs: work/logo_refs\n  context: work/context\n  evidence: work/evidence\n  features: work/features\n  reuse: work/reuse\n  prompts: configs/prompts\n  annotations: annotations\n  results: results\n  reports: reports\n\ndata:\n  years: [2023, 2024, 2025]          # 報告年度（報告涵蓋的會計年度）\n  n_firms: 150\n  n_dev: 30                          # 以公司為單位\n  dev_must_include: [\"1101\", \"1707\"] # 台泥、葡萄王\n\nextract:\n  crop_long_side: 1024\n  jpg_quality: 90\n\npage_graph:\n  container_min_area: 0.02           # 色塊容器面積下限（占頁面比例）\n  container_max_area: 0.90\n  heading_levels: 3                  # 章、節、小標題\n  # 以下是 page_graph.py 用的初值（10/18 晚上加；只在開發集上看 HTML 調）\n  container_rect_fill: 0.90          # 線段／曲線圍成的形狀：多邊形面積 ≥ 外框的這個比例才算矩形（圓角矩形算，圓形不算）\n  colour_tolerance: 0.02             # 色塊顏色（乘上不透明度）跟底下顏色每個 RGB 通道都差不到這個值 → 只是重刷底色，不算容器\n  inside_container: 0.75             # 文字框、照片有這個比例以上在色塊裡，才算在這個容器裡\n  heading_min_ratio: 1.15            # 字級 ≥ 內文 × 這個值，才可能是標題\n  heading_min_pages: 3               # v2：一個字級至少出現在幾個不同頁的短文字框，才算一種標題字級（v1 是 heading_min_boxes: 3 個框）\n  heading_max_chars: 50              # 標題最多幾個字（不含空白）\n  split_size_jump: 0.20              # 同一個 MuPDF 區塊裡，相鄰兩行字級差超過 20% 就切開（標題和內文被放在同一區塊）\n  column_gap: 3                      # 分欄：兩群文字框的 x 範圍之間至少要空這麼多 pt\n  sparse_max_chars: 20               # --sparse-stats：一頁不超過這麼多字（不含空白）算「幾乎沒字」\n  # v2（10/18 晚上，審查後加；初值，只在開發集上看）\n  slot_tolerance: 4                  # 導覽列：同一段字在很多頁的「同一個位置」（左上角 x、y 差 ≤ 這麼多 pt）\n  repeat_heading_ratio: 1.5          # 重複出現的字 ≥ 內文 × 這個值、不在選單裡 → 當標題，不當導覽列\n  repeat_heading_max_share: 0.25     # …而且出現的頁數 ≤ 全本頁數的這個比例（超過的是頁首的報告名稱等）\n  caption_max_lines: 3               # 圖說型最多幾行\n  picture_unit_max_area: 0.6         # 閱讀順序：圖片 ≤ 頁面這個比例才排進順序（更大的是背景）\n  garbled_box_share: 0.5             # 文字框裡亂碼字 ≥ 這個比例 → 角色 garbled，不當標題\n  panel_area: 0.8                    # 色塊 ≥ 頁面這個比例（或包住整頁所有文字框）→ 標 panel（整頁大底板）\n\nlogo_refs:\n  ocr_workers: 10                    # 10/20：OCR 同時開幾個程序（一個只用到約 1.6 核，一張約 4 秒）\n  min_pages: 3                       # 出現幾頁以上的小圖算候選\n  min_short_side_pt: 10               # 10/18 決定 5：20 → 10 pt（每個提議 Eden 都會確認）\n  vector: true                       # 10/18 決定 10：向量畫的 logo 也當候選\n  vector_band: 0.15                  # 內頁只看頁首、頁尾各 15% 高的帶狀區\n  vector_tolerance: 6                # 向量圖形分群的間距（pt）：字形 logo 的字要連在一起\n  vector_min_items: 3                # 一群至少幾條路徑\n  vector_max_long_frac: 0.5          # 長邊不超過頁寬的一半\n  vector_render_px: 600              # 截圖長邊（像素）\n  use_cover: true\n  # 以下 10/18 晚上 logo_refs.py 加的；標「初值」的只在開發集上調\n  cover_min_short_side_pt: 8         # 封面、封底的小圖：PLAN 沒設尺寸門檻；20 pt 會漏掉真的 logo（5519、6693、8070，審查 10/18），改 8 pt\n  whatif_min_short_side_pt: 10       # 只供比較，不影響輸出；10/18 決定 5 已經把正式門檻改成 10 pt，所以現在不會多出候選\n  shared_scope: dev                  # 算「幾家公司也有」只用開發集報告（測試集的圖不拿來調門檻）；--all 要不要改用全部 450 本等 Eden 決定\n  text_on_top_share: 0.5             # 一半以上的位置上面疊了文字的圖是底圖（頁籤、標題底色），不是 logo\n  ocr: true                          # 候選跑 PaddleOCR（.venv_ocr），讀到的字對得上公司名稱就算符合提議條件\n  ocr_lang: chinese_cht\n  ocr_min_score: 0.5                 # OCR 信心分數低於這個值的字不用\n  review_glob: annotations/logo_refs/review*.csv   # Eden 在確認頁勾選後匯出的 CSV；只有確認過的圖才是參考圖\n  use_back_cover: true               # 封底（最後一頁）的小圖也算候選\n  min_px: 16                         # 內嵌圖檔短邊至少幾像素（更小的是項目符號、細線，SuperPoint 也抓不到特徵點）\n  max_area_frac: 0.10                # 頁面上畫出來的面積超過頁面 10% 的不算小圖（整頁背景、封面大圖）\n  edge_frac: 0.12                    # 離頁緣不超過頁面短邊的 12% 算「靠邊」\n  tile_gap_pt: 1.5                   # 跟同頁其他圖片邊對邊貼齊（間距 <= 這個值）的是大圖切成的碎片\n  shared_min_firms: 3                # 同一張圖出現在 >= 3 家公司的報告裡：共用圖示（GRI、SDG、獎項），不是公司 logo\n  lookalike_dhash_bits: 26           # 256 位元 dHash 相差 <= 26 位元（約 10%）、長寬比差 <= 10%、平均顏色差 <= 30 算「看起來同一張」\n  lookalike_aspect_tol: 0.10\n  lookalike_colour_tol: 30\n  shared_dhash_bits: 32              # 初值：算「別家公司也有」時放寬到 32 位元（各家的 SDG 圖示版本略有不同）；每張候選「別家最像的差幾位元」記在結果檔 nearest_other_firm_bits\n  ref_long_side: 1024               # 存下來的參考圖長邊上限（像素）\n  min_contrast: 48                   # 灰階第 2～98 百分位差 < 48 的是色塊、陰影、漸層，不是 logo\n  max_refs_per_firm: 5\n  select_min_score: 0.5              # 初值：logo 分數 >= 這個值，而且符合提議條件（多頁、跨年或名稱對得上）才自動提議；提議還要 Eden 確認\n  weights: {small: 1.0, edge: 1.0, repeat: 1.0, cover: 1.0, cross_year: 2.0, aspect: 0.5, alpha: 1.0, flat: 1.0}\n\nphoto_filter:\n  model: ViT-L-14\n  pretrained: openai\n  exclude_first_last_page: true\n  photo_prompts: [\"a photograph of a real scene\", \"a photograph of people\"]\n  nonphoto_prompts: [\"an illustration\", \"a chart or infographic\", \"a logo or icon\",\n                     \"a scanned certificate or document\", \"an abstract graphic design\"]\n  photo_threshold: 0.1               # 10/19 用標註 A 開發集 100 張（a1）定：加權準確率 0.5 → 85.5%、0.1 → 97.1%（results/photo_threshold_dev_20261019_1352.json）；a2 交回後再確認，11/2 凍結\n  vlm_threshold: 0.98                # 10/19：OpenCLIP 分數 ≥ photo_threshold「或」視覺語言模型說是照片 ≥ 這個值，就算照片（開發集 149 張加權準確率 93.7%，只用 OpenCLIP 91.4%；results/photo_threshold_dev_20261019_1749.json）\n  exclude_image_only_reports: true   # 整本轉成圖片的報告（results/download_check_*.json 的 image_only）\n  exclude_vector_shading: true       # PyMuPDF 把向量漸層當成圖片回報的位置（LOG 2026-10-18 晚上）\n  batch_size: 64\n  load_workers: 8                    # 讀裁切圖的執行緒數\n\ntiles:                               # 10/18 決定 16：切成小塊的照片（tile_groups.py）\n  gap_pt: 1.5                        # 同一頁兩張圖相對的邊相距 ≤ 這麼多 pt 算貼在一起\n  min_shared_edge: 0.5               # 共用的邊至少占較短那邊的這個比例\n  max_overlap: 0.1                   # 兩張圖重疊不超過較小那張面積的這個比例（疊在一起的不算拼塊）\n  seam_zoom: 2.0                     # 看接縫時頁面的解析度（每 pt 幾個像素）\n  seam_min_std: 2.0                  # 初值：緊貼接縫的兩排像素，明暗變化（標準差，灰階）都至少這麼大（白邊、分隔線不算）\n  seam_max_std_ratio: 1.5            # 初值：兩排的變化大小差不超過 1.5 倍\n  seam_min_corr: 0.9                 # 初值：兩排的相關係數 ≥ 0.9 才算畫面連續（同一張圖切開）；寧可漏併，不要把不同照片併在一起\n  decide_share: 0.02                 # 開發集「給模型判斷的圖」裡屬於「畫面連續」的組的比例 ≥ 2% 就寫 tile_merge.py 合併\n\ncontext_link:\n  model: logistic_regression\n  max_body_blocks: 2\n  baselines: [nearest_paragraph, same_column_nearest, caption_only, section_heading_only, rules_v1]\n\nevidence:\n  llm: Qwen/Qwen2.5-7B-Instruct      # 開工時確認可用，記錄 revision\n  vlm: Qwen/Qwen3-VL-8B-Instruct     # 10/20 起（Eden 照 D15 決定）；之前是 Qwen2.5-VL-7B（現在的 vlm_alt）\n  temperature: 0\n  ocr: paddleocr_chinese_cht\n  depiction_threshold: 0.5           # 10/19 開發集調後仍是 0.5（各題 p(是) 取最大值；results/tune_evidence_dev_20261019_2002.json）\n  topical_threshold: 0.6             # 10/19 開發集調（R 開發集 100 張，gate v4；results/tune_evidence_dev_20261019_2002.json）\n  ocr_match_threshold: 0.7           # 初值：字元二元組重疊\n  logo_min_inliers: 40               # 10/19 開發集調：R 開發集照片上找到 logo 的 9 張，目測對的內點 41–190、錯的 16–38（初值 15）；樣本小，R 開發集標完再看\n  logo_angle_range: [45, 135]        # 10/22：投影四邊形每個角的範圍（度）；原本寫死在 evidence.py，數值沒變\n  logo_area_range: [0.0005, 0.9]     # 10/22：投影四邊形占照片面積的範圍\n  logo_min_side_px: 8                # 10/22：投影四邊形最短邊（像素）\n  logo_aspect_range: [0.5, 2.0]      # 10/22：投影長寬比相對參考圖的倍數範圍\n  superpoint_keypoints: 2048         # 10/22：SuperPoint 最多特徵點數\n  short_name_split_punct: true       # 10/22 NEXT C11 試驗：true 時 ≤3 字母的英文簡稱以標點相鄰的 token 也算\n  years_roc_offset: 1911\n  baselines: [chinese_clip_vitl14, vlm_direct_zeroshot, vlm_direct_fewshot]\n  # 以下 10/18 baselines_evidence.py 加的（版本取自 results/models_20261018_1442.json）\n  vlm_revision: 0c351dd01ed87e9c1b53cbc748cba10e6187ff3b   # Qwen3-VL-8B-Instruct（Hugging Face，10/20 下載）\n  llm_revision: a09a35458c702b33eeacc393d103063234e8bc28   # Qwen2.5-7B-Instruct（results/models_20261018_1442.json）\n  vlm_max_pixels: 1003520            # 照片送進視覺語言模型前最多這麼多像素（1280 × 28 × 28）\n  vlm_alt: Qwen/Qwen2.5-VL-7B-Instruct   # 10/20 前的主模型；--vlm alt 重現比較表（表 5 的模型列）\n  vlm_alt_revision: cc594898137f460bfe9f0759e9844b3ce807cfb5\n  vlm_third: OpenGVLab/InternVL3-8B-hf   # 10/22 NEXT C12：第三個模型家族，只跑標過的照片（表 5 多一列）\n  vlm_third_revision: \"259a3b64a14623c0ec91a045cb43f7c5af5fa6af\"               # 下載後填 snapshot 的 commit\n  cnclip: OFA-Sys/chinese-clip-vit-large-patch14\n  cnclip_revision: 660941af70c6ff89ce658a1735404c0f3e536c38\n  context_max_chars: 900             # 規則版上下文（圖上文字、圖說、小標題、標題、內文 2 段）最多幾個字\n  e1_thresholds: null                # E1 的兩個門檻：等標註 R 開發集調；沒定之前用試跑照片相似度的三分位數（只是讓流程跑通）\n\nmeasure:\n  # D15（10/20 Eden 決定）：「拍到」改用視覺語言模型的直接判斷，少樣本、在開發集校正；定錨照用 OCR＋logo；\n  # 拆題（evidence.py 的可拍性判斷、是非題、DSG）改當消融。開發集換公司驗證：E3 校正 0.555、模組 2 0.454\n  # （results/eval_dev_methods_rules_q3_20261020_1423.json）。11/2 寫進 frozen.yaml 前可能再依開發集調整。\n  depiction: E3_cal                  # baselines_evidence.py --only e3，tune_evidence.py 的 E3_cal\n  prompt: direct_zeroshot            # configs/prompts/direct_zeroshot.txt（手冊 v1.5 的說法）\n  shots_per_level: 1                 # 每級 1 個開發集例子（直接對應、主題相關、無關）\n  cut_p_direct: 0.0017               # p(A) ≥ 這個值 → 直接對應；開發集全部 103 張調（results/tune_evidence_dev_20261020_1423_2.json）\n  cut_p_unrelated: 0.0002            # 否則 p(C) ≥ 這個值 → 無關；否則主題相關\n  anchors: [ocr, logo]\n\nreuse:\n  global_models: [dinov2_vitb14, sscd_disc_mixup]\n  topk: 10\n  years_back: [1]\n  use_flip: true\n  matcher: superpoint_lightglue\n  ransac: magsac\n  min_inliers: 25                    # 初值\n  min_coverage: 0.30                 # 初值\n  stock_topk_other_firms: 5\n\nsynthetic:\n  n_pos: 1000\n  n_neg: 5000\n  crop_keep_area: [0.5, 0.9]\n  brightness_contrast: 0.30\n  saturation: 0.50\n  hue_deg: 10\n  overlay_text_area: [0.10, 0.30]\n  jpeg_quality: [50, 90]\n  collage_area: [0.40, 0.70]\n  # 以下 10/18 make_synthetic.py 加的（初值）\n  source: photo_filter_keep          # 原圖：照片過濾留下的照片（目前是初值門檻 0.5 的結果）\n  p_transform: {crop: 0.6, flip: 0.3, color: 0.6, text: 0.3, collage: 0.2, jpeg: 0.6}   # 每個正例各變換的機率；至少一種\n  crop_aspect: [0.75, 1.33]          # 裁切框的長寬比相對原圖的變化\n  text_opacity: [0.6, 0.9]           # 壓字的底色不透明度\n  neg_max_sscd: 0.5                  # 負例兩張的 SSCD 餘弦相似度要 < 這個值（太像的可能真的是同一張圖庫照）\n\nevaluation:\n  bootstrap_unit: firm\n  bootstrap_n: 2000\n  ci: 0.95\n",
+  "data_sha256": {
+   "D:\\accounting\\esg_reuse_kit\\work\\photo_filter.csv": "3f6f6e206ee31a03d68bcd2313518dbc3b7201ec8dc427ade840bfe268f4fe5c",
+   "D:\\accounting\\esg_reuse_kit\\configs\\prompts\\direct_zeroshot.txt": "3a02eaeee878043dfd17af859604d217830e3956a0843a56584fd5fc205595bf",
+   "annotations\\test\\R.jsonl": "d47ade2cbbf50b6dd27c0f2cc1a518357ef30be963d3089c18fd92806b713254",
+   "D:\\accounting\\esg_reuse_kit\\work\\context\\L4_heading_test340.jsonl": "99060bd03eeee3102e298f1e54d5c5c42153ecafdf8bc8e22bc0a6c16c38d7bf"
+  }
+ },
+ "tag": "test_ctx_L4_heading_q3e3",
+ "photos": 298,
+ "crops": "annotations/test/R_items.jsonl (labelled in annotations/test/R.jsonl)",
+ "context": "L4_heading (work/context/L4_heading_test340.jsonl)",
+ "context_name": "L4_heading",
+ "empty_context": 0,
+ "e3": {
+  "model": "Qwen/Qwen3-VL-8B-Instruct",
+  "revision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+  "prompt": "configs/prompts/direct_zeroshot.txt",
+  "prompt_sha256": "3a02eaeee878043dfd17af859604d217830e3956a0843a56584fd5fc205595bf",
+  "max_pixels": 1003520,
+  "new": 296,
+  "seconds": 300.3,
+  "seconds_per_photo": 0.57,
+  "peak_gpu_gb": 19.79,
+  "few_shot": {
+   "per_class": 1,
+   "seed": "2026:E3",
+   "other_firms_only": true
+  },
+  "levels": {
+   "direct": 132,
+   "topical": 124,
+   "unrelated": 42
+  },
+  "letter_mass_min": 1.0,
+  "examples_used": {
+   "7723_2024_p090_05.jpg": 298,
+   "2645_2025_p092_00.jpg": 298,
+   "2645_2025_p018_00.jpg": 298
+  }
+ },
+ "per_photo": [
+  {
+   "crop": "2642_2023_p134_01.jpg",
+   "context_chars": 42,
+   "e3_p": {
+    "direct": 0.9998,
+    "topical": 0.0002,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2748_2025_p020_05.jpg",
+   "context_chars": 29,
+   "e3_p": {
+    "direct": 0.0953,
+    "topical": 0.9045,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2892_2023_p179_10.jpg",
+   "context_chars": 44,
+   "e3_p": {
+    "direct": 0.0001,
+    "topical": 0.9984,
+    "unrelated": 0.0015
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "9933_2023_p096_00.jpg",
+   "context_chars": 35,
+   "e3_p": {
+    "direct": 0.0109,
+    "topical": 0.985,
+    "unrelated": 0.004
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8069_2025_p149_00.jpg",
+   "context_chars": 29,
+   "e3_p": {
+    "direct": 0.9994,
+    "topical": 0.0006,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1785_2025_p046_05.jpg",
+   "context_chars": 67,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6116_2024_p127_00.jpg",
+   "context_chars": 36,
+   "e3_p": {
+    "direct": 0.982,
+    "topical": 0.018,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3026_2025_p053_08.jpg",
+   "context_chars": 20,
+   "e3_p": {
+    "direct": 0.2227,
+    "topical": 0.7772,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8021_2024_p086_02.jpg",
+   "context_chars": 17,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4706_2023_p059_02.jpg",
+   "context_chars": 13,
+   "e3_p": {
+    "direct": 0.0043,
+    "topical": 0.1816,
+    "unrelated": 0.8141
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "9937_2025_p061_06.jpg",
+   "context_chars": 24,
+   "e3_p": {
+    "direct": 0.0141,
+    "topical": 0.9859,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "9933_2025_p161_03.jpg",
+   "context_chars": 64,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3711_2023_p187_00.jpg",
+   "context_chars": 36,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4506_2025_p053_00.jpg",
+   "context_chars": 17,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.9985,
+    "unrelated": 0.0015
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2331_2023_p117_07.jpg",
+   "context_chars": 22,
+   "e3_p": {
+    "direct": 0.0019,
+    "topical": 0.9976,
+    "unrelated": 0.0004
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5515_2025_p082_02.jpg",
+   "context_chars": 53,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2362_2023_p098_00.jpg",
+   "context_chars": 14,
+   "e3_p": {
+    "direct": 0.9047,
+    "topical": 0.0953,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3034_2024_p117_06.jpg",
+   "context_chars": 53,
+   "e3_p": {
+    "direct": 0.0012,
+    "topical": 0.9987,
+    "unrelated": 0.0002
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5426_2025_p097_04.jpg",
+   "context_chars": 68,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0,
+    "unrelated": 1.0
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2115_2025_p221_03.jpg",
+   "context_chars": 45,
+   "e3_p": {
+    "direct": 0.9994,
+    "topical": 0.0006,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2495_2023_p062_03.jpg",
+   "context_chars": 22,
+   "e3_p": {
+    "direct": 0.0293,
+    "topical": 0.9707,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8163_2023_p007_05.jpg",
+   "context_chars": 14,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1513_2023_p099_01.jpg",
+   "context_chars": 53,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.9627,
+    "unrelated": 0.0373
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4707_2025_p004_00.jpg",
+   "context_chars": 17,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0,
+    "unrelated": 1.0
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1737_2024_p120_00.jpg",
+   "context_chars": 44,
+   "e3_p": {
+    "direct": 0.0067,
+    "topical": 0.9932,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2331_2024_p102_01.jpg",
+   "context_chars": 32,
+   "e3_p": {
+    "direct": 0.4378,
+    "topical": 0.5622,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3265_2024_p042_02.jpg",
+   "context_chars": 25,
+   "e3_p": {
+    "direct": 0.0015,
+    "topical": 0.9985,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3711_2024_p191_01.jpg",
+   "context_chars": 46,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.9998,
+    "unrelated": 0.0002
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2454_2025_p037_00.jpg",
+   "context_chars": 42,
+   "e3_p": {
+    "direct": 0.7773,
+    "topical": 0.2227,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2481_2024_p112_05.jpg",
+   "context_chars": 69,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6120_2024_p072_05.jpg",
+   "context_chars": 21,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.9996,
+    "unrelated": 0.0003
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1513_2023_p098_00.jpg",
+   "context_chars": 47,
+   "e3_p": {
+    "direct": 0.0141,
+    "topical": 0.9859,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4419_2024_p026_03.jpg",
+   "context_chars": 41,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.9999,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3653_2024_p006_03.jpg",
+   "context_chars": 17,
+   "e3_p": {
+    "direct": 0.9241,
+    "topical": 0.0759,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2481_2024_p102_02.jpg",
+   "context_chars": 15,
+   "e3_p": {
+    "direct": 0.018,
+    "topical": 0.982,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1217_2025_p009_01.jpg",
+   "context_chars": 20,
+   "e3_p": {
+    "direct": 0.0035,
+    "topical": 0.1475,
+    "unrelated": 0.849
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1802_2025_p167_00.jpg",
+   "context_chars": 20,
+   "e3_p": {
+    "direct": 0.0066,
+    "topical": 0.9848,
+    "unrelated": 0.0085
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2454_2025_p037_03.jpg",
+   "context_chars": 53,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 1.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8163_2024_p119_03.jpg",
+   "context_chars": 76,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2454_2025_p083_02.jpg",
+   "context_chars": 54,
+   "e3_p": {
+    "direct": 0.9997,
+    "topical": 0.0003,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2362_2025_p075_02.jpg",
+   "context_chars": 43,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.9707,
+    "unrelated": 0.0293
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2331_2025_p095_08.jpg",
+   "context_chars": 28,
+   "e3_p": {
+    "direct": 0.0019,
+    "topical": 0.9981,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8150_2023_p088_02.jpg",
+   "context_chars": 66,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2367_2024_p068_01.jpg",
+   "context_chars": 27,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0,
+    "unrelated": 1.0
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4506_2024_p012_01.jpg",
+   "context_chars": 20,
+   "e3_p": {
+    "direct": 0.0031,
+    "topical": 0.9597,
+    "unrelated": 0.0372
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3034_2023_p114_03.jpg",
+   "context_chars": 32,
+   "e3_p": {
+    "direct": 0.1824,
+    "topical": 0.8176,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2915_2025_p052_02.jpg",
+   "context_chars": 25,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1785_2024_p084_03.jpg",
+   "context_chars": 24,
+   "e3_p": {
+    "direct": 0.9948,
+    "topical": 0.0052,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8069_2023_p079_04.jpg",
+   "context_chars": 77,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.011,
+    "unrelated": 0.989
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2481_2025_p111_01.jpg",
+   "context_chars": 7,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.6225,
+    "unrelated": 0.3775
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2376_2023_p075_05.jpg",
+   "context_chars": 55,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1217_2023_p104_02.jpg",
+   "context_chars": 25,
+   "e3_p": {
+    "direct": 0.0141,
+    "topical": 0.9859,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2484_2025_p112_03.jpg",
+   "context_chars": 45,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2641_2024_p056_10.jpg",
+   "context_chars": 37,
+   "e3_p": {
+    "direct": 0.0067,
+    "topical": 0.9933,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6823_2024_p063_00.jpg",
+   "context_chars": 26,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0002,
+    "unrelated": 0.9998
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6854_2024_p108_02.jpg",
+   "context_chars": 39,
+   "e3_p": {
+    "direct": 0.0041,
+    "topical": 0.9959,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1227_2024_p126_02.jpg",
+   "context_chars": 20,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5213_2023_p061_01.jpg",
+   "context_chars": 43,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5522_2024_p110_02.jpg",
+   "context_chars": 19,
+   "e3_p": {
+    "direct": 0.3208,
+    "topical": 0.6792,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6116_2023_p102_00.jpg",
+   "context_chars": 43,
+   "e3_p": {
+    "direct": 0.9998,
+    "topical": 0.0002,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2332_2023_p122_00.jpg",
+   "context_chars": 31,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6691_2025_p023_00.jpg",
+   "context_chars": 23,
+   "e3_p": {
+    "direct": 0.0141,
+    "topical": 0.9859,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6281_2023_p005_00.jpg",
+   "context_chars": 44,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.9999,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6790_2023_p086_00.jpg",
+   "context_chars": 12,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.1192,
+    "unrelated": 0.8808
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3711_2023_p183_01.jpg",
+   "context_chars": 26,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4549_2025_p088_00.jpg",
+   "context_chars": 38,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8069_2025_p150_02.jpg",
+   "context_chars": 29,
+   "e3_p": {
+    "direct": 0.0601,
+    "topical": 0.9399,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6271_2024_p101_01.jpg",
+   "context_chars": 31,
+   "e3_p": {
+    "direct": 0.9399,
+    "topical": 0.0601,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2498_2025_p067_00.jpg",
+   "context_chars": 9,
+   "e3_p": {
+    "direct": 0.1824,
+    "topical": 0.8176,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5880_2023_p154_02.jpg",
+   "context_chars": 27,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4558_2023_p041_02.jpg",
+   "context_chars": 12,
+   "e3_p": {
+    "direct": 0.0048,
+    "topical": 0.0755,
+    "unrelated": 0.9197
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2481_2023_p102_01.jpg",
+   "context_chars": 16,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0474,
+    "unrelated": 0.9525
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8150_2024_p077_00.jpg",
+   "context_chars": 42,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 1.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1419_2025_p074_02.jpg",
+   "context_chars": 37,
+   "e3_p": {
+    "direct": 0.0005,
+    "topical": 0.9702,
+    "unrelated": 0.0293
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4714_2024_p058_05.jpg",
+   "context_chars": 35,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2332_2023_p148_03.jpg",
+   "context_chars": 26,
+   "e3_p": {
+    "direct": 0.0141,
+    "topical": 0.9859,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5515_2023_p099_02.jpg",
+   "context_chars": 25,
+   "e3_p": {
+    "direct": 0.1192,
+    "topical": 0.8808,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1227_2024_p137_05.jpg",
+   "context_chars": 40,
+   "e3_p": {
+    "direct": 0.0003,
+    "topical": 0.0025,
+    "unrelated": 0.9972
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4506_2024_p037_00.jpg",
+   "context_chars": 26,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.9707,
+    "unrelated": 0.0293
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6120_2023_p066_01.jpg",
+   "context_chars": 26,
+   "e3_p": {
+    "direct": 0.0012,
+    "topical": 0.9969,
+    "unrelated": 0.0019
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3034_2025_p120_09.jpg",
+   "context_chars": 35,
+   "e3_p": {
+    "direct": 0.9526,
+    "topical": 0.0474,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8021_2025_p093_03.jpg",
+   "context_chars": 43,
+   "e3_p": {
+    "direct": 0.0052,
+    "topical": 0.9948,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3034_2025_p119_03.jpg",
+   "context_chars": 35,
+   "e3_p": {
+    "direct": 0.9948,
+    "topical": 0.0052,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5878_2024_p112_01.jpg",
+   "context_chars": 34,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2498_2024_p074_08.jpg",
+   "context_chars": 38,
+   "e3_p": {
+    "direct": 0.5,
+    "topical": 0.5,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6691_2023_p049_00.jpg",
+   "context_chars": 24,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.9996,
+    "unrelated": 0.0003
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6689_2025_p089_01.jpg",
+   "context_chars": 31,
+   "e3_p": {
+    "direct": 0.9998,
+    "topical": 0.0002,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1737_2023_p121_00.jpg",
+   "context_chars": 28,
+   "e3_p": {
+    "direct": 0.0002,
+    "topical": 0.0002,
+    "unrelated": 0.9996
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6281_2024_p053_01.jpg",
+   "context_chars": 57,
+   "e3_p": {
+    "direct": 0.9525,
+    "topical": 0.0474,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6854_2024_p111_01.jpg",
+   "context_chars": 26,
+   "e3_p": {
+    "direct": 0.0003,
+    "topical": 0.8517,
+    "unrelated": 0.148
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1227_2023_p148_05.jpg",
+   "context_chars": 19,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1227_2024_p122_04.jpg",
+   "context_chars": 26,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0,
+    "unrelated": 1.0
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4961_2024_p101_05.jpg",
+   "context_chars": 35,
+   "e3_p": {
+    "direct": 0.9968,
+    "topical": 0.0032,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3231_2024_p164_04.jpg",
+   "context_chars": 37,
+   "e3_p": {
+    "direct": 0.0009,
+    "topical": 0.9982,
+    "unrelated": 0.0009
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5522_2023_p141_04.jpg",
+   "context_chars": 34,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 1.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5312_2023_p054_06.jpg",
+   "context_chars": 37,
+   "e3_p": {
+    "direct": 0.9914,
+    "topical": 0.0086,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4714_2024_p039_01.jpg",
+   "context_chars": 23,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3293_2024_p093_06.jpg",
+   "context_chars": 27,
+   "e3_p": {
+    "direct": 0.0001,
+    "topical": 0.9997,
+    "unrelated": 0.0002
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8473_2024_p137_00.jpg",
+   "context_chars": 40,
+   "e3_p": {
+    "direct": 0.9526,
+    "topical": 0.0474,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2312_2023_p088_01.jpg",
+   "context_chars": 43,
+   "e3_p": {
+    "direct": 0.0002,
+    "topical": 0.9524,
+    "unrelated": 0.0474
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5522_2025_p121_02.jpg",
+   "context_chars": 38,
+   "e3_p": {
+    "direct": 0.0001,
+    "topical": 0.989,
+    "unrelated": 0.011
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2481_2025_p127_00.jpg",
+   "context_chars": 24,
+   "e3_p": {
+    "direct": 0.0012,
+    "topical": 0.9986,
+    "unrelated": 0.0002
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "9933_2024_p131_02.jpg",
+   "context_chars": 42,
+   "e3_p": {
+    "direct": 0.0007,
+    "topical": 0.9992,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6120_2023_p070_02.jpg",
+   "context_chars": 21,
+   "e3_p": {
+    "direct": 0.2227,
+    "topical": 0.7773,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "9910_2025_p138_02.jpg",
+   "context_chars": 22,
+   "e3_p": {
+    "direct": 0.9985,
+    "topical": 0.0015,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6464_2024_p032_01.jpg",
+   "context_chars": 21,
+   "e3_p": {
+    "direct": 0.9998,
+    "topical": 0.0002,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3034_2024_p116_02.jpg",
+   "context_chars": 53,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.018,
+    "unrelated": 0.982
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5426_2025_p078_02.jpg",
+   "context_chars": 41,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0,
+    "unrelated": 1.0
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1785_2023_p096_01.jpg",
+   "context_chars": 29,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4707_2023_p061_01.jpg",
+   "context_chars": 14,
+   "e3_p": {
+    "direct": 0.9999,
+    "topical": 0.0001,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2362_2024_p063_04.jpg",
+   "context_chars": 21,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6248_2024_p100_00.jpg",
+   "context_chars": 29,
+   "e3_p": {
+    "direct": 0.9859,
+    "topical": 0.0141,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3231_2023_p130_04.jpg",
+   "context_chars": 40,
+   "e3_p": {
+    "direct": 0.0002,
+    "topical": 0.9889,
+    "unrelated": 0.011
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6854_2024_p086_05.jpg",
+   "context_chars": 29,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2337_2023_p006_00.jpg",
+   "context_chars": 33,
+   "e3_p": {
+    "direct": 0.9998,
+    "topical": 0.0002,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1513_2023_p085_06.jpg",
+   "context_chars": 15,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0003,
+    "unrelated": 0.9997
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2376_2023_p075_00.jpg",
+   "context_chars": 31,
+   "e3_p": {
+    "direct": 0.5,
+    "topical": 0.5,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2484_2025_p097_00.jpg",
+   "context_chars": 28,
+   "e3_p": {
+    "direct": 0.982,
+    "topical": 0.018,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1402_2024_p142_00.jpg",
+   "context_chars": 65,
+   "e3_p": {
+    "direct": 0.9707,
+    "topical": 0.0293,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1513_2023_p064_02.jpg",
+   "context_chars": 34,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4419_2025_p080_05.jpg",
+   "context_chars": 44,
+   "e3_p": {
+    "direct": 0.0004,
+    "topical": 0.0758,
+    "unrelated": 0.9238
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1535_2023_p161_01.jpg",
+   "context_chars": 33,
+   "e3_p": {
+    "direct": 0.0141,
+    "topical": 0.9858,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2498_2025_p094_01.jpg",
+   "context_chars": 63,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2455_2025_p053_03.jpg",
+   "context_chars": 45,
+   "e3_p": {
+    "direct": 0.9998,
+    "topical": 0.0002,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3034_2023_p113_06.jpg",
+   "context_chars": 32,
+   "e3_p": {
+    "direct": 0.4378,
+    "topical": 0.5622,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8069_2025_p149_14.jpg",
+   "context_chars": 30,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0474,
+    "unrelated": 0.9525
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1416_2025_p131_00.jpg",
+   "context_chars": 42,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1802_2025_p167_04.jpg",
+   "context_chars": 15,
+   "e3_p": {
+    "direct": 0.0002,
+    "topical": 0.0758,
+    "unrelated": 0.924
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3034_2023_p113_00.jpg",
+   "context_chars": 24,
+   "e3_p": {
+    "direct": 0.8176,
+    "topical": 0.1824,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2395_2025_p250_00.jpg",
+   "context_chars": 29,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0,
+    "unrelated": 1.0
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2312_2024_p115_03.jpg",
+   "context_chars": 29,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6120_2023_p016_06.jpg",
+   "context_chars": 23,
+   "e3_p": {
+    "direct": 0.0009,
+    "topical": 0.9991,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6691_2025_p072_04.jpg",
+   "context_chars": 27,
+   "e3_p": {
+    "direct": 0.9999,
+    "topical": 0.0001,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1802_2025_p149_04.jpg",
+   "context_chars": 60,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2337_2023_p073_05.jpg",
+   "context_chars": 29,
+   "e3_p": {
+    "direct": 0.0032,
+    "topical": 0.9968,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "9933_2023_p044_00.jpg",
+   "context_chars": 51,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5426_2024_p094_00.jpg",
+   "context_chars": 68,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0012,
+    "unrelated": 0.9988
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2642_2024_p079_00.jpg",
+   "context_chars": 18,
+   "e3_p": {
+    "direct": 0.0001,
+    "topical": 0.1824,
+    "unrelated": 0.8175
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2641_2023_p054_05.jpg",
+   "context_chars": 20,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0,
+    "unrelated": 1.0
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3231_2025_p289_03.jpg",
+   "context_chars": 26,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0,
+    "unrelated": 1.0
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2481_2024_p103_00.jpg",
+   "context_chars": 61,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.9999,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8016_2025_p086_00.jpg",
+   "context_chars": 11,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 1.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2642_2024_p141_00.jpg",
+   "context_chars": 40,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0086,
+    "unrelated": 0.9914
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2312_2025_p086_02.jpg",
+   "context_chars": 32,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2063_2024_p085_04.jpg",
+   "context_chars": 17,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6689_2024_p081_04.jpg",
+   "context_chars": 31,
+   "e3_p": {
+    "direct": 0.0109,
+    "topical": 0.9839,
+    "unrelated": 0.0052
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2454_2023_p023_04.jpg",
+   "context_chars": 41,
+   "e3_p": {
+    "direct": 0.0005,
+    "topical": 0.9815,
+    "unrelated": 0.018
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5880_2023_p142_05.jpg",
+   "context_chars": 33,
+   "e3_p": {
+    "direct": 0.3208,
+    "topical": 0.6792,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2892_2024_p200_00.jpg",
+   "context_chars": 19,
+   "e3_p": {
+    "direct": 0.9933,
+    "topical": 0.0067,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1535_2025_p175_02.jpg",
+   "context_chars": 27,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0003,
+    "unrelated": 0.9997
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8069_2025_p164_07.jpg",
+   "context_chars": 48,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6248_2023_p043_06.jpg",
+   "context_chars": 17,
+   "e3_p": {
+    "direct": 0.3775,
+    "topical": 0.6225,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2362_2023_p120_00.jpg",
+   "context_chars": 34,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6689_2023_p064_13.jpg",
+   "context_chars": 15,
+   "e3_p": {
+    "direct": 0.9975,
+    "topical": 0.0025,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3034_2023_p136_00.jpg",
+   "context_chars": 22,
+   "e3_p": {
+    "direct": 0.0052,
+    "topical": 0.9948,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6269_2023_p131_03.jpg",
+   "context_chars": 21,
+   "e3_p": {
+    "direct": 0.9991,
+    "topical": 0.0009,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8150_2023_p113_01.jpg",
+   "context_chars": 32,
+   "e3_p": {
+    "direct": 0.0003,
+    "topical": 0.9997,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2376_2023_p044_01.jpg",
+   "context_chars": 24,
+   "e3_p": {
+    "direct": 0.018,
+    "topical": 0.982,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2892_2023_p134_01.jpg",
+   "context_chars": 30,
+   "e3_p": {
+    "direct": 0.9999,
+    "topical": 0.0001,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6142_2023_p068_07.jpg",
+   "context_chars": 28,
+   "e3_p": {
+    "direct": 0.5,
+    "topical": 0.5,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1612_2025_p082_01.jpg",
+   "context_chars": 7,
+   "e3_p": {
+    "direct": 0.0002,
+    "topical": 0.9983,
+    "unrelated": 0.0015
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2376_2024_p089_05.jpg",
+   "context_chars": 38,
+   "e3_p": {
+    "direct": 0.1479,
+    "topical": 0.8513,
+    "unrelated": 0.0008
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2362_2024_p041_00.jpg",
+   "context_chars": 21,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 1.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "9933_2025_p134_09.jpg",
+   "context_chars": 23,
+   "e3_p": {
+    "direct": 0.3775,
+    "topical": 0.6224,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2362_2025_p074_06.jpg",
+   "context_chars": 42,
+   "e3_p": {
+    "direct": 0.0001,
+    "topical": 0.9932,
+    "unrelated": 0.0067
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1402_2025_p162_03.jpg",
+   "context_chars": 35,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.8176,
+    "unrelated": 0.1824
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8046_2023_p107_01.jpg",
+   "context_chars": 19,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2748_2025_p132_02.jpg",
+   "context_chars": 20,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8069_2025_p079_00.jpg",
+   "context_chars": 41,
+   "e3_p": {
+    "direct": 0.9999,
+    "topical": 0.0001,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1513_2023_p083_05.jpg",
+   "context_chars": 24,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4755_2025_p087_01.jpg",
+   "context_chars": 25,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0373,
+    "unrelated": 0.9627
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2331_2025_p008_00.jpg",
+   "context_chars": 28,
+   "e3_p": {
+    "direct": 0.787,
+    "topical": 0.1065,
+    "unrelated": 0.1065
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6464_2024_p095_03.jpg",
+   "context_chars": 52,
+   "e3_p": {
+    "direct": 0.9981,
+    "topical": 0.0019,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "9933_2025_p155_05.jpg",
+   "context_chars": 42,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.8519,
+    "unrelated": 0.148
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1217_2023_p107_04.jpg",
+   "context_chars": 31,
+   "e3_p": {
+    "direct": 0.9391,
+    "topical": 0.06,
+    "unrelated": 0.0009
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4549_2023_p103_02.jpg",
+   "context_chars": 41,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0759,
+    "unrelated": 0.9241
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1612_2023_p064_02.jpg",
+   "context_chars": 25,
+   "e3_p": {
+    "direct": 0.0004,
+    "topical": 0.9995,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2481_2024_p117_00.jpg",
+   "context_chars": 37,
+   "e3_p": {
+    "direct": 0.9975,
+    "topical": 0.0025,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6271_2024_p102_03.jpg",
+   "context_chars": 31,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2545_2025_p053_00.jpg",
+   "context_chars": 34,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0,
+    "unrelated": 1.0
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2362_2024_p109_00.jpg",
+   "context_chars": 30,
+   "e3_p": {
+    "direct": 0.7309,
+    "topical": 0.2689,
+    "unrelated": 0.0002
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "9910_2025_p115_01.jpg",
+   "context_chars": 26,
+   "e3_p": {
+    "direct": 0.0025,
+    "topical": 0.9974,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5312_2024_p044_00.jpg",
+   "context_chars": 39,
+   "e3_p": {
+    "direct": 0.9991,
+    "topical": 0.0009,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8069_2025_p150_00.jpg",
+   "context_chars": 29,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.023,
+    "unrelated": 0.977
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4549_2024_p100_02.jpg",
+   "context_chars": 34,
+   "e3_p": {
+    "direct": 0.0003,
+    "topical": 0.8174,
+    "unrelated": 0.1824
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2641_2023_p054_00.jpg",
+   "context_chars": 20,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0,
+    "unrelated": 1.0
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4558_2025_p072_02.jpg",
+   "context_chars": 9,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2063_2024_p086_04.jpg",
+   "context_chars": 17,
+   "e3_p": {
+    "direct": 0.0001,
+    "topical": 0.1192,
+    "unrelated": 0.8807
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5515_2025_p088_01.jpg",
+   "context_chars": 51,
+   "e3_p": {
+    "direct": 0.0758,
+    "topical": 0.924,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1513_2023_p061_02.jpg",
+   "context_chars": 19,
+   "e3_p": {
+    "direct": 0.0953,
+    "topical": 0.9044,
+    "unrelated": 0.0002
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6854_2023_p083_01.jpg",
+   "context_chars": 30,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.8808,
+    "unrelated": 0.1192
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6689_2025_p082_01.jpg",
+   "context_chars": 31,
+   "e3_p": {
+    "direct": 0.9859,
+    "topical": 0.0141,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1402_2023_p120_00.jpg",
+   "context_chars": 35,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4506_2024_p136_01.jpg",
+   "context_chars": 34,
+   "e3_p": {
+    "direct": 0.1192,
+    "topical": 0.8808,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1513_2023_p105_01.jpg",
+   "context_chars": 26,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0373,
+    "unrelated": 0.9626
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3034_2024_p109_03.jpg",
+   "context_chars": 31,
+   "e3_p": {
+    "direct": 0.148,
+    "topical": 0.852,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "9933_2023_p148_01.jpg",
+   "context_chars": 15,
+   "e3_p": {
+    "direct": 0.0013,
+    "topical": 0.8796,
+    "unrelated": 0.119
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3034_2023_p132_01.jpg",
+   "context_chars": 44,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 1.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8182_2025_p097_00.jpg",
+   "context_chars": 27,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 1.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6271_2024_p007_01.jpg",
+   "context_chars": 43,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6538_2023_p054_01.jpg",
+   "context_chars": 43,
+   "e3_p": {
+    "direct": 0.0003,
+    "topical": 0.9997,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1785_2023_p089_02.jpg",
+   "context_chars": 29,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2498_2024_p032_00.jpg",
+   "context_chars": 18,
+   "e3_p": {
+    "direct": 0.0001,
+    "topical": 0.9999,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1402_2025_p157_03.jpg",
+   "context_chars": 40,
+   "e3_p": {
+    "direct": 0.0003,
+    "topical": 0.9997,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2454_2024_p041_02.jpg",
+   "context_chars": 59,
+   "e3_p": {
+    "direct": 0.0601,
+    "topical": 0.9399,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4306_2023_p066_04.jpg",
+   "context_chars": 51,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.5622,
+    "unrelated": 0.4378
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5522_2024_p075_10.jpg",
+   "context_chars": 34,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.9999,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2641_2023_p050_00.jpg",
+   "context_chars": 20,
+   "e3_p": {
+    "direct": 0.0015,
+    "topical": 0.9933,
+    "unrelated": 0.0052
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6854_2024_p111_05.jpg",
+   "context_chars": 26,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "9933_2025_p149_03.jpg",
+   "context_chars": 52,
+   "e3_p": {
+    "direct": 0.011,
+    "topical": 0.989,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2454_2023_p018_01.jpg",
+   "context_chars": 62,
+   "e3_p": {
+    "direct": 0.9999,
+    "topical": 0.0001,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3231_2023_p151_00.jpg",
+   "context_chars": 57,
+   "e3_p": {
+    "direct": 0.3208,
+    "topical": 0.6792,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2642_2023_p087_00.jpg",
+   "context_chars": 20,
+   "e3_p": {
+    "direct": 0.9046,
+    "topical": 0.0953,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1227_2025_p126_02.jpg",
+   "context_chars": 21,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0,
+    "unrelated": 1.0
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6691_2025_p047_00.jpg",
+   "context_chars": 18,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0006,
+    "unrelated": 0.9994
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1402_2023_p032_01.jpg",
+   "context_chars": 20,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3653_2024_p082_02.jpg",
+   "context_chars": 48,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "9933_2024_p137_00.jpg",
+   "context_chars": 39,
+   "e3_p": {
+    "direct": 0.0009,
+    "topical": 0.9991,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2498_2025_p097_00.jpg",
+   "context_chars": 43,
+   "e3_p": {
+    "direct": 0.9999,
+    "topical": 0.0001,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2367_2024_p071_05.jpg",
+   "context_chars": 40,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "9937_2025_p061_01.jpg",
+   "context_chars": 24,
+   "e3_p": {
+    "direct": 0.0003,
+    "topical": 0.9993,
+    "unrelated": 0.0003
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3034_2025_p150_02.jpg",
+   "context_chars": 28,
+   "e3_p": {
+    "direct": 0.9999,
+    "topical": 0.0001,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2481_2023_p112_00.jpg",
+   "context_chars": 28,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3293_2024_p102_01.jpg",
+   "context_chars": 14,
+   "e3_p": {
+    "direct": 0.5605,
+    "topical": 0.4365,
+    "unrelated": 0.0029
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6854_2023_p037_02.jpg",
+   "context_chars": 54,
+   "e3_p": {
+    "direct": 0.9959,
+    "topical": 0.0041,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3231_2024_p249_01.jpg",
+   "context_chars": 39,
+   "e3_p": {
+    "direct": 0.0373,
+    "topical": 0.9627,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6670_2023_p059_01.jpg",
+   "context_chars": 38,
+   "e3_p": {
+    "direct": 0.9948,
+    "topical": 0.0052,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5515_2025_p056_04.jpg",
+   "context_chars": 51,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.9975,
+    "unrelated": 0.0025
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2498_2025_p052_00.jpg",
+   "context_chars": 17,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0009,
+    "unrelated": 0.9991
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8069_2024_p171_02.jpg",
+   "context_chars": 42,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5880_2025_p084_00.jpg",
+   "context_chars": 40,
+   "e3_p": {
+    "direct": 0.0001,
+    "topical": 0.0953,
+    "unrelated": 0.9046
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6605_2025_p095_01.jpg",
+   "context_chars": 48,
+   "e3_p": {
+    "direct": 0.0041,
+    "topical": 0.9959,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8021_2025_p098_02.jpg",
+   "context_chars": 42,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3131_2025_p105_03.jpg",
+   "context_chars": 17,
+   "e3_p": {
+    "direct": 0.852,
+    "topical": 0.148,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3293_2023_p112_00.jpg",
+   "context_chars": 39,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.9993,
+    "unrelated": 0.0007
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5213_2025_p078_01.jpg",
+   "context_chars": 11,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 1.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5426_2023_p076_03.jpg",
+   "context_chars": 22,
+   "e3_p": {
+    "direct": 0.148,
+    "topical": 0.852,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8021_2024_p061_04.jpg",
+   "context_chars": 17,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.8519,
+    "unrelated": 0.148
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5426_2023_p053_01.jpg",
+   "context_chars": 12,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.9046,
+    "unrelated": 0.0953
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5213_2023_p071_00.jpg",
+   "context_chars": 27,
+   "e3_p": {
+    "direct": 0.0025,
+    "topical": 0.9973,
+    "unrelated": 0.0002
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2423_2024_p003_00.jpg",
+   "context_chars": 6,
+   "e3_p": {
+    "direct": 0.9999,
+    "topical": 0.0001,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1314_2023_p138_05.jpg",
+   "context_chars": 13,
+   "e3_p": {
+    "direct": 0.9991,
+    "topical": 0.0009,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "9910_2023_p113_01.jpg",
+   "context_chars": 24,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5426_2023_p076_06.jpg",
+   "context_chars": 22,
+   "e3_p": {
+    "direct": 0.3208,
+    "topical": 0.6792,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6271_2024_p108_01.jpg",
+   "context_chars": 65,
+   "e3_p": {
+    "direct": 0.3775,
+    "topical": 0.6225,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8046_2025_p084_06.jpg",
+   "context_chars": 60,
+   "e3_p": {
+    "direct": 0.9996,
+    "topical": 0.0004,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4755_2023_p080_02.jpg",
+   "context_chars": 42,
+   "e3_p": {
+    "direct": 0.989,
+    "topical": 0.011,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8021_2023_p085_00.jpg",
+   "context_chars": 38,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1737_2023_p036_01.jpg",
+   "context_chars": 52,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0,
+    "unrelated": 1.0
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2332_2025_p161_03.jpg",
+   "context_chars": 25,
+   "e3_p": {
+    "direct": 0.0141,
+    "topical": 0.9859,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2454_2025_p050_02.jpg",
+   "context_chars": 75,
+   "e3_p": {
+    "direct": 0.0041,
+    "topical": 0.9955,
+    "unrelated": 0.0004
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "9910_2024_p103_00.jpg",
+   "context_chars": 42,
+   "e3_p": {
+    "direct": 0.4378,
+    "topical": 0.5622,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1227_2025_p126_00.jpg",
+   "context_chars": 21,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2545_2024_p097_00.jpg",
+   "context_chars": 20,
+   "e3_p": {
+    "direct": 0.9991,
+    "topical": 0.0009,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3265_2025_p084_07.jpg",
+   "context_chars": 28,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6716_2025_p078_03.jpg",
+   "context_chars": 32,
+   "e3_p": {
+    "direct": 0.0031,
+    "topical": 0.9859,
+    "unrelated": 0.011
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8182_2025_p083_00.jpg",
+   "context_chars": 27,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0012,
+    "unrelated": 0.9988
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2395_2023_p197_01.jpg",
+   "context_chars": 22,
+   "e3_p": {
+    "direct": 0.9707,
+    "topical": 0.0293,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "5878_2023_p079_04.jpg",
+   "context_chars": 42,
+   "e3_p": {
+    "direct": 0.148,
+    "topical": 0.852,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4419_2024_p047_07.jpg",
+   "context_chars": 24,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1802_2023_p084_03.jpg",
+   "context_chars": 28,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.982,
+    "unrelated": 0.018
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1802_2024_p170_01.jpg",
+   "context_chars": 17,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2395_2025_p236_00.jpg",
+   "context_chars": 52,
+   "e3_p": {
+    "direct": 0.0141,
+    "topical": 0.9859,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4755_2023_p046_01.jpg",
+   "context_chars": 7,
+   "e3_p": {
+    "direct": 0.0229,
+    "topical": 0.9756,
+    "unrelated": 0.0015
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2454_2024_p026_05.jpg",
+   "context_chars": 48,
+   "e3_p": {
+    "direct": 0.852,
+    "topical": 0.148,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2748_2025_p105_06.jpg",
+   "context_chars": 27,
+   "e3_p": {
+    "direct": 0.1192,
+    "topical": 0.8808,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2332_2023_p081_00.jpg",
+   "context_chars": 52,
+   "e3_p": {
+    "direct": 0.9994,
+    "topical": 0.0006,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1785_2025_p090_13.jpg",
+   "context_chars": 38,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1419_2023_p083_02.jpg",
+   "context_chars": 26,
+   "e3_p": {
+    "direct": 0.0032,
+    "topical": 0.9967,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "3231_2023_p151_01.jpg",
+   "context_chars": 57,
+   "e3_p": {
+    "direct": 0.5622,
+    "topical": 0.4378,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4706_2023_p059_03.jpg",
+   "context_chars": 13,
+   "e3_p": {
+    "direct": 0.0149,
+    "topical": 0.4926,
+    "unrelated": 0.4926
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2454_2024_p021_01.jpg",
+   "context_chars": 50,
+   "e3_p": {
+    "direct": 0.9988,
+    "topical": 0.0012,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6116_2023_p058_00.jpg",
+   "context_chars": 35,
+   "e3_p": {
+    "direct": 0.0007,
+    "topical": 0.9992,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2454_2023_p018_06.jpg",
+   "context_chars": 54,
+   "e3_p": {
+    "direct": 0.9988,
+    "topical": 0.0012,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1402_2024_p125_00.jpg",
+   "context_chars": 52,
+   "e3_p": {
+    "direct": 0.0014,
+    "topical": 0.9613,
+    "unrelated": 0.0373
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2481_2023_p046_00.jpg",
+   "context_chars": 14,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8046_2025_p084_02.jpg",
+   "context_chars": 60,
+   "e3_p": {
+    "direct": 0.731,
+    "topical": 0.2689,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2115_2025_p182_07.jpg",
+   "context_chars": 32,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6271_2024_p107_05.jpg",
+   "context_chars": 35,
+   "e3_p": {
+    "direct": 0.9932,
+    "topical": 0.0067,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2892_2024_p135_00.jpg",
+   "context_chars": 33,
+   "e3_p": {
+    "direct": 0.9706,
+    "topical": 0.0293,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6269_2023_p129_03.jpg",
+   "context_chars": 26,
+   "e3_p": {
+    "direct": 0.0293,
+    "topical": 0.9706,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6854_2024_p100_02.jpg",
+   "context_chars": 33,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2395_2025_p190_08.jpg",
+   "context_chars": 22,
+   "e3_p": {
+    "direct": 0.9998,
+    "topical": 0.0002,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6854_2025_p098_00.jpg",
+   "context_chars": 51,
+   "e3_p": {
+    "direct": 0.0001,
+    "topical": 0.4378,
+    "unrelated": 0.5621
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2331_2025_p106_00.jpg",
+   "context_chars": 30,
+   "e3_p": {
+    "direct": 0.9999,
+    "topical": 0.0001,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1785_2024_p080_01.jpg",
+   "context_chars": 26,
+   "e3_p": {
+    "direct": 0.0141,
+    "topical": 0.9859,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2331_2024_p067_05.jpg",
+   "context_chars": 34,
+   "e3_p": {
+    "direct": 0.9991,
+    "topical": 0.0009,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2455_2023_p105_01.jpg",
+   "context_chars": 38,
+   "e3_p": {
+    "direct": 1.0,
+    "topical": 0.0,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6269_2025_p095_03.jpg",
+   "context_chars": 24,
+   "e3_p": {
+    "direct": 0.8176,
+    "topical": 0.1824,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2455_2024_p052_02.jpg",
+   "context_chars": 28,
+   "e3_p": {
+    "direct": 0.148,
+    "topical": 0.8519,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6716_2025_p047_03.jpg",
+   "context_chars": 31,
+   "e3_p": {
+    "direct": 0.3775,
+    "topical": 0.6225,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1785_2024_p083_00.jpg",
+   "context_chars": 28,
+   "e3_p": {
+    "direct": 0.0015,
+    "topical": 0.9985,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "6464_2024_p026_03.jpg",
+   "context_chars": 44,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0007,
+    "unrelated": 0.9993
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "4419_2024_p067_06.jpg",
+   "context_chars": 14,
+   "e3_p": {
+    "direct": 0.5621,
+    "topical": 0.4378,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8150_2025_p132_00.jpg",
+   "context_chars": 37,
+   "e3_p": {
+    "direct": 0.9241,
+    "topical": 0.0759,
+    "unrelated": 0.0
+   },
+   "e3_choice": "direct",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "1419_2025_p068_05.jpg",
+   "context_chars": 26,
+   "e3_p": {
+    "direct": 0.0,
+    "topical": 0.0759,
+    "unrelated": 0.9241
+   },
+   "e3_choice": "unrelated",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "2362_2024_p113_00.jpg",
+   "context_chars": 30,
+   "e3_p": {
+    "direct": 0.0001,
+    "topical": 0.9998,
+    "unrelated": 0.0001
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  },
+  {
+   "crop": "8016_2025_p016_02.jpg",
+   "context_chars": 35,
+   "e3_p": {
+    "direct": 0.0086,
+    "topical": 0.9914,
+    "unrelated": 0.0
+   },
+   "e3_choice": "topical",
+   "e3_examples": [
+    "7723_2024_p090_05.jpg",
+    "2645_2025_p092_00.jpg",
+    "2645_2025_p018_00.jpg"
+   ]
+  }
+ ],
+ "labels": "outputs only; scored by tune_evidence.py / evaluate.py against annotation R"
+}

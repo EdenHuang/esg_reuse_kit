@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+message: "If you use this dataset or code, please cite the paper (preferred-citation) and this release."
+type: dataset
+title: "Do Sustainability Report Photos Show What the Text Claims? A Dataset and a Four-Level Measurement (data and code release)"
+authors:
+  - family-names: Huang
+    given-names: Yueh-Cheng
+    affiliation: "Department of Computer Science and Information Engineering, National Dong Hwa University, Hualien, Taiwan"
+    email: yuehch@gms.ndhu.edu.tw
+version: 1.0.0
+date-released: 2026-10-28
+license:
+  - MIT
+  - CC-BY-4.0
+# repository-code and doi are filled in when the GitHub repository and the Zenodo record exist.
+# repository-code: "https://github.com/<owner>/<repository>"
+# doi: 10.5281/zenodo.<record>
+keywords:
+  - sustainability reports
+  - document analysis
+  - image-text relations
+  - photographic evidence
+  - dataset
+  - ESG
+  - Taiwan
+abstract: >-
+  Report list (URLs and hashes), page structure, photo placements, photo-to-text links, six annotation tasks
+  with guidelines, every result file and the code and frozen configuration behind the paper
+  "Do Sustainability Report Photos Show What the Text Claims? A Dataset and a Four-Level Measurement":
+  443 Chinese-language sustainability reports from 150 listed Taiwanese firms (reporting years 2023-2025),
+  17,450 photos, and a four-level measurement of photographic evidence (evidence, illustration, packaging,
+  unrelated). The report PDFs and the images cut from them are not redistributed; the release rebuilds them
+  from the public filings.
+preferred-citation:
+  type: unpublished
+  title: "Do Sustainability Report Photos Show What the Text Claims? A Dataset and a Four-Level Measurement"
+  authors:
+    - family-names: Huang
+      given-names: Yueh-Cheng
+      affiliation: "Department of Computer Science and Information Engineering, National Dong Hwa University, Hualien, Taiwan"
+  year: 2026
+  notes: "Submitted to the International Journal on Document Analysis and Recognition (ICDAR 2027 journal track), November 2026."

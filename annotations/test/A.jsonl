@@ -1,0 +1,400 @@
+{"item": "A0468260d", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.1, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A0711d0cb", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A07b35837", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A080de13e", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A092954fd", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A0a1c4809", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A0a3065f1", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A0b20d433", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A0b8fda24", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A0bf11251", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.9, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A0ccbad3f", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A0de16b29", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.9, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A0ec3df43", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.9, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A0f64107c", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.1, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A0fcc873a", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A100226eb", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A10958ccd", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A11109691", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A130cdf70", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.3, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A170c3367", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A181f5a84", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A1b609caf", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A1bbf39ac", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.2, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A1cd5046e", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.2, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A1cffc7a1", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.1, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A1d0ac835", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A21de1690", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A21f8686a", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A24511800", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1.2, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A24c5f1c4", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A253fc1a0", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1.1, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A27b881a1", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A290249b8", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A2a07c6c5", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A2a75383a", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A2ba8376d", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A2ccfdd72", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A2e40c767", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A2eba8ae1", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A2f6734b0", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1.3, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A308d47c1", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 2.3, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A316c5f9d", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A31c65327", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A35d8f6c0", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A39544272", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A39da50f3", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A3b753631", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A3c8b62b7", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1.6, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A3cb37e4e", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.4, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A428a676f", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A44052b35", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A44fd0e39", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A4761dc6e", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A478e9bc8", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A47b8432f", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A4b9c1b8b", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A4cdf2b20", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.3, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A4cf59c53", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.8, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A504204a6", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.8, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A507dc933", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A50a78ee8", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A51a10c86", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A533e03b3", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 2.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A54ac0c16", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A580fa838", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 3.6, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A59332ada", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A599b2c34", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A5b11acc5", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A5b6cb4b6", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A5da38e1a", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 3.4, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A608f63d0", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A61582e1b", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A624a5f5f", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A63c7d2e8", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A65be98a7", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A684fd8db", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A69c27b54", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A6a15e9e3", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 2, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A6a7e71cc", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.8, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A6bc103e5", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A6d046015", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.2, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A6d9fca86", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.3, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A6db788e6", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.8, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A7140259c", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A720da868", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.4, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A771a4054", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1.9, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A7792e0eb", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.2, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A77bbfe1e", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A7995b347", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A79f2f304", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1.3, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A7b1f6701", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A7dfc2acc", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A7e78408b", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A7ee9238e", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A818a443c", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A81b25b2e", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A83012ea9", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A8452adc1", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A84835817", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A848504bc", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A861ed2c1", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A871a2202", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A88139c6b", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.1, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A88b6c563", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A8b21b568", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A8b729578", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1.1, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A8c1423c2", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A8c1a8a58", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A8cfc7f78", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A8d87b202", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A8e4c34b5", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A8ef984a1", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A972ce069", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1.3, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A9759f3a0", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.8, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "A97cc306d", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A97f299a0", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "A9906e1a8", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "A9be05329", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A9d369ea1", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A9d39db2c", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A9dd4bfdf", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.3, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Aa070eada", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Aa0c19b19", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "Aa2d8509a", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "Aa3f959d7", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Aa584e23b", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "Aa69128ea", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1.4, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Aa87d8608", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1.2, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Aab118fb9", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "Aab2b5cad", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "Aadaa46fd", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.9, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "Aaff5391d", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.8, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Ab06257a0", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "Ab1f30bcd", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Ab3099e8b", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Ab50f0d84", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "Ab6a38f0f", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 3.2, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Ab73193a5", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.8, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "Ab9171afe", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Aba3b8c4a", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Abc1c0526", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Abcefec45", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Abe74808c", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Abfa507ff", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.1, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Abff3026d", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.9, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Ac17d37c2", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.2, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "Ac35e16d5", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.8, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Ac3a30e07", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Ac3c22c70", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Ac5176100", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1.2, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Ac561aa58", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "Ac621d209", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 4.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Ac70414c5", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Ac8a32528", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "Ac8c77bd7", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "Ac905f5ac", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Ac9ceac3d", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "Aca919676", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Acb322b99", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1.5, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Acba3512a", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.4, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "Acca68032", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 4.1, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "Acce1b698", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Ad0d1312a", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "Ad4339d3b", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Ad4341d97", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.4, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "Ad7359b38", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.4, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Ad9fc4cf9", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1.1, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Adb433952", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.1, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "Adc6fea83", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "Adc7c6da7", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Adce1e3fd", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "Adcef4660", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Add7de121", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Addf733b5", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Ae0fc933e", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "Ae113f60d", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Ae41e4871", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Ae59befea", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Ae5b0d823", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Ae5d9e26e", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Ae694fd32", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "Ae6b8e185", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Ae7be8f86", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 6.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Aea5851c6", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "Aea6bb8a4", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Aecf3676e", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Aeed72809", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.8, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Af3a92259", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.4, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "Af3abaf71", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch06_20261021_165351.json"}
+{"item": "Af47860b9", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "Af5e0afd3", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Af5fa81e3", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Af6a2c2cf", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.8, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Af6b1281d", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "Af876c213", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.4, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "Afb2a496e", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "Afb39a820", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 0.9, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "Afc006d51", "annotator": "a1", "answer": "Not a photo", "not_sure": false, "seconds": 1.1, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch05_20261021_165259.json"}
+{"item": "Afd41c928", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 3.5, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch03_20261021_165108.json"}
+{"item": "Afebb3bbe", "annotator": "a1", "answer": "Photo", "not_sure": false, "seconds": 1.9, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a1_batch04_20261021_165209.json"}
+{"item": "A0468260d", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A0711d0cb", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A07b35837", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A080de13e", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A092954fd", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1.2, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A0a1c4809", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A0a3065f1", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1.8, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A0b20d433", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1.9, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A0b8fda24", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A0bf11251", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A0ccbad3f", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A0de16b29", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A0ec3df43", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A0f64107c", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A0fcc873a", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A100226eb", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1.2, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A10958ccd", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A11109691", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1.9, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A130cdf70", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.4, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A170c3367", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A181f5a84", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A1b609caf", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A1bbf39ac", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A1cd5046e", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 2.8, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A1cffc7a1", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A1d0ac835", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.4, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A21de1690", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1.1, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A21f8686a", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A24511800", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A24c5f1c4", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A253fc1a0", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A27b881a1", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A290249b8", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A2a07c6c5", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A2a75383a", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A2ba8376d", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A2ccfdd72", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A2e40c767", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A2eba8ae1", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A2f6734b0", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A308d47c1", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1.2, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A316c5f9d", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A31c65327", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A35d8f6c0", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A39544272", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A39da50f3", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1.4, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A3b753631", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A3c8b62b7", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A3cb37e4e", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.8, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A428a676f", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1.4, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A44052b35", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A44fd0e39", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1.6, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A4761dc6e", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A478e9bc8", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A47b8432f", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A4b9c1b8b", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A4cdf2b20", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A4cf59c53", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A504204a6", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A507dc933", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A50a78ee8", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A51a10c86", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A533e03b3", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A54ac0c16", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A580fa838", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A59332ada", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A599b2c34", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A5b11acc5", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A5b6cb4b6", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A5da38e1a", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A608f63d0", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A61582e1b", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1.5, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A624a5f5f", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A63c7d2e8", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A65be98a7", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A684fd8db", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 3.1, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A69c27b54", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A6a15e9e3", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1.2, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A6a7e71cc", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A6bc103e5", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1.2, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A6d046015", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1.2, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A6d9fca86", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A6db788e6", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A7140259c", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.4, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A720da868", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A771a4054", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1.9, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A7792e0eb", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.8, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A77bbfe1e", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A7995b347", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A79f2f304", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A7b1f6701", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A7dfc2acc", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A7e78408b", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A7ee9238e", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A818a443c", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A81b25b2e", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A83012ea9", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1.1, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A8452adc1", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A84835817", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A848504bc", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1.5, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A861ed2c1", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A871a2202", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1.5, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A88139c6b", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A88b6c563", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A8b21b568", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A8b729578", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A8c1423c2", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A8c1a8a58", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A8cfc7f78", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A8d87b202", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A8e4c34b5", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.8, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A8ef984a1", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A972ce069", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "A9759f3a0", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A97cc306d", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A97f299a0", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "A9906e1a8", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A9be05329", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "A9d369ea1", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.9, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A9d39db2c", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1.9, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "A9dd4bfdf", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "Aa070eada", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1.9, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Aa0c19b19", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Aa2d8509a", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "Aa3f959d7", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Aa584e23b", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.9, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Aa69128ea", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.9, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Aa87d8608", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Aab118fb9", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Aab2b5cad", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "Aadaa46fd", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Aaff5391d", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.4, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Ab06257a0", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Ab1f30bcd", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1.8, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Ab3099e8b", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Ab50f0d84", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Ab6a38f0f", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 3.3, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "Ab73193a5", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Ab9171afe", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Aba3b8c4a", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Abc1c0526", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "Abcefec45", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Abe74808c", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Abfa507ff", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Abff3026d", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Ac17d37c2", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "Ac35e16d5", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Ac3a30e07", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Ac3c22c70", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 2.5, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "Ac5176100", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 3.3, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Ac561aa58", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Ac621d209", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.4, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "Ac70414c5", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Ac8a32528", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Ac8c77bd7", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.8, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "Ac905f5ac", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1.5, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "Ac9ceac3d", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Aca919676", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Acb322b99", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Acba3512a", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.9, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "Acca68032", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Acce1b698", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1.1, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Ad0d1312a", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Ad4339d3b", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Ad4341d97", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Ad7359b38", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.9, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "Ad9fc4cf9", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Adb433952", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.8, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Adc6fea83", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Adc7c6da7", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "Adce1e3fd", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Adcef4660", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Add7de121", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Addf733b5", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.4, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Ae0fc933e", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "Ae113f60d", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Ae41e4871", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Ae59befea", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Ae5b0d823", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Ae5d9e26e", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1.3, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Ae694fd32", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.8, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Ae6b8e185", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Ae7be8f86", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 2.3, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Aea5851c6", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1.4, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Aea6bb8a4", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.5, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Aecf3676e", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.9, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Aeed72809", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Af3a92259", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Af3abaf71", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Af47860b9", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.7, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Af5e0afd3", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Af5fa81e3", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 1, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Af6a2c2cf", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Af6b1281d", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Af876c213", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 6, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch06_20261021_165855.json"}
+{"item": "Afb2a496e", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.7, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Afb39a820", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.5, "batch": 3, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch03_20261021_165626.json"}
+{"item": "Afc006d51", "annotator": "a2", "answer": "Not a photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}
+{"item": "Afd41c928", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 1.8, "batch": 4, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch04_20261021_165717.json"}
+{"item": "Afebb3bbe", "annotator": "a2", "answer": "Photo", "not_sure": false, "seconds": 0.6, "batch": 5, "version": 1, "guidelines": "v1.5", "source": "A_a2_batch05_20261021_165807.json"}

@@ -1,0 +1,555 @@
+{
+ "task": "R2",
+ "annotator": "r2",
+ "split": "test",
+ "guidelines": "v1.5",
+ "seed": 2026,
+ "pool": 147,
+ "batches": [
+  {
+   "batch": 1,
+   "items": [
+    {
+     "key": "R6b3d7ef7",
+     "role": "real",
+     "item": "R2998e8382"
+    },
+    {
+     "key": "R5ffc3556",
+     "role": "real",
+     "item": "R268c929c9"
+    },
+    {
+     "key": "R35d4bd51",
+     "role": "check",
+     "item": "R2cc705c99"
+    },
+    {
+     "key": "R18d710a1",
+     "role": "real",
+     "item": "R286753672"
+    },
+    {
+     "key": "R9cbc6cfd",
+     "role": "real",
+     "item": "R2a4ba81d1"
+    },
+    {
+     "key": "Re8fa882f",
+     "role": "real",
+     "item": "R22330f257"
+    },
+    {
+     "key": "R61ff72f6",
+     "role": "real",
+     "item": "R224f35242"
+    },
+    {
+     "key": "Rc12bbfe1",
+     "role": "real",
+     "item": "R238596c30"
+    },
+    {
+     "key": "R8450e424",
+     "role": "real",
+     "item": "R2e49c8d5d"
+    },
+    {
+     "key": "R7c3db7a5",
+     "role": "real",
+     "item": "R237c8350c"
+    },
+    {
+     "key": "R3005d86c",
+     "role": "real",
+     "item": "R25638300d"
+    },
+    {
+     "key": "R8985013a",
+     "role": "real",
+     "item": "R2dec7f42b"
+    },
+    {
+     "key": "R84a0c578",
+     "role": "real",
+     "item": "R2a41daf7a"
+    },
+    {
+     "key": "R69b37245",
+     "role": "real",
+     "item": "R28e3c0bf5"
+    },
+    {
+     "key": "Rc0762729",
+     "role": "real",
+     "item": "R2be55b444"
+    },
+    {
+     "key": "R42efe57a",
+     "role": "real",
+     "item": "R2415e8d9b"
+    },
+    {
+     "key": "Ree9eda9c",
+     "role": "real",
+     "item": "R2487375d6"
+    },
+    {
+     "key": "R169a27ef",
+     "role": "real",
+     "item": "R27a26a71f"
+    },
+    {
+     "key": "R92b9d7df",
+     "role": "real",
+     "item": "R2a65afc64"
+    },
+    {
+     "key": "R077373bd",
+     "role": "real",
+     "item": "R2301606f9"
+    },
+    {
+     "key": "R66851804",
+     "role": "real",
+     "item": "R2c8561d1f"
+    },
+    {
+     "key": "R9ba9a46c",
+     "role": "real",
+     "item": "R2e44543d3"
+    },
+    {
+     "key": "Ra17fae5d",
+     "role": "real",
+     "item": "R22d1cb856"
+    },
+    {
+     "key": "Rfc4c73cd",
+     "role": "real",
+     "item": "R2744cc2aa"
+    },
+    {
+     "key": "R2f05ab01",
+     "role": "real",
+     "item": "R26e5d1a6f"
+    },
+    {
+     "key": "Red0448a8",
+     "role": "real",
+     "item": "R2dca1f55d"
+    },
+    {
+     "key": "R3c9c7a69",
+     "role": "real",
+     "item": "R2c7fff166"
+    },
+    {
+     "key": "R0b5b9d42",
+     "role": "real",
+     "item": "R2ed37af66"
+    },
+    {
+     "key": "R6bebcf1e",
+     "role": "real",
+     "item": "R217ade49e"
+    },
+    {
+     "key": "R3e0f23e9",
+     "role": "real",
+     "item": "R2bc5e6585"
+    },
+    {
+     "key": "R491b38e7",
+     "role": "real",
+     "item": "R261eb90ab"
+    },
+    {
+     "key": "R2ef34863",
+     "role": "real",
+     "item": "R228565d47"
+    },
+    {
+     "key": "R639869a7",
+     "role": "real",
+     "item": "R25b52c820"
+    },
+    {
+     "key": "Re7670e30",
+     "role": "real",
+     "item": "R2b79a905e"
+    },
+    {
+     "key": "Rd958973d",
+     "role": "real",
+     "item": "R2c9d43c12"
+    },
+    {
+     "key": "Rb7ef7867",
+     "role": "real",
+     "item": "R2fba56ce4"
+    },
+    {
+     "key": "R34d6a8d0",
+     "role": "real",
+     "item": "R24d7c0a51"
+    },
+    {
+     "key": "Ra98b07ff",
+     "role": "real",
+     "item": "R2ba869c0d"
+    },
+    {
+     "key": "R9e01cc2b",
+     "role": "real",
+     "item": "R221c572f1"
+    },
+    {
+     "key": "R9a0744c7",
+     "role": "real",
+     "item": "R2ceab7105"
+    },
+    {
+     "key": "Rb01a450c",
+     "role": "real",
+     "item": "R226b1ae7d"
+    },
+    {
+     "key": "Rb5c4d19b",
+     "role": "real",
+     "item": "R277b14d38"
+    },
+    {
+     "key": "R32d2162c",
+     "role": "real",
+     "item": "R28fadd6e1"
+    },
+    {
+     "key": "R453093fd",
+     "role": "real",
+     "item": "R2c28fe1f9"
+    },
+    {
+     "key": "R7a79b902",
+     "role": "real",
+     "item": "R21b599b79"
+    },
+    {
+     "key": "Refd85677",
+     "role": "real",
+     "item": "R27e603b91"
+    },
+    {
+     "key": "R2b52854a",
+     "role": "real",
+     "item": "R2628856a9"
+    },
+    {
+     "key": "Rfecfc428",
+     "role": "real",
+     "item": "R22de6ceb8"
+    },
+    {
+     "key": "Rd0a11a4b",
+     "role": "real",
+     "item": "R2b345cb67"
+    },
+    {
+     "key": "Red269c71",
+     "role": "real",
+     "item": "R240fdf87f"
+    },
+    {
+     "key": "R64b723fb",
+     "role": "real",
+     "item": "R2e42c093c"
+    }
+   ],
+   "page_id": "6f1aab340bde2a66"
+  },
+  {
+   "batch": 2,
+   "items": [
+    {
+     "key": "Ra52ba7d4",
+     "role": "real",
+     "item": "R2095e7b72"
+    },
+    {
+     "key": "Ra3f70bc4",
+     "role": "real",
+     "item": "R2eabfabf4"
+    },
+    {
+     "key": "R1c9add29",
+     "role": "real",
+     "item": "R2029ae319"
+    },
+    {
+     "key": "Rdb54b590",
+     "role": "real",
+     "item": "R20f3ad3ef"
+    },
+    {
+     "key": "R51f8cf6b",
+     "role": "real",
+     "item": "R28be2641e"
+    },
+    {
+     "key": "R53e2a217",
+     "role": "real",
+     "item": "R29babff8b"
+    },
+    {
+     "key": "Ra3c3db7e",
+     "role": "real",
+     "item": "R20db83b5e"
+    },
+    {
+     "key": "Rc7efb4aa",
+     "role": "real",
+     "item": "R2af3ad417"
+    },
+    {
+     "key": "R8c73a89d",
+     "role": "real",
+     "item": "R29835ba73"
+    },
+    {
+     "key": "R46896933",
+     "role": "real",
+     "item": "R24ca74ab0"
+    },
+    {
+     "key": "R22d0061e",
+     "role": "real",
+     "item": "R2209a18cc"
+    },
+    {
+     "key": "Rb60b7145",
+     "role": "real",
+     "item": "R241b3b6c8"
+    },
+    {
+     "key": "R8a05e161",
+     "role": "real",
+     "item": "R26c4fd772"
+    },
+    {
+     "key": "R098503c5",
+     "role": "real",
+     "item": "R22d191a10"
+    },
+    {
+     "key": "R48f9a81d",
+     "role": "real",
+     "item": "R28a055149"
+    },
+    {
+     "key": "R9a5dcaf5",
+     "role": "real",
+     "item": "R2a9ebe6a1"
+    },
+    {
+     "key": "R6767e6b2",
+     "role": "real",
+     "item": "R2442de5af"
+    },
+    {
+     "key": "R3a7c0abf",
+     "role": "real",
+     "item": "R21c16cf23"
+    },
+    {
+     "key": "R46a4cf26",
+     "role": "real",
+     "item": "R26b129f13"
+    },
+    {
+     "key": "R784f3133",
+     "role": "real",
+     "item": "R2d4ed7ee4"
+    },
+    {
+     "key": "R7199496f",
+     "role": "real",
+     "item": "R292a24cd3"
+    },
+    {
+     "key": "Raee7932e",
+     "role": "real",
+     "item": "R29abe9394"
+    },
+    {
+     "key": "R42b19778",
+     "role": "real",
+     "item": "R2adfd6963"
+    },
+    {
+     "key": "R428bf29d",
+     "role": "check",
+     "item": "R24c9e9b5f"
+    },
+    {
+     "key": "R375c025e",
+     "role": "real",
+     "item": "R2737a509f"
+    },
+    {
+     "key": "R81a75748",
+     "role": "real",
+     "item": "R27ce9d133"
+    },
+    {
+     "key": "Rcc892186",
+     "role": "real",
+     "item": "R2854a7244"
+    },
+    {
+     "key": "Rcd6f41c1",
+     "role": "real",
+     "item": "R227ba4384"
+    },
+    {
+     "key": "Rdf6637ce",
+     "role": "real",
+     "item": "R2dea76992"
+    },
+    {
+     "key": "R1d194f82",
+     "role": "real",
+     "item": "R22c584d87"
+    },
+    {
+     "key": "R7027d507",
+     "role": "real",
+     "item": "R270c38e10"
+    },
+    {
+     "key": "Rb6d514be",
+     "role": "real",
+     "item": "R2aa6067fb"
+    },
+    {
+     "key": "R07a4c1f9",
+     "role": "real",
+     "item": "R2743a6330"
+    },
+    {
+     "key": "Rfd6f5c58",
+     "role": "real",
+     "item": "R21d1e950a"
+    },
+    {
+     "key": "Reba38b83",
+     "role": "real",
+     "item": "R2a593aeb1"
+    },
+    {
+     "key": "R2547345b",
+     "role": "real",
+     "item": "R29af07e0f"
+    },
+    {
+     "key": "R552c312b",
+     "role": "real",
+     "item": "R2e270d7de"
+    },
+    {
+     "key": "R085cf166",
+     "role": "real",
+     "item": "R2c8f335bf"
+    },
+    {
+     "key": "R07337b4a",
+     "role": "real",
+     "item": "R284a3cc47"
+    },
+    {
+     "key": "R9c6d4967",
+     "role": "real",
+     "item": "R2401dbbfc"
+    },
+    {
+     "key": "R63f812a0",
+     "role": "real",
+     "item": "R2f0d57bf3"
+    },
+    {
+     "key": "R33cfb541",
+     "role": "real",
+     "item": "R2e9f257d2"
+    },
+    {
+     "key": "R6798f56b",
+     "role": "real",
+     "item": "R2523622ed"
+    },
+    {
+     "key": "R07ad2426",
+     "role": "real",
+     "item": "R250227403"
+    },
+    {
+     "key": "R14b3e7c8",
+     "role": "real",
+     "item": "R2e0559b0d"
+    },
+    {
+     "key": "R547b8727",
+     "role": "real",
+     "item": "R24b757ee4"
+    },
+    {
+     "key": "R1fe4e08e",
+     "role": "real",
+     "item": "R297999554"
+    },
+    {
+     "key": "Rda998ed0",
+     "role": "real",
+     "item": "R28e0a47c9"
+    },
+    {
+     "key": "Rd4f633ea",
+     "role": "real",
+     "item": "R27f09e47c"
+    },
+    {
+     "key": "Raee124c0",
+     "role": "real",
+     "item": "R270ee5b54"
+    },
+    {
+     "key": "Rb34918db",
+     "role": "real",
+     "item": "R20c0aca74"
+    }
+   ],
+   "page_id": "366e1a122c8359be"
+  }
+ ],
+ "practice": [
+  "R3b4a0d6b",
+  "R0b3e2994",
+  "Rf1e77da7",
+  "R04616be5",
+  "R01a9d499",
+  "Rc2412f21",
+  "Ra2b813b2",
+  "Rdbdc984d",
+  "R1d94b301",
+  "Rda91702b",
+  "Rbd503689",
+  "R4dae1d03",
+  "R382582c6",
+  "R3450e454",
+  "R2520f0d0",
+  "R2dcb7765",
+  "Rb924d029",
+  "Rb50f64c8",
+  "Rce2f713d",
+  "Rb9336526"
+ ],
+ "note": "pool = Eden's test items labelled as photos when sampled (only his not-a-photo flag read)"
+}

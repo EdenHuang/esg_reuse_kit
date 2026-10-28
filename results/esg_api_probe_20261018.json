@@ -1,0 +1,152 @@
+{
+ "meta": {
+  "date": "2026-10-18T11:11:55+08:00",
+  "command": "browser JavaScript (fetch) in the Claude desktop app's built-in browser on Eden's PC; values copied here by Claude",
+  "git": {
+   "commit": null,
+   "uncommitted_changes": null,
+   "note": "not run inside a git repository"
+  },
+  "python": "3.13.16",
+  "platform": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39",
+  "packages": {
+   "pymupdf": "1.28.2",
+   "pillow": "13.0.0",
+   "numpy": "2.5.4",
+   "pyyaml": "6.0.3"
+  },
+  "config_file": null,
+  "config": null,
+  "data_sha256": {},
+  "note": "Not produced by a repo script. src/build_population.py repeats these queries from Python; setup_local.ps1 runs it with --compare."
+ },
+ "source": "https://esggenplus.twse.com.tw (證交所 ESG InfoHub / ESG數位平台), page /inquiry/report",
+ "endpoints": {
+  "firm_list": "GET /api/api/MopsSustainReport/industryAndCompanyCode?marketType=0 (上市, 1,097 firms) | 1 (上櫃, 893 firms) | 2 (other public firms, not used)",
+  "records": "POST /api/api/MopsSustainReport/data JSON {marketType, year, industryNameList:[], industryName:null, companyCodeList:[codes], companyCode:'all'|code}; years >= 2023",
+  "records_before_2023": "POST /api/api/MopsSustainReport/data/old (files on mopsov.twse.com.tw/server-java/FileDownLoad); not needed",
+  "file": "GET /api/api/MopsSustainReport/data/FileStream?id={twFirstReportDownloadId | twEditReportDownloadId} -> application/pdf",
+  "auth": "none: POST worked without the antiforgery token or login (2026-10-18)",
+  "rate_limit": "none observed over about 12 requests spaced 3 s apart; not documented"
+ },
+ "record_fields_used": [
+  "code",
+  "shortName",
+  "sector",
+  "reportingInterval",
+  "twStatus",
+  "twFirstReportDownloadId",
+  "twCommencementDate",
+  "twEditReportDownloadId",
+  "twRevisionDate",
+  "enFirstReportDownloadId",
+  "enEditReportDownloadId",
+  "twDocLink"
+ ],
+ "records_per_year_market": {
+  "2023": {
+   "TWSE": 727,
+   "TPEx": 348
+  },
+  "2024": {
+   "TWSE": 1044,
+   "TPEx": 849
+  },
+  "2025": {
+   "TWSE": 1071,
+   "TPEx": 879
+  }
+ },
+ "tw_status_counts": {
+  "2023_TWSE": {
+   "2": 726,
+   "1": 1
+  },
+  "2024_TWSE": {
+   "2": 1043,
+   "1": 1
+  },
+  "2024_TPEx": {
+   "2": 849
+  },
+  "2023_TPEx": {
+   "2": 348
+  },
+  "2025_TWSE": {
+   "2": 1071
+  },
+  "2025_TPEx": {
+   "2": 879
+  }
+ },
+ "records_without_chinese_file": {
+  "2024_TPEx": 1
+ },
+ "firms_with_valid_chinese_report": {
+  "2023": 1074,
+  "2024": 1891,
+  "2025": 1950
+ },
+ "cross_check_cgc_twse_2025": "cgc.twse.com.tw statistics page (updated 2026-10-01): 1,949 firms filed 2025 reports (1,069 TWSE + 880 TPEx)",
+ "firms_all_three_years": 1073,
+ "dropped_wrong_period": {
+  "2505": "2024 record says 2025/01/01~2025/12/31",
+  "3011": "2024 record says 2025/01/01~2025/12/31",
+  "4119": "2025 record says 2026/01/01~2026/12/31",
+  "5475": "2023 record says 2027/01/01~2027/12/31"
+ },
+ "kept_with_odd_period": {
+  "3149": "2023: 2024/01/01~2023/12/31 (typo, ends 2023)",
+  "3323": "2023: 2022/01/01~2023/12/31 (two-year report)",
+  "4119": "2023: 2022/01/01~2023/12/31 (firm dropped anyway)",
+  "5315": "2023: two-year report",
+  "6923": "2023: two-year report"
+ },
+ "population": 1069,
+ "population_market": {
+  "TWSE": 723,
+  "TPEx": 346
+ },
+ "population_sha256_of_sorted_code_market_industry_lines": "4535805cba11b2453a4e8cc143f922504b987d2584ad1d2fe2dd60a90adf74e4",
+ "population_with_english_version": {
+  "2023": 702,
+  "2024": 777,
+  "2025": 479
+ },
+ "population_with_amended_chinese_version": {
+  "2023": 191,
+  "2024": 268,
+  "2025": 167
+ },
+ "official_vs_pilot_files_2025": {
+  "1101": {
+   "official_first": {
+    "bytes": 35489576,
+    "uploaded": "2026/08/27",
+    "name": "2025年永續報告書(中)台泥1101.pdf"
+   },
+   "official_amended": {
+    "bytes": 45441709,
+    "uploaded": "2026/10/02",
+    "name": "2025年永續報告書(中)台泥1101_修正版.pdf"
+   },
+   "pilot_copy": {
+    "bytes": 136939342,
+    "name": "台泥2025年度永續報告書_TCC_2025_Sustainability_Report.pdf"
+   }
+  },
+  "1707": {
+   "official_first": {
+    "bytes": 50826285,
+    "uploaded": "2026/05/29",
+    "name": "2025年永續報告書(中)葡萄王1707.pdf"
+   },
+   "official_amended": null,
+   "pilot_copy": {
+    "bytes": 50922610,
+    "name": "2025_ESG_report_CH_0624.pdf"
+   }
+  },
+  "conclusion": "The pilot copies are not the files filed on ESG InfoHub (different sizes), so the pilot numbers do not carry over to the official files."
+ }
+}

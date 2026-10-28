@@ -1,0 +1,172 @@
+{
+ "meta": {
+  "date": "2026-10-18T14:42:22+08:00",
+  "command": "python src\\check_models.py",
+  "git": {
+   "commit": null,
+   "uncommitted_changes": null,
+   "note": "not run inside a git repository"
+  },
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "packages": {
+   "pymupdf": "1.28.2",
+   "pillow": "13.0.0",
+   "numpy": "2.4.6",
+   "pyyaml": "6.0.3"
+  },
+  "config_file": "configs\\default.yaml",
+  "config": "# 所有參數放這裡（PLAN v2.0）。標「初值」的門檻只能在開發集上調，11/2 凍結後另存 configs/frozen.yaml。\nseed: 2026\n\npaths:\n  raw: data/raw\n  catalog: data/catalog.csv\n  index: data/index\n  synthetic: data/synthetic\n  extract: work/extract\n  page_graph: work/page_graph\n  logo_refs: work/logo_refs\n  context: work/context\n  evidence: work/evidence\n  features: work/features\n  reuse: work/reuse\n  prompts: configs/prompts\n  annotations: annotations\n  results: results\n  reports: reports\n\ndata:\n  years: [2023, 2024, 2025]          # 報告年度（報告涵蓋的會計年度）\n  n_firms: 150\n  n_dev: 30                          # 以公司為單位\n  dev_must_include: [\"1101\", \"1707\"] # 台泥、葡萄王\n\nextract:\n  crop_long_side: 1024\n  jpg_quality: 90\n\npage_graph:\n  container_min_area: 0.02           # 色塊容器面積下限（占頁面比例）\n  container_max_area: 0.90\n  heading_levels: 3                  # 章、節、小標題\n\nlogo_refs:\n  min_pages: 3                       # 出現幾頁以上的小圖算候選\n  min_short_side_pt: 20\n  use_cover: true\n\nphoto_filter:\n  model: ViT-L-14\n  pretrained: openai\n  exclude_first_last_page: true\n  photo_prompts: [\"a photograph of a real scene\", \"a photograph of people\"]\n  nonphoto_prompts: [\"an illustration\", \"a chart or infographic\", \"a logo or icon\",\n                     \"a scanned certificate or document\", \"an abstract graphic design\"]\n\ncontext_link:\n  model: logistic_regression\n  max_body_blocks: 2\n  baselines: [nearest_paragraph, same_column_nearest, caption_only, section_heading_only, rules_v1]\n\nevidence:\n  llm: Qwen/Qwen2.5-7B-Instruct      # 開工時確認可用，記錄 revision\n  vlm: Qwen/Qwen2.5-VL-7B-Instruct   # 或 Qwen3-VL-8B\n  temperature: 0\n  ocr: paddleocr_chinese_cht\n  depiction_threshold: 0.5           # 初值\n  topical_threshold: 0.5             # 初值\n  ocr_match_threshold: 0.7           # 初值：字元二元組重疊\n  logo_min_inliers: 15               # 初值\n  years_roc_offset: 1911\n  baselines: [chinese_clip_vitl14, vlm_direct_zeroshot, vlm_direct_fewshot]\n\nreuse:\n  global_models: [dinov2_vitb14, sscd_disc_mixup]\n  topk: 10\n  years_back: [1]\n  use_flip: true\n  matcher: superpoint_lightglue\n  ransac: magsac\n  min_inliers: 25                    # 初值\n  min_coverage: 0.30                 # 初值\n  stock_topk_other_firms: 5\n\nsynthetic:\n  n_pos: 1000\n  n_neg: 5000\n  crop_keep_area: [0.5, 0.9]\n  brightness_contrast: 0.30\n  saturation: 0.50\n  hue_deg: 10\n  overlay_text_area: [0.10, 0.30]\n  jpeg_quality: [50, 90]\n  collage_area: [0.40, 0.70]\n\nevaluation:\n  bootstrap_unit: firm\n  bootstrap_n: 2000\n  ci: 0.95\n",
+  "data_sha256": {}
+ },
+ "env": {
+  "torch": "2.14.1+cu130",
+  "cuda": "13.0",
+  "gpu_available": true,
+  "gpu": "NVIDIA RTX PRO 5000 Blackwell，51 GB",
+  "packages": {
+   "transformers": "5.20.1",
+   "accelerate": "1.15.0",
+   "huggingface-hub": "2.2.0",
+   "tokenizers": "0.23.3",
+   "open_clip_torch": "3.3.0",
+   "lightglue": "0.0",
+   "faiss-cpu": "1.15.1",
+   "opencv-python": "5.0.0.93",
+   "torchvision": "0.29.1+cu130",
+   "qwen-vl-utils": "0.0.14"
+  },
+  "HF_HOME": "D:\\accounting\\esg_reuse_kit\\work\\models\\hf",
+  "TORCH_HOME": "D:\\accounting\\esg_reuse_kit\\work\\models\\torch"
+ },
+ "checks": {
+  "llm": {
+   "model": "Qwen/Qwen2.5-7B-Instruct",
+   "revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+   "ok": true,
+   "load_s": 12.817117929458618,
+   "infer_s": 2.979543685913086,
+   "input": "台泥於花蓮和平廠舉辦 2025 年度淨零轉型員工說明會，邀請社區居民參觀碳捕捉示範設備。",
+   "output": "```json\n{\n  \"referents\": [\n    {\"type\": \"activity\", \"text\": \"2025年度淨零轉型員工說明會\"},\n    {\"type\": \"object\", \"text\": \"碳捕捉示範設備\"},\n    {\"type\": \"place\", \"text\": \"花蓮和平廠\"},\n    {\"type\": \"person\", \"text\": \"社區居民\"}\n  ],\n  \"anchors\": {\n    \"org\": [\"台泥\"],\n    \"event\": [\"2025年度淨零轉型員工說明會\"],\n    \"year\": [\"2025\"]\n  }\n}\n```",
+   "summary": "JSON 解析成功",
+   "peak_gpu_gb": 15.27,
+   "total_s": 161.1
+  },
+  "vlm:Qwen2.5-VL-7B-Instruct": {
+   "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+   "revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
+   "ok": true,
+   "load_s": 13.465787649154663,
+   "infer_s": 0.2120818614959717,
+   "p_yes": {
+    "photo_event": 0.953,
+    "photo_signs": 0.995,
+    "portrait_text": 0.905,
+    "illustration": 0.001,
+    "cover_art": 0.002
+   },
+   "summary": "「是」的機率取自輸出 logits；5/5 張和預期一致",
+   "peak_gpu_gb": 16.63,
+   "total_s": 152.7
+  },
+  "ocr": {
+   "ok": false,
+   "summary": "PaddleOCR 沒跑起來",
+   "error": "kages\\paddlex\\inference\\pipelines\\_parallel.py\", line 161, in predict\n    yield from self._pipeline.predict(\n  File \"D:\\accounting\\esg_reuse_kit\\.venv_ocr\\Lib\\site-packages\\paddlex\\inference\\pipelines\\ocr\\pipeline.py\", line 366, in predict\n    det_results = list(\n                  ^^^^^\n  File \"D:\\accounting\\esg_reuse_kit\\.venv_ocr\\Lib\\site-packages\\paddlex\\inference\\models\\predictors\\base_predictor.py\", line 117, in __call__\n    yield from self.apply(input, **kwargs)\n  File \"D:\\accounting\\esg_reuse_kit\\.venv_ocr\\Lib\\site-packages\\paddlex\\inference\\models\\predictors\\base_predictor.py\", line 140, in apply\n    pred = self.process(batch_data, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\accounting\\esg_reuse_kit\\.venv_ocr\\Lib\\site-packages\\paddlex\\inference\\models\\text_detection\\predictor.py\", line 145, in process\n    batch_preds = self.runner(x=x)\n                  ^^^^^^^^^^^^^^^^\n  File \"D:\\accounting\\esg_reuse_kit\\.venv_ocr\\Lib\\site-packages\\paddlex\\inference\\models\\runners\\paddle_static\\runner.py\", line 297, in __call__\n    pred = self.infer(x)\n           ^^^^^^^^^^^^^\n  File \"D:\\accounting\\esg_reuse_kit\\.venv_ocr\\Lib\\site-packages\\paddlex\\inference\\models\\runners\\paddle_static\\runner.py\", line 265, in __call__\n    self.predictor.run()\nNotImplementedError: (Unimplemented) ConvertPirAttribute2RuntimeAttribute not support [pir::ArrayAttribute<pir::DoubleAttribute>]  (at ..\\paddle\\fluid\\framework\\new_executor\\instruction\\onednn\\onednn_instruction.cc:118)\n\n",
+   "peak_gpu_gb": 0.03,
+   "total_s": 20.3
+  },
+  "cnclip": {
+   "model": "OFA-Sys/chinese-clip-vit-large-patch14",
+   "revision": "660941af70c6ff89ce658a1735404c0f3e536c38",
+   "ok": true,
+   "load_s": 1.0241007804870605,
+   "infer_s": 0.045346736907958984,
+   "p_photo": {
+    "photo_event": 0.675,
+    "photo_signs": 0.834,
+    "portrait_text": 0.441,
+    "illustration": 0.0,
+    "cover_art": 0.005
+   },
+   "summary": "4/5 張和預期一致（比較對象 E1 用）",
+   "peak_gpu_gb": 1.66,
+   "total_s": 34.7
+  },
+  "openclip": {
+   "model": "OpenCLIP ViT-L-14 / openai",
+   "ok": true,
+   "load_s": 19.245754718780518,
+   "infer_s": 0.010755825042724609,
+   "p_photo": {
+    "photo_event": 0.19,
+    "photo_signs": 0.032,
+    "portrait_text": 0.044,
+    "illustration": 0.008,
+    "cover_art": 0.019
+   },
+   "summary": "configs 的英文提示詞；2/5 張和預期一致（照片過濾用）",
+   "peak_gpu_gb": 1.75,
+   "total_s": 20.3
+  },
+  "dinov2": {
+   "model": "facebookresearch/dinov2 dinov2_vitb14（torch.hub）",
+   "ok": true,
+   "weights_sha256": "0b8b82f85de91b424aded121c7e1dcc2b7bc6d0adeea651bf73a13307fad8c73",
+   "load_s": 6.612513065338135,
+   "infer_s": 0.1394045352935791,
+   "cosine": {
+    "same_photo_edited": 0.787,
+    "same_photo_flipped": 0.954,
+    "different_photo": 0.108
+   },
+   "summary": "同一張（裁切調色後）vs 不同照片的餘弦相似度",
+   "peak_gpu_gb": 0.38,
+   "total_s": 7.0
+  },
+  "sscd": {
+   "model": "SSCD sscd_disc_mixup（TorchScript）",
+   "source": "https://dl.fbaipublicfiles.com/sscd-copy-detection/sscd_disc_mixup.torchscript.pt",
+   "weights_sha256": "9f26bd4c848cc19b73d2ae92eea6e04886f61a7b764ceb7a13aeee62e6a6db56",
+   "ok": true,
+   "load_s": 0.14739394187927246,
+   "infer_s": 0.211683988571167,
+   "cosine": {
+    "same_photo_edited": 0.74,
+    "same_photo_flipped": 0.938,
+    "different_photo": 0.08
+   },
+   "summary": "同一張（裁切調色後）vs 不同照片的餘弦相似度",
+   "peak_gpu_gb": 0.13,
+   "total_s": 1.9
+  },
+  "lightglue": {
+   "model": "SuperPoint + LightGlue（cvg/LightGlue）＋ OpenCV USAC_MAGSAC",
+   "ok": true,
+   "load_s": 1.9187262058258057,
+   "infer_s": 0.17067158222198486,
+   "result": {
+    "same_photo_edited": {
+     "matches": 1167,
+     "magsac_inliers": 1167
+    },
+    "different_photo": {
+     "matches": 20,
+     "magsac_inliers": 6
+    }
+   },
+   "summary": "同一張（裁切調色後）的內點數應該遠高於不同照片",
+   "peak_gpu_gb": 0.09,
+   "total_s": 3.2
+  },
+  "faiss": {
+   "model": "faiss 1.15.1（CPU，IndexFlatIP）",
+   "ok": true,
+   "load_s": 0,
+   "infer_s": 0.023037433624267578,
+   "summary": "2 萬筆 512 維向量，100 次查詢都找回自己",
+   "peak_gpu_gb": 0.03,
+   "total_s": 1.0
+  }
+ }
+}

@@ -1,0 +1,522 @@
+{
+ "meta": {
+  "date": "2026-10-28T08:03:57+08:00",
+  "command": "python src/analyze.py --split test",
+  "git": {
+   "commit": "f930f9dc159d9bbec60a9259e2ca1a1fec2daa7a",
+   "uncommitted_changes": false
+  },
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "packages": {
+   "pymupdf": "1.28.2",
+   "pillow": "13.0.0",
+   "numpy": "2.4.6",
+   "pyyaml": "6.0.3"
+  },
+  "config_file": "configs\\default.yaml",
+  "config": "# 所有參數放這裡（PLAN v2.0）。標「初值」的門檻只能在開發集上調，11/2 凍結後另存 configs/frozen.yaml。\nseed: 2026\n\npaths:\n  raw: data/raw\n  catalog: data/catalog.csv\n  index: data/index\n  synthetic: data/synthetic\n  extract: work/extract\n  page_graph: work/page_graph\n  logo_refs: work/logo_refs\n  context: work/context\n  evidence: work/evidence\n  features: work/features\n  reuse: work/reuse\n  prompts: configs/prompts\n  annotations: annotations\n  results: results\n  reports: reports\n\ndata:\n  years: [2023, 2024, 2025]          # 報告年度（報告涵蓋的會計年度）\n  n_firms: 150\n  n_dev: 30                          # 以公司為單位\n  dev_must_include: [\"1101\", \"1707\"] # 台泥、葡萄王\n\nextract:\n  crop_long_side: 1024\n  jpg_quality: 90\n\npage_graph:\n  container_min_area: 0.02           # 色塊容器面積下限（占頁面比例）\n  container_max_area: 0.90\n  heading_levels: 3                  # 章、節、小標題\n  # 以下是 page_graph.py 用的初值（10/18 晚上加；只在開發集上看 HTML 調）\n  container_rect_fill: 0.90          # 線段／曲線圍成的形狀：多邊形面積 ≥ 外框的這個比例才算矩形（圓角矩形算，圓形不算）\n  colour_tolerance: 0.02             # 色塊顏色（乘上不透明度）跟底下顏色每個 RGB 通道都差不到這個值 → 只是重刷底色，不算容器\n  inside_container: 0.75             # 文字框、照片有這個比例以上在色塊裡，才算在這個容器裡\n  heading_min_ratio: 1.15            # 字級 ≥ 內文 × 這個值，才可能是標題\n  heading_min_pages: 3               # v2：一個字級至少出現在幾個不同頁的短文字框，才算一種標題字級（v1 是 heading_min_boxes: 3 個框）\n  heading_max_chars: 50              # 標題最多幾個字（不含空白）\n  split_size_jump: 0.20              # 同一個 MuPDF 區塊裡，相鄰兩行字級差超過 20% 就切開（標題和內文被放在同一區塊）\n  column_gap: 3                      # 分欄：兩群文字框的 x 範圍之間至少要空這麼多 pt\n  sparse_max_chars: 20               # --sparse-stats：一頁不超過這麼多字（不含空白）算「幾乎沒字」\n  # v2（10/18 晚上，審查後加；初值，只在開發集上看）\n  slot_tolerance: 4                  # 導覽列：同一段字在很多頁的「同一個位置」（左上角 x、y 差 ≤ 這麼多 pt）\n  repeat_heading_ratio: 1.5          # 重複出現的字 ≥ 內文 × 這個值、不在選單裡 → 當標題，不當導覽列\n  repeat_heading_max_share: 0.25     # …而且出現的頁數 ≤ 全本頁數的這個比例（超過的是頁首的報告名稱等）\n  caption_max_lines: 3               # 圖說型最多幾行\n  picture_unit_max_area: 0.6         # 閱讀順序：圖片 ≤ 頁面這個比例才排進順序（更大的是背景）\n  garbled_box_share: 0.5             # 文字框裡亂碼字 ≥ 這個比例 → 角色 garbled，不當標題\n  panel_area: 0.8                    # 色塊 ≥ 頁面這個比例（或包住整頁所有文字框）→ 標 panel（整頁大底板）\n\nlogo_refs:\n  ocr_workers: 10                    # 10/20：OCR 同時開幾個程序（一個只用到約 1.6 核，一張約 4 秒）\n  min_pages: 3                       # 出現幾頁以上的小圖算候選\n  min_short_side_pt: 10               # 10/18 決定 5：20 → 10 pt（每個提議 Eden 都會確認）\n  vector: true                       # 10/18 決定 10：向量畫的 logo 也當候選\n  vector_band: 0.15                  # 內頁只看頁首、頁尾各 15% 高的帶狀區\n  vector_tolerance: 6                # 向量圖形分群的間距（pt）：字形 logo 的字要連在一起\n  vector_min_items: 3                # 一群至少幾條路徑\n  vector_max_long_frac: 0.5          # 長邊不超過頁寬的一半\n  vector_render_px: 600              # 截圖長邊（像素）\n  use_cover: true\n  # 以下 10/18 晚上 logo_refs.py 加的；標「初值」的只在開發集上調\n  cover_min_short_side_pt: 8         # 封面、封底的小圖：PLAN 沒設尺寸門檻；20 pt 會漏掉真的 logo（5519、6693、8070，審查 10/18），改 8 pt\n  whatif_min_short_side_pt: 10       # 只供比較，不影響輸出；10/18 決定 5 已經把正式門檻改成 10 pt，所以現在不會多出候選\n  shared_scope: dev                  # 算「幾家公司也有」只用開發集報告（測試集的圖不拿來調門檻）；--all 要不要改用全部 450 本等 Eden 決定\n  text_on_top_share: 0.5             # 一半以上的位置上面疊了文字的圖是底圖（頁籤、標題底色），不是 logo\n  ocr: true                          # 候選跑 PaddleOCR（.venv_ocr），讀到的字對得上公司名稱就算符合提議條件\n  ocr_lang: chinese_cht\n  ocr_min_score: 0.5                 # OCR 信心分數低於這個值的字不用\n  review_glob: annotations/logo_refs/review*.csv   # Eden 在確認頁勾選後匯出的 CSV；只有確認過的圖才是參考圖\n  use_back_cover: true               # 封底（最後一頁）的小圖也算候選\n  min_px: 16                         # 內嵌圖檔短邊至少幾像素（更小的是項目符號、細線，SuperPoint 也抓不到特徵點）\n  max_area_frac: 0.10                # 頁面上畫出來的面積超過頁面 10% 的不算小圖（整頁背景、封面大圖）\n  edge_frac: 0.12                    # 離頁緣不超過頁面短邊的 12% 算「靠邊」\n  tile_gap_pt: 1.5                   # 跟同頁其他圖片邊對邊貼齊（間距 <= 這個值）的是大圖切成的碎片\n  shared_min_firms: 3                # 同一張圖出現在 >= 3 家公司的報告裡：共用圖示（GRI、SDG、獎項），不是公司 logo\n  lookalike_dhash_bits: 26           # 256 位元 dHash 相差 <= 26 位元（約 10%）、長寬比差 <= 10%、平均顏色差 <= 30 算「看起來同一張」\n  lookalike_aspect_tol: 0.10\n  lookalike_colour_tol: 30\n  shared_dhash_bits: 32              # 初值：算「別家公司也有」時放寬到 32 位元（各家的 SDG 圖示版本略有不同）；每張候選「別家最像的差幾位元」記在結果檔 nearest_other_firm_bits\n  ref_long_side: 1024               # 存下來的參考圖長邊上限（像素）\n  min_contrast: 48                   # 灰階第 2～98 百分位差 < 48 的是色塊、陰影、漸層，不是 logo\n  max_refs_per_firm: 5\n  select_min_score: 0.5              # 初值：logo 分數 >= 這個值，而且符合提議條件（多頁、跨年或名稱對得上）才自動提議；提議還要 Eden 確認\n  weights: {small: 1.0, edge: 1.0, repeat: 1.0, cover: 1.0, cross_year: 2.0, aspect: 0.5, alpha: 1.0, flat: 1.0}\n\nphoto_filter:\n  model: ViT-L-14\n  pretrained: openai\n  exclude_first_last_page: true\n  photo_prompts: [\"a photograph of a real scene\", \"a photograph of people\"]\n  nonphoto_prompts: [\"an illustration\", \"a chart or infographic\", \"a logo or icon\",\n                     \"a scanned certificate or document\", \"an abstract graphic design\"]\n  photo_threshold: 0.1               # 10/19 用標註 A 開發集 100 張（a1）定：加權準確率 0.5 → 85.5%、0.1 → 97.1%（results/photo_threshold_dev_20261019_1352.json）；a2 交回後再確認，11/2 凍結\n  vlm_threshold: 0.98                # 10/19：OpenCLIP 分數 ≥ photo_threshold「或」視覺語言模型說是照片 ≥ 這個值，就算照片（開發集 149 張加權準確率 93.7%，只用 OpenCLIP 91.4%；results/photo_threshold_dev_20261019_1749.json）\n  exclude_image_only_reports: true   # 整本轉成圖片的報告（results/download_check_*.json 的 image_only）\n  exclude_vector_shading: true       # PyMuPDF 把向量漸層當成圖片回報的位置（LOG 2026-10-18 晚上）\n  batch_size: 64\n  load_workers: 8                    # 讀裁切圖的執行緒數\n\ntiles:                               # 10/18 決定 16：切成小塊的照片（tile_groups.py）\n  gap_pt: 1.5                        # 同一頁兩張圖相對的邊相距 ≤ 這麼多 pt 算貼在一起\n  min_shared_edge: 0.5               # 共用的邊至少占較短那邊的這個比例\n  max_overlap: 0.1                   # 兩張圖重疊不超過較小那張面積的這個比例（疊在一起的不算拼塊）\n  seam_zoom: 2.0                     # 看接縫時頁面的解析度（每 pt 幾個像素）\n  seam_min_std: 2.0                  # 初值：緊貼接縫的兩排像素，明暗變化（標準差，灰階）都至少這麼大（白邊、分隔線不算）\n  seam_max_std_ratio: 1.5            # 初值：兩排的變化大小差不超過 1.5 倍\n  seam_min_corr: 0.9                 # 初值：兩排的相關係數 ≥ 0.9 才算畫面連續（同一張圖切開）；寧可漏併，不要把不同照片併在一起\n  decide_share: 0.02                 # 開發集「給模型判斷的圖」裡屬於「畫面連續」的組的比例 ≥ 2% 就寫 tile_merge.py 合併\n\ncontext_link:\n  model: logistic_regression\n  max_body_blocks: 2\n  baselines: [nearest_paragraph, same_column_nearest, caption_only, section_heading_only, rules_v1]\n\nevidence:\n  llm: Qwen/Qwen2.5-7B-Instruct      # 開工時確認可用，記錄 revision\n  vlm: Qwen/Qwen3-VL-8B-Instruct     # 10/20 起（Eden 照 D15 決定）；之前是 Qwen2.5-VL-7B（現在的 vlm_alt）\n  temperature: 0\n  ocr: paddleocr_chinese_cht\n  depiction_threshold: 0.5           # 10/19 開發集調後仍是 0.5（各題 p(是) 取最大值；results/tune_evidence_dev_20261019_2002.json）\n  topical_threshold: 0.6             # 10/19 開發集調（R 開發集 100 張，gate v4；results/tune_evidence_dev_20261019_2002.json）\n  ocr_match_threshold: 0.7           # 初值：字元二元組重疊\n  logo_min_inliers: 40               # 10/19 開發集調：R 開發集照片上找到 logo 的 9 張，目測對的內點 41–190、錯的 16–38（初值 15）；樣本小，R 開發集標完再看\n  logo_angle_range: [45, 135]        # 10/22：投影四邊形每個角的範圍（度）；原本寫死在 evidence.py，數值沒變\n  logo_area_range: [0.0005, 0.9]     # 10/22：投影四邊形占照片面積的範圍\n  logo_min_side_px: 8                # 10/22：投影四邊形最短邊（像素）\n  logo_aspect_range: [0.5, 2.0]      # 10/22：投影長寬比相對參考圖的倍數範圍\n  superpoint_keypoints: 2048         # 10/22：SuperPoint 最多特徵點數\n  short_name_split_punct: true       # 10/22 NEXT C11 試驗：true 時 ≤3 字母的英文簡稱以標點相鄰的 token 也算\n  years_roc_offset: 1911\n  baselines: [chinese_clip_vitl14, vlm_direct_zeroshot, vlm_direct_fewshot]\n  # 以下 10/18 baselines_evidence.py 加的（版本取自 results/models_20261018_1442.json）\n  vlm_revision: 0c351dd01ed87e9c1b53cbc748cba10e6187ff3b   # Qwen3-VL-8B-Instruct（Hugging Face，10/20 下載）\n  llm_revision: a09a35458c702b33eeacc393d103063234e8bc28   # Qwen2.5-7B-Instruct（results/models_20261018_1442.json）\n  vlm_max_pixels: 1003520            # 照片送進視覺語言模型前最多這麼多像素（1280 × 28 × 28）\n  vlm_alt: Qwen/Qwen2.5-VL-7B-Instruct   # 10/20 前的主模型；--vlm alt 重現比較表（表 5 的模型列）\n  vlm_alt_revision: cc594898137f460bfe9f0759e9844b3ce807cfb5\n  vlm_third: OpenGVLab/InternVL3-8B-hf   # 10/22 NEXT C12：第三個模型家族，只跑標過的照片（表 5 多一列）\n  vlm_third_revision: \"259a3b64a14623c0ec91a045cb43f7c5af5fa6af\"               # 下載後填 snapshot 的 commit\n  cnclip: OFA-Sys/chinese-clip-vit-large-patch14\n  cnclip_revision: 660941af70c6ff89ce658a1735404c0f3e536c38\n  context_max_chars: 900             # 規則版上下文（圖上文字、圖說、小標題、標題、內文 2 段）最多幾個字\n  e1_thresholds: null                # E1 的兩個門檻：等標註 R 開發集調；沒定之前用試跑照片相似度的三分位數（只是讓流程跑通）\n\nmeasure:\n  # D15（10/20 Eden 決定）：「拍到」改用視覺語言模型的直接判斷，少樣本、在開發集校正；定錨照用 OCR＋logo；\n  # 拆題（evidence.py 的可拍性判斷、是非題、DSG）改當消融。開發集換公司驗證：E3 校正 0.555、模組 2 0.454\n  # （results/eval_dev_methods_rules_q3_20261020_1423.json）。11/2 寫進 frozen.yaml 前可能再依開發集調整。\n  depiction: E3_cal                  # baselines_evidence.py --only e3，tune_evidence.py 的 E3_cal\n  prompt: direct_zeroshot            # configs/prompts/direct_zeroshot.txt（手冊 v1.5 的說法）\n  shots_per_level: 1                 # 每級 1 個開發集例子（直接對應、主題相關、無關）\n  cut_p_direct: 0.0017               # p(A) ≥ 這個值 → 直接對應；開發集全部 103 張調（results/tune_evidence_dev_20261020_1423_2.json）\n  cut_p_unrelated: 0.0002            # 否則 p(C) ≥ 這個值 → 無關；否則主題相關\n  anchors: [ocr, logo]\n\nreuse:\n  global_models: [dinov2_vitb14, sscd_disc_mixup]\n  topk: 10\n  years_back: [1]\n  use_flip: true\n  matcher: superpoint_lightglue\n  ransac: magsac\n  min_inliers: 25                    # 初值\n  min_coverage: 0.30                 # 初值\n  stock_topk_other_firms: 5\n\nsynthetic:\n  n_pos: 1000\n  n_neg: 5000\n  crop_keep_area: [0.5, 0.9]\n  brightness_contrast: 0.30\n  saturation: 0.50\n  hue_deg: 10\n  overlay_text_area: [0.10, 0.30]\n  jpeg_quality: [50, 90]\n  collage_area: [0.40, 0.70]\n  # 以下 10/18 make_synthetic.py 加的（初值）\n  source: photo_filter_keep          # 原圖：照片過濾留下的照片（目前是初值門檻 0.5 的結果）\n  p_transform: {crop: 0.6, flip: 0.3, color: 0.6, text: 0.3, collage: 0.2, jpeg: 0.6}   # 每個正例各變換的機率；至少一種\n  crop_aspect: [0.75, 1.33]          # 裁切框的長寬比相對原圖的變化\n  text_opacity: [0.6, 0.9]           # 壓字的底色不透明度\n  neg_max_sscd: 0.5                  # 負例兩張的 SSCD 餘弦相似度要 < 這個值（太像的可能真的是同一張圖庫照）\n\nevaluation:\n  bootstrap_unit: firm\n  bootstrap_n: 2000\n  ci: 0.95\n",
+  "data_sha256": {
+   "D:\\accounting\\esg_reuse_kit\\work\\photo_filter.csv": "3f6f6e206ee31a03d68bcd2313518dbc3b7201ec8dc427ade840bfe268f4fe5c",
+   "D:\\accounting\\esg_reuse_kit\\work\\measure\\test_all.jsonl": "f0c12df09c5a0d70129ac630988f2585cb0a709bd6d77769120a57a7cc800bdc",
+   "D:\\accounting\\esg_reuse_kit\\work\\section\\test_photos.jsonl": "6f97ca2ef6b7798b332b7898e332b35220cb8402afa2a449abbc18bd90206a81",
+   "D:\\accounting\\esg_reuse_kit\\work\\reuse\\test_candidates.jsonl": "d77ab5adafd6db7be43613535e95cd95040456029227e9ac2a26072872b638c9",
+   "D:\\accounting\\esg_reuse_kit\\work\\reuse\\stock_test_candidates.jsonl": "8b228c84a90eae271981625ae20594830a18a7a267ed64344b9f4a4c1e54f235"
+  }
+ },
+ "split": "test",
+ "reports": 350,
+ "firms": 120,
+ "photos": 14013,
+ "images_judged": 36279,
+ "nonphoto_share": 0.6137,
+ "overall": {
+  "photos": 14013,
+  "證據": 0.1455,
+  "示意": 0.6135,
+  "包裝": 0.0665,
+  "無關": 0.1745,
+  "anchored": 0.1756,
+  "reuse_queries": 9500,
+  "reuse_share": 0.1502,
+  "stock_share": 0.0103
+ },
+ "by_section": {
+  "E": {
+   "photos": 2630,
+   "證據": 0.124,
+   "示意": 0.6631,
+   "包裝": 0.0856,
+   "無關": 0.1274,
+   "anchored": 0.1487,
+   "reuse_queries": 1706,
+   "reuse_share": 0.2315,
+   "stock_share": 0.0087
+  },
+  "G": {
+   "photos": 755,
+   "證據": 0.1152,
+   "示意": 0.396,
+   "包裝": 0.1656,
+   "無關": 0.3232,
+   "anchored": 0.1576,
+   "reuse_queries": 464,
+   "reuse_share": 0.1918,
+   "stock_share": 0.0278
+  },
+  "S": {
+   "photos": 8892,
+   "證據": 0.1513,
+   "示意": 0.6387,
+   "包裝": 0.0517,
+   "無關": 0.1583,
+   "anchored": 0.1786,
+   "reuse_queries": 6148,
+   "reuse_share": 0.1132,
+   "stock_share": 0.0094
+  },
+  "公司概況": {
+   "photos": 648,
+   "證據": 0.162,
+   "示意": 0.4938,
+   "包裝": 0.1019,
+   "無關": 0.2423,
+   "anchored": 0.2099,
+   "reuse_queries": 455,
+   "reuse_share": 0.3143,
+   "stock_share": 0.0154
+  },
+  "其他": {
+   "photos": 1088,
+   "證據": 0.1618,
+   "示意": 0.5101,
+   "包裝": 0.0515,
+   "無關": 0.2767,
+   "anchored": 0.2077,
+   "reuse_queries": 727,
+   "reuse_share": 0.1431,
+   "stock_share": 0.0064
+  }
+ },
+ "by_year": {
+  "2023": {
+   "photos": 4432,
+   "證據": 0.1444,
+   "示意": 0.6173,
+   "包裝": 0.0693,
+   "無關": 0.169,
+   "anchored": 0.1771,
+   "reuse_queries": 0,
+   "reuse_share": null,
+   "stock_share": 0.0104
+  },
+  "2024": {
+   "photos": 4739,
+   "證據": 0.1426,
+   "示意": 0.6176,
+   "包裝": 0.0652,
+   "無關": 0.1745,
+   "anchored": 0.168,
+   "reuse_queries": 4715,
+   "reuse_share": 0.1495,
+   "stock_share": 0.011
+  },
+  "2025": {
+   "photos": 4842,
+   "證據": 0.1493,
+   "示意": 0.6059,
+   "包裝": 0.0653,
+   "無關": 0.1795,
+   "anchored": 0.1815,
+   "reuse_queries": 4785,
+   "reuse_share": 0.1509,
+   "stock_share": 0.0097
+  }
+ },
+ "by_industry": {
+  "光電業": {
+   "photos": 773,
+   "證據": 0.1462,
+   "示意": 0.6973,
+   "包裝": 0.0401,
+   "無關": 0.1164,
+   "anchored": 0.1734,
+   "reuse_queries": 526,
+   "reuse_share": 0.1103,
+   "stock_share": 0.0078
+  },
+  "其他": {
+   "photos": 693,
+   "證據": 0.114,
+   "示意": 0.6797,
+   "包裝": 0.0447,
+   "無關": 0.1616,
+   "anchored": 0.1356,
+   "reuse_queries": 493,
+   "reuse_share": 0.1481,
+   "stock_share": 0.0072
+  },
+  "其他電子業": {
+   "photos": 845,
+   "證據": 0.1609,
+   "示意": 0.6497,
+   "包裝": 0.0698,
+   "無關": 0.1195,
+   "anchored": 0.1905,
+   "reuse_queries": 638,
+   "reuse_share": 0.0893,
+   "stock_share": 0.0095
+  },
+  "化學工業": {
+   "photos": 653,
+   "證據": 0.124,
+   "示意": 0.5207,
+   "包裝": 0.0413,
+   "無關": 0.3139,
+   "anchored": 0.1455,
+   "reuse_queries": 460,
+   "reuse_share": 0.3022,
+   "stock_share": 0.0138
+  },
+  "半導體業": {
+   "photos": 1974,
+   "證據": 0.1687,
+   "示意": 0.5897,
+   "包裝": 0.0724,
+   "無關": 0.1692,
+   "anchored": 0.2123,
+   "reuse_queries": 1372,
+   "reuse_share": 0.0802,
+   "stock_share": 0.0127
+  },
+  "塑膠工業": {
+   "photos": 283,
+   "證據": 0.1025,
+   "示意": 0.6325,
+   "包裝": 0.0989,
+   "無關": 0.1661,
+   "anchored": 0.1237,
+   "reuse_queries": 180,
+   "reuse_share": 0.4889,
+   "stock_share": 0.0035
+  },
+  "居家生活": {
+   "photos": 35,
+   "證據": 0.0286,
+   "示意": 0.6571,
+   "包裝": 0.0571,
+   "無關": 0.2571,
+   "anchored": 0.0571,
+   "reuse_queries": 14,
+   "reuse_share": 0.1429,
+   "stock_share": 0.0
+  },
+  "建材營造": {
+   "photos": 748,
+   "證據": 0.0976,
+   "示意": 0.6832,
+   "包裝": 0.0455,
+   "無關": 0.1738,
+   "anchored": 0.1163,
+   "reuse_queries": 546,
+   "reuse_share": 0.2363,
+   "stock_share": 0.008
+  },
+  "數位雲端": {
+   "photos": 97,
+   "證據": 0.299,
+   "示意": 0.5979,
+   "包裝": 0.0103,
+   "無關": 0.0928,
+   "anchored": 0.3299,
+   "reuse_queries": 67,
+   "reuse_share": 0.0597,
+   "stock_share": 0.0103
+  },
+  "文化創意業": {
+   "photos": 180,
+   "證據": 0.0722,
+   "示意": 0.6333,
+   "包裝": 0.0333,
+   "無關": 0.2611,
+   "anchored": 0.0722,
+   "reuse_queries": 118,
+   "reuse_share": 0.5424,
+   "stock_share": 0.0222
+  },
+  "汽車工業": {
+   "photos": 314,
+   "證據": 0.1911,
+   "示意": 0.6497,
+   "包裝": 0.0669,
+   "無關": 0.0924,
+   "anchored": 0.207,
+   "reuse_queries": 232,
+   "reuse_share": 0.0517,
+   "stock_share": 0.0
+  },
+  "油電燃氣業": {
+   "photos": 51,
+   "證據": 0.3922,
+   "示意": 0.1765,
+   "包裝": 0.1569,
+   "無關": 0.2745,
+   "anchored": 0.4118,
+   "reuse_queries": 37,
+   "reuse_share": 0.1081,
+   "stock_share": 0.0196
+  },
+  "玻璃陶瓷": {
+   "photos": 287,
+   "證據": 0.122,
+   "示意": 0.7108,
+   "包裝": 0.0348,
+   "無關": 0.1324,
+   "anchored": 0.1324,
+   "reuse_queries": 184,
+   "reuse_share": 0.288,
+   "stock_share": 0.0139
+  },
+  "生技醫療業": {
+   "photos": 331,
+   "證據": 0.1601,
+   "示意": 0.6103,
+   "包裝": 0.0785,
+   "無關": 0.1511,
+   "anchored": 0.2175,
+   "reuse_queries": 180,
+   "reuse_share": 0.1722,
+   "stock_share": 0.0151
+  },
+  "紡織纖維": {
+   "photos": 370,
+   "證據": 0.1162,
+   "示意": 0.6676,
+   "包裝": 0.0649,
+   "無關": 0.1514,
+   "anchored": 0.1351,
+   "reuse_queries": 264,
+   "reuse_share": 0.053,
+   "stock_share": 0.0135
+  },
+  "綠能環保": {
+   "photos": 137,
+   "證據": 0.1095,
+   "示意": 0.6058,
+   "包裝": 0.0511,
+   "無關": 0.2336,
+   "anchored": 0.1533,
+   "reuse_queries": 76,
+   "reuse_share": 0.1711,
+   "stock_share": 0.0
+  },
+  "航運業": {
+   "photos": 373,
+   "證據": 0.0804,
+   "示意": 0.5684,
+   "包裝": 0.134,
+   "無關": 0.2172,
+   "anchored": 0.126,
+   "reuse_queries": 250,
+   "reuse_share": 0.212,
+   "stock_share": 0.0107
+  },
+  "觀光餐旅": {
+   "photos": 246,
+   "證據": 0.0569,
+   "示意": 0.6545,
+   "包裝": 0.0407,
+   "無關": 0.248,
+   "anchored": 0.061,
+   "reuse_queries": 172,
+   "reuse_share": 0.1977,
+   "stock_share": 0.0
+  },
+  "貿易百貨": {
+   "photos": 45,
+   "證據": 0.0667,
+   "示意": 0.7778,
+   "包裝": 0.0,
+   "無關": 0.1556,
+   "anchored": 0.0667,
+   "reuse_queries": 31,
+   "reuse_share": 0.3548,
+   "stock_share": 0.0
+  },
+  "資訊服務業": {
+   "photos": 98,
+   "證據": 0.1735,
+   "示意": 0.4388,
+   "包裝": 0.2449,
+   "無關": 0.1429,
+   "anchored": 0.1939,
+   "reuse_queries": 67,
+   "reuse_share": 0.0448,
+   "stock_share": 0.0204
+  },
+  "通信網路業": {
+   "photos": 593,
+   "證據": 0.118,
+   "示意": 0.6408,
+   "包裝": 0.0978,
+   "無關": 0.1433,
+   "anchored": 0.1383,
+   "reuse_queries": 382,
+   "reuse_share": 0.1963,
+   "stock_share": 0.0152
+  },
+  "造紙工業": {
+   "photos": 115,
+   "證據": 0.1652,
+   "示意": 0.5652,
+   "包裝": 0.0522,
+   "無關": 0.2174,
+   "anchored": 0.1913,
+   "reuse_queries": 80,
+   "reuse_share": 0.025,
+   "stock_share": 0.0174
+  },
+  "運動休閒": {
+   "photos": 169,
+   "證據": 0.1124,
+   "示意": 0.7574,
+   "包裝": 0.0592,
+   "無關": 0.071,
+   "anchored": 0.1243,
+   "reuse_queries": 124,
+   "reuse_share": 0.0161,
+   "stock_share": 0.0178
+  },
+  "金融保險業": {
+   "photos": 390,
+   "證據": 0.1744,
+   "示意": 0.6308,
+   "包裝": 0.059,
+   "無關": 0.1359,
+   "anchored": 0.1872,
+   "reuse_queries": 239,
+   "reuse_share": 0.0795,
+   "stock_share": 0.0103
+  },
+  "鋼鐵工業": {
+   "photos": 376,
+   "證據": 0.1676,
+   "示意": 0.4814,
+   "包裝": 0.0293,
+   "無關": 0.3218,
+   "anchored": 0.2128,
+   "reuse_queries": 261,
+   "reuse_share": 0.1609,
+   "stock_share": 0.0106
+  },
+  "電器電纜": {
+   "photos": 63,
+   "證據": 0.0159,
+   "示意": 0.5714,
+   "包裝": 0.2222,
+   "無關": 0.1905,
+   "anchored": 0.0476,
+   "reuse_queries": 46,
+   "reuse_share": 0.0435,
+   "stock_share": 0.0635
+  },
+  "電子通路業": {
+   "photos": 50,
+   "證據": 0.6,
+   "示意": 0.3,
+   "包裝": 0.02,
+   "無關": 0.08,
+   "anchored": 0.66,
+   "reuse_queries": 41,
+   "reuse_share": 0.0488,
+   "stock_share": 0.0
+  },
+  "電子零組件業": {
+   "photos": 1119,
+   "證據": 0.1055,
+   "示意": 0.6381,
+   "包裝": 0.0679,
+   "無關": 0.1886,
+   "anchored": 0.143,
+   "reuse_queries": 722,
+   "reuse_share": 0.205,
+   "stock_share": 0.0116
+  },
+  "電機機械": {
+   "photos": 578,
+   "證據": 0.1332,
+   "示意": 0.5865,
+   "包裝": 0.0727,
+   "無關": 0.2076,
+   "anchored": 0.1626,
+   "reuse_queries": 308,
+   "reuse_share": 0.0909,
+   "stock_share": 0.0173
+  },
+  "電腦及週邊設備業": {
+   "photos": 1570,
+   "證據": 0.1994,
+   "示意": 0.558,
+   "包裝": 0.0841,
+   "無關": 0.1586,
+   "anchored": 0.242,
+   "reuse_queries": 1091,
+   "reuse_share": 0.1008,
+   "stock_share": 0.0057
+  },
+  "食品工業": {
+   "photos": 457,
+   "證據": 0.1838,
+   "示意": 0.5886,
+   "包裝": 0.0372,
+   "無關": 0.1904,
+   "anchored": 0.1947,
+   "reuse_queries": 299,
+   "reuse_share": 0.1505,
+   "stock_share": 0.0022
+  }
+ },
+ "section_x_level4": {
+  "E": {
+   "無關": 335,
+   "包裝": 225,
+   "證據": 326,
+   "示意": 1744
+  },
+  "S": {
+   "示意": 5679,
+   "證據": 1345,
+   "無關": 1408,
+   "包裝": 460
+  },
+  "G": {
+   "無關": 244,
+   "包裝": 125,
+   "示意": 299,
+   "證據": 87
+  },
+  "公司概況": {
+   "示意": 320,
+   "證據": 105,
+   "無關": 157,
+   "包裝": 66
+  },
+  "其他": {
+   "示意": 555,
+   "無關": 301,
+   "證據": 176,
+   "包裝": 56
+  }
+ },
+ "report_level": {
+  "mean_evidence_share": 0.1385,
+  "mean_nonphoto_share": 0.5992
+ },
+ "note": "four levels are the measurement tool's estimates (measure.py); on the development split its cuts were set on the same R photos",
+ "sources": {
+  "measure": "work/measure/test_all.jsonl",
+  "section": "work/section/test_photos.jsonl",
+  "reuse": "work/reuse/test_candidates.jsonl",
+  "stock": "work/reuse/stock_test_candidates.jsonl"
+ }
+}

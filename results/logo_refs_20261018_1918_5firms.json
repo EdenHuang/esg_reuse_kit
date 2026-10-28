@@ -1,0 +1,1095 @@
+{
+ "meta": {
+  "date": "2026-10-18T19:19:25+08:00",
+  "command": "python src\\logo_refs.py --firms 1101 1707 2882 2610 2385 --workers 16",
+  "git": {
+   "commit": null,
+   "uncommitted_changes": null,
+   "note": "not run inside a git repository"
+  },
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "packages": {
+   "pymupdf": "1.28.2",
+   "pillow": "13.0.0",
+   "numpy": "2.4.6",
+   "pyyaml": "6.0.3",
+   "opencv-python": "5.0.0.93",
+   "opencv-python-headless": null,
+   "opencv-contrib-python": null
+  },
+  "config_file": "configs\\default.yaml",
+  "config": "# 所有參數放這裡（PLAN v2.0）。標「初值」的門檻只能在開發集上調，11/2 凍結後另存 configs/frozen.yaml。\nseed: 2026\n\npaths:\n  raw: data/raw\n  catalog: data/catalog.csv\n  index: data/index\n  synthetic: data/synthetic\n  extract: work/extract\n  page_graph: work/page_graph\n  logo_refs: work/logo_refs\n  context: work/context\n  evidence: work/evidence\n  features: work/features\n  reuse: work/reuse\n  prompts: configs/prompts\n  annotations: annotations\n  results: results\n  reports: reports\n\ndata:\n  years: [2023, 2024, 2025]          # 報告年度（報告涵蓋的會計年度）\n  n_firms: 150\n  n_dev: 30                          # 以公司為單位\n  dev_must_include: [\"1101\", \"1707\"] # 台泥、葡萄王\n\nextract:\n  crop_long_side: 1024\n  jpg_quality: 90\n\npage_graph:\n  container_min_area: 0.02           # 色塊容器面積下限（占頁面比例）\n  container_max_area: 0.90\n  heading_levels: 3                  # 章、節、小標題\n  # 以下是 page_graph.py 用的初值（10/18 晚上加；只在開發集上看 HTML 調）\n  container_rect_fill: 0.90          # 線段／曲線圍成的形狀：多邊形面積 ≥ 外框的這個比例才算矩形（圓角矩形算，圓形不算）\n  colour_tolerance: 0.02             # 色塊顏色（乘上不透明度）跟底下顏色每個 RGB 通道都差不到這個值 → 只是重刷底色，不算容器\n  inside_container: 0.75             # 文字框、照片有這個比例以上在色塊裡，才算在這個容器裡\n  heading_min_ratio: 1.15            # 字級 ≥ 內文 × 這個值，才可能是標題\n  heading_min_boxes: 3               # 一個字級至少出現在幾個短文字框，才算一種標題字級\n  heading_max_chars: 50              # 標題最多幾個字（不含空白）\n  split_size_jump: 0.20              # 同一個 MuPDF 區塊裡，相鄰兩行字級差超過 20% 就切開（標題和內文被放在同一區塊）\n  column_gap: 3                      # 分欄：兩群文字框的 x 範圍之間至少要空這麼多 pt\n  sparse_max_chars: 20               # --sparse-stats：一頁不超過這麼多字（不含空白）算「幾乎沒字」\n\nlogo_refs:\n  min_pages: 3                       # 出現幾頁以上的小圖算候選\n  min_short_side_pt: 20\n  use_cover: true\n  # 以下 10/18 晚上 logo_refs.py 加的；標「初值」的只在開發集上調\n  cover_min_short_side_pt: 8         # 封面、封底的小圖：PLAN 沒設尺寸門檻；20 pt 會漏掉真的 logo（5519、6693、8070，審查 10/18），改 8 pt\n  whatif_min_short_side_pt: 10       # 只供比較：重複小圖門檻降到 10 pt 會多出哪些候選（頁尾 logo），不影響輸出；要不要改等 Eden 決定\n  shared_scope: dev                  # 算「幾家公司也有」只用開發集報告（測試集的圖不拿來調門檻）；--all 要不要改用全部 450 本等 Eden 決定\n  text_on_top_share: 0.5             # 一半以上的位置上面疊了文字的圖是底圖（頁籤、標題底色），不是 logo\n  ocr: true                          # 候選跑 PaddleOCR（.venv_ocr），讀到的字對得上公司名稱就算符合提議條件\n  ocr_lang: chinese_cht\n  ocr_min_score: 0.5                 # OCR 信心分數低於這個值的字不用\n  review_glob: annotations/logo_refs/review*.csv   # Eden 在確認頁勾選後匯出的 CSV；只有確認過的圖才是參考圖\n  use_back_cover: true               # 封底（最後一頁）的小圖也算候選\n  min_px: 16                         # 內嵌圖檔短邊至少幾像素（更小的是項目符號、細線，SuperPoint 也抓不到特徵點）\n  max_area_frac: 0.10                # 頁面上畫出來的面積超過頁面 10% 的不算小圖（整頁背景、封面大圖）\n  edge_frac: 0.12                    # 離頁緣不超過頁面短邊的 12% 算「靠邊」\n  tile_gap_pt: 1.5                   # 跟同頁其他圖片邊對邊貼齊（間距 <= 這個值）的是大圖切成的碎片\n  shared_min_firms: 3                # 同一張圖出現在 >= 3 家公司的報告裡：共用圖示（GRI、SDG、獎項），不是公司 logo\n  lookalike_dhash_bits: 26           # 256 位元 dHash 相差 <= 26 位元（約 10%）、長寬比差 <= 10%、平均顏色差 <= 30 算「看起來同一張」\n  lookalike_aspect_tol: 0.10\n  lookalike_colour_tol: 30\n  shared_dhash_bits: 32              # 初值：算「別家公司也有」時放寬到 32 位元（各家的 SDG 圖示版本略有不同）；每張候選「別家最像的差幾位元」記在結果檔 nearest_other_firm_bits\n  ref_long_side: 1024               # 存下來的參考圖長邊上限（像素）\n  min_contrast: 48                   # 灰階第 2～98 百分位差 < 48 的是色塊、陰影、漸層，不是 logo\n  max_refs_per_firm: 5\n  select_min_score: 0.5              # 初值：logo 分數 >= 這個值，而且符合提議條件（多頁、跨年或名稱對得上）才自動提議；提議還要 Eden 確認\n  weights: {small: 1.0, edge: 1.0, repeat: 1.0, cover: 1.0, cross_year: 2.0, aspect: 0.5, alpha: 1.0, flat: 1.0}\n\nphoto_filter:\n  model: ViT-L-14\n  pretrained: openai\n  exclude_first_last_page: true\n  photo_prompts: [\"a photograph of a real scene\", \"a photograph of people\"]\n  nonphoto_prompts: [\"an illustration\", \"a chart or infographic\", \"a logo or icon\",\n                     \"a scanned certificate or document\", \"an abstract graphic design\"]\n  photo_threshold: 0.5               # 初值：照片類提示詞的機率加總 ≥ 這個值算照片；用標註 A 開發集 100 張決定\n  exclude_image_only_reports: true   # 整本轉成圖片的報告（results/download_check_*.json 的 image_only）\n  exclude_vector_shading: true       # PyMuPDF 把向量漸層當成圖片回報的位置（LOG 2026-10-18 晚上）\n  batch_size: 64\n  load_workers: 8                    # 讀裁切圖的執行緒數\n\ncontext_link:\n  model: logistic_regression\n  max_body_blocks: 2\n  baselines: [nearest_paragraph, same_column_nearest, caption_only, section_heading_only, rules_v1]\n\nevidence:\n  llm: Qwen/Qwen2.5-7B-Instruct      # 開工時確認可用，記錄 revision\n  vlm: Qwen/Qwen2.5-VL-7B-Instruct   # 或 Qwen3-VL-8B\n  temperature: 0\n  ocr: paddleocr_chinese_cht\n  depiction_threshold: 0.5           # 初值\n  topical_threshold: 0.5             # 初值\n  ocr_match_threshold: 0.7           # 初值：字元二元組重疊\n  logo_min_inliers: 15               # 初值\n  years_roc_offset: 1911\n  baselines: [chinese_clip_vitl14, vlm_direct_zeroshot, vlm_direct_fewshot]\n\nreuse:\n  global_models: [dinov2_vitb14, sscd_disc_mixup]\n  topk: 10\n  years_back: [1]\n  use_flip: true\n  matcher: superpoint_lightglue\n  ransac: magsac\n  min_inliers: 25                    # 初值\n  min_coverage: 0.30                 # 初值\n  stock_topk_other_firms: 5\n\nsynthetic:\n  n_pos: 1000\n  n_neg: 5000\n  crop_keep_area: [0.5, 0.9]\n  brightness_contrast: 0.30\n  saturation: 0.50\n  hue_deg: 10\n  overlay_text_area: [0.10, 0.30]\n  jpeg_quality: [50, 90]\n  collage_area: [0.40, 0.70]\n\nevaluation:\n  bootstrap_unit: firm\n  bootstrap_n: 2000\n  ci: 0.95\n",
+  "data_sha256": {
+   "data/catalog.csv": "62c48866537324a53b2d5de29b716d4b9ec2b7af32a70c968eb92fcbf1d4eabd",
+   "D:\\accounting\\esg_reuse_kit\\results\\download_check_20261018_1603.json": "616f0e6023ccfcc827dd2ce0d2c294eb97f39279bdffd0016e0d4e779636a739",
+   "data\\index\\reports_index.csv": "00084c747574cadd840ef355ba5e622e230e98ac484f721119773163a66f11e2",
+   "data\\index\\raw\\company_lists.json": "201c584691e2c2e2cc07ec04230965a355a1c6aadbc4505efdd738d5c57468ef"
+  }
+ },
+ "tag": "5firms",
+ "result_file": "results/logo_refs_20261018_1918_5firms.json",
+ "official_output": true,
+ "params": {
+  "min_pages": 3,
+  "min_short_side_pt": 20,
+  "use_cover": true,
+  "use_back_cover": true,
+  "cover_min_short_side_pt": 8,
+  "whatif_min_short_side_pt": 10,
+  "min_px": 16,
+  "max_area_frac": 0.1,
+  "edge_frac": 0.12,
+  "tile_gap_pt": 1.5,
+  "shared_min_firms": 3,
+  "shared_scope": "dev",
+  "lookalike_dhash_bits": 26,
+  "lookalike_aspect_tol": 0.1,
+  "lookalike_colour_tol": 30,
+  "shared_dhash_bits": 32,
+  "ref_long_side": 1024,
+  "max_refs_per_firm": 5,
+  "select_min_score": 0.5,
+  "min_contrast": 48,
+  "text_on_top_share": 0.5,
+  "ocr": true,
+  "ocr_lang": "chinese_cht",
+  "ocr_min_score": 0.5,
+  "review_glob": "annotations/logo_refs/review*.csv",
+  "weights": {
+   "small": 1.0,
+   "edge": 1.0,
+   "repeat": 1.0,
+   "cover": 1.0,
+   "cross_year": 2.0,
+   "aspect": 0.5,
+   "alpha": 1.0,
+   "flat": 1.0
+  },
+  "min_keypoints": 15,
+  "name_bigram_min": 0.7,
+  "scan_min_pt": 8
+ },
+ "floors_pt": {
+  "official": {
+   "repeated": 20,
+   "cover": 8
+  },
+  "whatif": {
+   "repeated": 10,
+   "cover": 8
+  },
+  "scan": 8
+ },
+ "download_check": "D:\\accounting\\esg_reuse_kit\\results\\download_check_20261018_1603.json",
+ "shared_index": {
+  "scope": "dev",
+  "n_reports": 88,
+  "n_firms": 30,
+  "n_small_images": 11861,
+  "image_only_reports_left_out": [
+   "1776_2023",
+   "2392_2023",
+   "2392_2024",
+   "4174_2025",
+   "4934_2023",
+   "4934_2025",
+   "6823_2023"
+  ]
+ },
+ "name_sources": [
+  "data\\index\\reports_index.csv",
+  "data\\index\\raw\\company_lists.json"
+ ],
+ "ocr": {
+  "enabled": true,
+  "prep": "v1: upscale to a 320 px long side when smaller (LANCZOS), 16 px white border",
+  "lang": "chinese_cht",
+  "min_score": 0.5,
+  "n_pictures": 17,
+  "new": 0,
+  "ok": true,
+  "models": [
+   {
+    "paddleocr": "3.7.0",
+    "paddle": "3.3.1",
+    "device": "cpu",
+    "lang": "chinese_cht",
+    "models": [
+     "PP-OCRv6_medium_det",
+     "PP-OCRv6_medium_rec"
+    ]
+   }
+  ],
+  "seconds": 0.0
+ },
+ "seconds": {
+  "scan": 63,
+  "scan_sum_recorded_in_cache": 600,
+  "candidates": 0,
+  "total_before_html": 63
+ },
+ "outputs": {
+  "refs_dir": "work\\logo_refs",
+  "missing_csv": "work\\logo_refs\\missing.csv",
+  "html": [
+   "reports\\logo_refs\\1101.html",
+   "reports\\logo_refs\\1707.html",
+   "reports\\logo_refs\\2385.html",
+   "reports\\logo_refs\\2610.html",
+   "reports\\logo_refs\\2882.html",
+   "reports\\logo_refs\\index.html",
+   "reports\\logo_refs\\review_5firms.html"
+  ]
+ },
+ "totals": {
+  "firms": 5,
+  "reports_selected": 15,
+  "reports_used": 15,
+  "reports_skipped": 0,
+  "reports_skipped_names": [],
+  "reports_unreadable": 0,
+  "scan_errors_in_shared_scope": {},
+  "reports_with_candidates": 9,
+  "candidates": 151,
+  "excluded": 141,
+  "excluded_by_reason": {
+   "background": 91,
+   "tile": 134,
+   "blank": 129,
+   "too_simple": 6,
+   "qr": 1,
+   "shared": 1
+  },
+  "status_counts": {
+   "no_gate": 2,
+   "excluded": 141,
+   "proposed": 4,
+   "low_score": 4
+  },
+  "auto_proposed": 4,
+  "firms_with_auto_proposal": 2,
+  "auto_proposal_note": "not reviewed: not coverage (coverage counts only refs Eden confirmed)",
+  "proposed_by_gate": {
+   "repeat": 3,
+   "cross_year": 1,
+   "name": 3
+  },
+  "blocked_by_gate_only": 1,
+  "name_matches": 4,
+  "by_source": {
+   "cover": 7,
+   "repeated": 143,
+   "back_cover": 2
+  },
+  "proposed_by_source": {
+   "cover": 2,
+   "back_cover": 2,
+   "repeated": 1
+  },
+  "auto_reason_codes": {
+   "no_candidate_in_window": 1,
+   "only_single_year_cover": 1,
+   "proposed": 2,
+   "low_score": 1
+  },
+  "shading_skipped": 69891,
+  "review": {
+   "files": [],
+   "firms_reviewed": 0,
+   "firms_with_confirmed_ref": 0,
+   "coverage_confirmed": null,
+   "coverage_among_reviewed": null,
+   "confirmed_refs": 0,
+   "auto_proposals_reviewed": 0,
+   "auto_proposals_confirmed": 0,
+   "logo_form": {}
+  },
+  "whatif": {
+   "floor_pt": 10,
+   "new_candidates": 12,
+   "new_not_excluded": 7,
+   "new_proposed": 3,
+   "firms_with_new_candidates": 2,
+   "firms_gaining_a_proposal": 0
+  }
+ },
+ "per_firm": {
+  "1101": {
+   "firm_name": "台泥",
+   "split": "dev",
+   "reports_used": [
+    "1101_2023",
+    "1101_2024",
+    "1101_2025"
+   ],
+   "reports_skipped": [],
+   "candidates": 0,
+   "excluded": 0,
+   "excluded_by_reason": {},
+   "status_counts": {},
+   "auto_proposed": 0,
+   "auto_reason_code": "no_candidate_in_window",
+   "auto_reason": "三年都沒有候選：沒有在 3 頁以上出現、短邊 ≥ 20 pt 的小圖，封面和封底也沒有短邊 ≥ 8 pt 的小圖",
+   "proposed_refs": [],
+   "review": {
+    "status": "not_reviewed",
+    "file": null,
+    "logo_form": null,
+    "note": null,
+    "confirmed": 0,
+    "proposals_confirmed": null,
+    "proposals_rejected": null,
+    "confirmed_not_proposed": null,
+    "whatif_confirmed": null,
+    "review_rows_not_matched": 0
+   },
+   "has_confirmed_ref": null,
+   "confirmed_refs": [],
+   "whatif": {
+    "floor_pt": 10,
+    "new_candidates": 0,
+    "new_not_excluded": 0,
+    "new_proposed": 0,
+    "new_proposed_ids": [],
+    "firm_has_proposal": false
+   }
+  },
+  "1707": {
+   "firm_name": "葡萄王",
+   "split": "dev",
+   "reports_used": [
+    "1707_2023",
+    "1707_2024",
+    "1707_2025"
+   ],
+   "reports_skipped": [],
+   "candidates": 2,
+   "excluded": 1,
+   "excluded_by_reason": {
+    "background": 1
+   },
+   "status_counts": {
+    "no_gate": 1,
+    "excluded": 1
+   },
+   "auto_proposed": 0,
+   "auto_reason_code": "only_single_year_cover",
+   "auto_reason": "沒被排除的候選都只在某一年的封面或封底出現，OCR 讀到的字也對不上公司名稱",
+   "proposed_refs": [],
+   "review": {
+    "status": "not_reviewed",
+    "file": null,
+    "logo_form": null,
+    "note": null,
+    "confirmed": 0,
+    "proposals_confirmed": null,
+    "proposals_rejected": null,
+    "confirmed_not_proposed": null,
+    "whatif_confirmed": null,
+    "review_rows_not_matched": 0
+   },
+   "has_confirmed_ref": null,
+   "confirmed_refs": [],
+   "whatif": {
+    "floor_pt": 10,
+    "new_candidates": 0,
+    "new_not_excluded": 0,
+    "new_proposed": 0,
+    "new_proposed_ids": [],
+    "firm_has_proposal": false
+   }
+  },
+  "2385": {
+   "firm_name": "群光",
+   "split": "dev",
+   "reports_used": [
+    "2385_2023",
+    "2385_2024",
+    "2385_2025"
+   ],
+   "reports_skipped": [],
+   "candidates": 137,
+   "excluded": 135,
+   "excluded_by_reason": {
+    "tile": 133,
+    "blank": 129,
+    "background": 88,
+    "too_simple": 4
+   },
+   "status_counts": {
+    "proposed": 1,
+    "excluded": 135,
+    "no_gate": 1
+   },
+   "auto_proposed": 1,
+   "auto_reason_code": "",
+   "auto_reason": "",
+   "proposed_refs": [
+    {
+     "id": "cand_00",
+     "score": 0.697,
+     "sources": [
+      "cover",
+      "back_cover"
+     ],
+     "years": [
+      "2024",
+      "2025"
+     ],
+     "w_px": 459,
+     "h_px": 126,
+     "gate": {
+      "repeat": true,
+      "cross_year": true,
+      "name": true
+     },
+     "name_match": {
+      "kind": "en_short",
+      "name": "CHICONY",
+      "how": "contained"
+     },
+     "max_pages_in_a_report": 3
+    }
+   ],
+   "review": {
+    "status": "not_reviewed",
+    "file": null,
+    "logo_form": null,
+    "note": null,
+    "confirmed": 0,
+    "proposals_confirmed": null,
+    "proposals_rejected": null,
+    "confirmed_not_proposed": null,
+    "whatif_confirmed": null,
+    "review_rows_not_matched": 0
+   },
+   "has_confirmed_ref": null,
+   "confirmed_refs": [],
+   "whatif": {
+    "floor_pt": 10,
+    "new_candidates": 3,
+    "new_not_excluded": 1,
+    "new_proposed": 1,
+    "new_proposed_ids": [
+     "w10_00"
+    ],
+    "firm_has_proposal": true
+   }
+  },
+  "2610": {
+   "firm_name": "華航",
+   "split": "dev",
+   "reports_used": [
+    "2610_2023",
+    "2610_2024",
+    "2610_2025"
+   ],
+   "reports_skipped": [],
+   "candidates": 9,
+   "excluded": 3,
+   "excluded_by_reason": {
+    "background": 1,
+    "qr": 1,
+    "shared": 1,
+    "tile": 1
+   },
+   "status_counts": {
+    "proposed": 3,
+    "low_score": 3,
+    "excluded": 3
+   },
+   "auto_proposed": 3,
+   "auto_reason_code": "",
+   "auto_reason": "",
+   "proposed_refs": [
+    {
+     "id": "cand_00",
+     "score": 0.623,
+     "sources": [
+      "back_cover"
+     ],
+     "years": [
+      "2025"
+     ],
+     "w_px": 232,
+     "h_px": 34,
+     "gate": {
+      "repeat": true,
+      "cross_year": false,
+      "name": true
+     },
+     "name_match": {
+      "kind": "en_full",
+      "name": "China Airlines",
+      "how": "contained"
+     },
+     "max_pages_in_a_report": 149
+    },
+    {
+     "id": "cand_01",
+     "score": 0.52,
+     "sources": [
+      "cover"
+     ],
+     "years": [
+      "2025"
+     ],
+     "w_px": 404,
+     "h_px": 59,
+     "gate": {
+      "repeat": false,
+      "cross_year": false,
+      "name": true
+     },
+     "name_match": {
+      "kind": "en_full",
+      "name": "China Airlines",
+      "how": "contained"
+     },
+     "max_pages_in_a_report": 1
+    },
+    {
+     "id": "cand_02",
+     "score": 0.503,
+     "sources": [
+      "repeated"
+     ],
+     "years": [
+      "2025"
+     ],
+     "w_px": 64,
+     "h_px": 59,
+     "gate": {
+      "repeat": true,
+      "cross_year": false,
+      "name": false
+     },
+     "name_match": null,
+     "max_pages_in_a_report": 16
+    }
+   ],
+   "review": {
+    "status": "not_reviewed",
+    "file": null,
+    "logo_form": null,
+    "note": null,
+    "confirmed": 0,
+    "proposals_confirmed": null,
+    "proposals_rejected": null,
+    "confirmed_not_proposed": null,
+    "whatif_confirmed": null,
+    "review_rows_not_matched": 0
+   },
+   "has_confirmed_ref": null,
+   "confirmed_refs": [],
+   "whatif": {
+    "floor_pt": 10,
+    "new_candidates": 9,
+    "new_not_excluded": 6,
+    "new_proposed": 2,
+    "new_proposed_ids": [
+     "w10_00",
+     "w10_01"
+    ],
+    "firm_has_proposal": true
+   }
+  },
+  "2882": {
+   "firm_name": "國泰金",
+   "split": "dev",
+   "reports_used": [
+    "2882_2023",
+    "2882_2024",
+    "2882_2025"
+   ],
+   "reports_skipped": [],
+   "candidates": 3,
+   "excluded": 2,
+   "excluded_by_reason": {
+    "too_simple": 2,
+    "background": 1
+   },
+   "status_counts": {
+    "excluded": 2,
+    "low_score": 1
+   },
+   "auto_proposed": 0,
+   "auto_reason_code": "low_score",
+   "auto_reason": "有符合提議條件的候選，但 logo 分數都低於 0.5",
+   "proposed_refs": [],
+   "review": {
+    "status": "not_reviewed",
+    "file": null,
+    "logo_form": null,
+    "note": null,
+    "confirmed": 0,
+    "proposals_confirmed": null,
+    "proposals_rejected": null,
+    "confirmed_not_proposed": null,
+    "whatif_confirmed": null,
+    "review_rows_not_matched": 0
+   },
+   "has_confirmed_ref": null,
+   "confirmed_refs": [],
+   "whatif": {
+    "floor_pt": 10,
+    "new_candidates": 0,
+    "new_not_excluded": 0,
+    "new_proposed": 0,
+    "new_proposed_ids": [],
+    "firm_has_proposal": false
+   }
+  }
+ },
+ "per_report": {
+  "1101_2023": {
+   "firm_id": "1101",
+   "year": "2023",
+   "split": "dev",
+   "pages": 216,
+   "placements": 557,
+   "shading_skipped": 374,
+   "below_min_px": 3,
+   "below_scan_min_pt": 2,
+   "too_large": 221,
+   "mostly_off_page": 26,
+   "window_placements": 305,
+   "unreadable_groups": 0,
+   "small_image_groups": 297,
+   "potential_groups": 0,
+   "candidates": 0,
+   "candidates_by_source": {},
+   "cover": {
+    "page": 1,
+    "images": 5,
+    "full_page_image": true,
+    "vector_paths": 25,
+    "text_chars": 169
+   },
+   "back_cover": {
+    "page": 216,
+    "images": 1,
+    "full_page_image": true,
+    "vector_paths": 1682,
+    "text_chars": 131
+   },
+   "reason_code": "no_candidate_in_window",
+   "scan_seconds": 14.9,
+   "scan_from_cache": false
+  },
+  "1101_2024": {
+   "firm_id": "1101",
+   "year": "2024",
+   "split": "dev",
+   "pages": 269,
+   "placements": 381,
+   "shading_skipped": 1169,
+   "below_min_px": 20,
+   "below_scan_min_pt": 6,
+   "too_large": 134,
+   "mostly_off_page": 1,
+   "window_placements": 220,
+   "unreadable_groups": 0,
+   "small_image_groups": 218,
+   "potential_groups": 0,
+   "candidates": 0,
+   "candidates_by_source": {},
+   "cover": {
+    "page": 1,
+    "images": 2,
+    "full_page_image": true,
+    "vector_paths": 490,
+    "text_chars": 86
+   },
+   "back_cover": {
+    "page": 269,
+    "images": 1,
+    "full_page_image": true,
+    "vector_paths": 1682,
+    "text_chars": 108
+   },
+   "reason_code": "no_candidate_in_window",
+   "scan_seconds": 4.8,
+   "scan_from_cache": false
+  },
+  "1101_2025": {
+   "firm_id": "1101",
+   "year": "2025",
+   "split": "dev",
+   "pages": 235,
+   "placements": 428,
+   "shading_skipped": 2750,
+   "below_min_px": 6,
+   "below_scan_min_pt": 1,
+   "too_large": 128,
+   "mostly_off_page": 2,
+   "window_placements": 291,
+   "unreadable_groups": 0,
+   "small_image_groups": 282,
+   "potential_groups": 0,
+   "candidates": 0,
+   "candidates_by_source": {},
+   "cover": {
+    "page": 1,
+    "images": 3,
+    "full_page_image": true,
+    "vector_paths": 106,
+    "text_chars": 112
+   },
+   "back_cover": {
+    "page": 235,
+    "images": 0,
+    "full_page_image": false,
+    "vector_paths": 2854,
+    "text_chars": 81
+   },
+   "reason_code": "no_candidate_in_window",
+   "scan_seconds": 18.2,
+   "scan_from_cache": false
+  },
+  "1707_2023": {
+   "firm_id": "1707",
+   "year": "2023",
+   "split": "dev",
+   "pages": 143,
+   "placements": 373,
+   "shading_skipped": 616,
+   "below_min_px": 87,
+   "below_scan_min_pt": 11,
+   "too_large": 41,
+   "mostly_off_page": 0,
+   "window_placements": 234,
+   "unreadable_groups": 0,
+   "small_image_groups": 190,
+   "potential_groups": 0,
+   "candidates": 0,
+   "candidates_by_source": {},
+   "cover": {
+    "page": 1,
+    "images": 1,
+    "full_page_image": true,
+    "vector_paths": 173,
+    "text_chars": 132
+   },
+   "back_cover": {
+    "page": 143,
+    "images": 1,
+    "full_page_image": true,
+    "vector_paths": 63,
+    "text_chars": 123
+   },
+   "reason_code": "no_candidate_in_window",
+   "scan_seconds": 2.4,
+   "scan_from_cache": false
+  },
+  "1707_2024": {
+   "firm_id": "1707",
+   "year": "2024",
+   "split": "dev",
+   "pages": 149,
+   "placements": 501,
+   "shading_skipped": 744,
+   "below_min_px": 54,
+   "below_scan_min_pt": 20,
+   "too_large": 53,
+   "mostly_off_page": 0,
+   "window_placements": 374,
+   "unreadable_groups": 0,
+   "small_image_groups": 351,
+   "potential_groups": 1,
+   "candidates": 1,
+   "candidates_by_source": {
+    "repeated": 1
+   },
+   "cover": {
+    "page": 1,
+    "images": 1,
+    "full_page_image": true,
+    "vector_paths": 0,
+    "text_chars": 0
+   },
+   "back_cover": {
+    "page": 149,
+    "images": 1,
+    "full_page_image": true,
+    "vector_paths": 0,
+    "text_chars": 0
+   },
+   "reason_code": "",
+   "scan_seconds": 8.6,
+   "scan_from_cache": false
+  },
+  "1707_2025": {
+   "firm_id": "1707",
+   "year": "2025",
+   "split": "dev",
+   "pages": 155,
+   "placements": 441,
+   "shading_skipped": 611,
+   "below_min_px": 73,
+   "below_scan_min_pt": 7,
+   "too_large": 50,
+   "mostly_off_page": 0,
+   "window_placements": 311,
+   "unreadable_groups": 0,
+   "small_image_groups": 299,
+   "potential_groups": 1,
+   "candidates": 1,
+   "candidates_by_source": {
+    "cover": 1
+   },
+   "cover": {
+    "page": 1,
+    "images": 3,
+    "full_page_image": true,
+    "vector_paths": 142,
+    "text_chars": 44
+   },
+   "back_cover": {
+    "page": 155,
+    "images": 1,
+    "full_page_image": true,
+    "vector_paths": 34,
+    "text_chars": 0
+   },
+   "reason_code": "",
+   "scan_seconds": 8.6,
+   "scan_from_cache": false
+  },
+  "2385_2023": {
+   "firm_id": "2385",
+   "year": "2023",
+   "split": "dev",
+   "pages": 113,
+   "placements": 882,
+   "shading_skipped": 1429,
+   "below_min_px": 794,
+   "below_scan_min_pt": 0,
+   "too_large": 24,
+   "mostly_off_page": 0,
+   "window_placements": 64,
+   "unreadable_groups": 0,
+   "small_image_groups": 57,
+   "potential_groups": 0,
+   "candidates": 0,
+   "candidates_by_source": {},
+   "cover": {
+    "page": 1,
+    "images": 0,
+    "full_page_image": false,
+    "vector_paths": 348,
+    "text_chars": 113
+   },
+   "back_cover": {
+    "page": 113,
+    "images": 0,
+    "full_page_image": false,
+    "vector_paths": 127,
+    "text_chars": 0
+   },
+   "reason_code": "no_candidate_in_window",
+   "scan_seconds": 2.8,
+   "scan_from_cache": false
+  },
+  "2385_2024": {
+   "firm_id": "2385",
+   "year": "2024",
+   "split": "dev",
+   "pages": 122,
+   "placements": 10940,
+   "shading_skipped": 1578,
+   "below_min_px": 229,
+   "below_scan_min_pt": 0,
+   "too_large": 122,
+   "mostly_off_page": 16,
+   "window_placements": 10573,
+   "unreadable_groups": 0,
+   "small_image_groups": 394,
+   "potential_groups": 139,
+   "candidates": 137,
+   "candidates_by_source": {
+    "cover": 1,
+    "back_cover": 1,
+    "repeated": 136
+   },
+   "cover": {
+    "page": 1,
+    "images": 2,
+    "full_page_image": true,
+    "vector_paths": 0,
+    "text_chars": 37
+   },
+   "back_cover": {
+    "page": 122,
+    "images": 2,
+    "full_page_image": true,
+    "vector_paths": 0,
+    "text_chars": 37
+   },
+   "reason_code": "",
+   "scan_seconds": 19.1,
+   "scan_from_cache": false
+  },
+  "2385_2025": {
+   "firm_id": "2385",
+   "year": "2025",
+   "split": "dev",
+   "pages": 144,
+   "placements": 343,
+   "shading_skipped": 277,
+   "below_min_px": 0,
+   "below_scan_min_pt": 0,
+   "too_large": 30,
+   "mostly_off_page": 1,
+   "window_placements": 312,
+   "unreadable_groups": 0,
+   "small_image_groups": 170,
+   "potential_groups": 8,
+   "candidates": 5,
+   "candidates_by_source": {
+    "cover": 4,
+    "back_cover": 1
+   },
+   "cover": {
+    "page": 1,
+    "images": 18,
+    "full_page_image": false,
+    "vector_paths": 747,
+    "text_chars": 32
+   },
+   "back_cover": {
+    "page": 144,
+    "images": 8,
+    "full_page_image": true,
+    "vector_paths": 649,
+    "text_chars": 32
+   },
+   "reason_code": "",
+   "scan_seconds": 4.6,
+   "scan_from_cache": false
+  },
+  "2610_2023": {
+   "firm_id": "2610",
+   "year": "2023",
+   "split": "dev",
+   "pages": 153,
+   "placements": 212,
+   "shading_skipped": 1573,
+   "below_min_px": 1,
+   "below_scan_min_pt": 14,
+   "too_large": 26,
+   "mostly_off_page": 5,
+   "window_placements": 166,
+   "unreadable_groups": 0,
+   "small_image_groups": 158,
+   "potential_groups": 1,
+   "candidates": 1,
+   "candidates_by_source": {
+    "repeated": 1
+   },
+   "cover": {
+    "page": 1,
+    "images": 2,
+    "full_page_image": false,
+    "vector_paths": 235,
+    "text_chars": 15
+   },
+   "back_cover": {
+    "page": 153,
+    "images": 4,
+    "full_page_image": false,
+    "vector_paths": 437,
+    "text_chars": 119
+   },
+   "reason_code": "",
+   "scan_seconds": 8.8,
+   "scan_from_cache": false
+  },
+  "2610_2024": {
+   "firm_id": "2610",
+   "year": "2024",
+   "split": "dev",
+   "pages": 147,
+   "placements": 263,
+   "shading_skipped": 33765,
+   "below_min_px": 3,
+   "below_scan_min_pt": 0,
+   "too_large": 13,
+   "mostly_off_page": 1,
+   "window_placements": 246,
+   "unreadable_groups": 0,
+   "small_image_groups": 219,
+   "potential_groups": 3,
+   "candidates": 3,
+   "candidates_by_source": {
+    "repeated": 3
+   },
+   "cover": {
+    "page": 1,
+    "images": 1,
+    "full_page_image": true,
+    "vector_paths": 0,
+    "text_chars": 0
+   },
+   "back_cover": {
+    "page": 147,
+    "images": 1,
+    "full_page_image": true,
+    "vector_paths": 0,
+    "text_chars": 0
+   },
+   "reason_code": "",
+   "scan_seconds": 13.7,
+   "scan_from_cache": false
+  },
+  "2610_2025": {
+   "firm_id": "2610",
+   "year": "2025",
+   "split": "dev",
+   "pages": 150,
+   "placements": 980,
+   "shading_skipped": 684,
+   "below_min_px": 33,
+   "below_scan_min_pt": 0,
+   "too_large": 22,
+   "mostly_off_page": 0,
+   "window_placements": 925,
+   "unreadable_groups": 0,
+   "small_image_groups": 477,
+   "potential_groups": 25,
+   "candidates": 5,
+   "candidates_by_source": {
+    "back_cover": 1,
+    "cover": 2,
+    "repeated": 2
+   },
+   "cover": {
+    "page": 1,
+    "images": 3,
+    "full_page_image": true,
+    "vector_paths": 0,
+    "text_chars": 51
+   },
+   "back_cover": {
+    "page": 150,
+    "images": 11,
+    "full_page_image": false,
+    "vector_paths": 596,
+    "text_chars": 11206
+   },
+   "reason_code": "",
+   "scan_seconds": 20.8,
+   "scan_from_cache": false
+  },
+  "2882_2023": {
+   "firm_id": "2882",
+   "year": "2023",
+   "split": "dev",
+   "pages": 213,
+   "placements": 580,
+   "shading_skipped": 22052,
+   "below_min_px": 0,
+   "below_scan_min_pt": 0,
+   "too_large": 237,
+   "mostly_off_page": 1,
+   "window_placements": 342,
+   "unreadable_groups": 0,
+   "small_image_groups": 303,
+   "potential_groups": 2,
+   "candidates": 2,
+   "candidates_by_source": {
+    "repeated": 2
+   },
+   "cover": {
+    "page": 1,
+    "images": 1,
+    "full_page_image": true,
+    "vector_paths": 51,
+    "text_chars": 9
+   },
+   "back_cover": {
+    "page": 213,
+    "images": 1,
+    "full_page_image": true,
+    "vector_paths": 51,
+    "text_chars": 0
+   },
+   "reason_code": "",
+   "scan_seconds": 16.7,
+   "scan_from_cache": false
+  },
+  "2882_2024": {
+   "firm_id": "2882",
+   "year": "2024",
+   "split": "dev",
+   "pages": 233,
+   "placements": 770,
+   "shading_skipped": 1620,
+   "below_min_px": 1,
+   "below_scan_min_pt": 0,
+   "too_large": 525,
+   "mostly_off_page": 0,
+   "window_placements": 244,
+   "unreadable_groups": 0,
+   "small_image_groups": 234,
+   "potential_groups": 0,
+   "candidates": 0,
+   "candidates_by_source": {},
+   "cover": {
+    "page": 1,
+    "images": 1,
+    "full_page_image": true,
+    "vector_paths": 0,
+    "text_chars": 0
+   },
+   "back_cover": {
+    "page": 233,
+    "images": 1,
+    "full_page_image": true,
+    "vector_paths": 0,
+    "text_chars": 0
+   },
+   "reason_code": "no_candidate_in_window",
+   "scan_seconds": 17.4,
+   "scan_from_cache": false
+  },
+  "2882_2025": {
+   "firm_id": "2882",
+   "year": "2025",
+   "split": "dev",
+   "pages": 213,
+   "placements": 666,
+   "shading_skipped": 649,
+   "below_min_px": 223,
+   "below_scan_min_pt": 7,
+   "too_large": 71,
+   "mostly_off_page": 0,
+   "window_placements": 365,
+   "unreadable_groups": 0,
+   "small_image_groups": 144,
+   "potential_groups": 2,
+   "candidates": 2,
+   "candidates_by_source": {
+    "repeated": 2
+   },
+   "cover": {
+    "page": 1,
+    "images": 1,
+    "full_page_image": true,
+    "vector_paths": 37,
+    "text_chars": 21
+   },
+   "back_cover": {
+    "page": 213,
+    "images": 1,
+    "full_page_image": true,
+    "vector_paths": 11,
+    "text_chars": 0
+   },
+   "reason_code": "",
+   "scan_seconds": 7.3,
+   "scan_from_cache": false
+  }
+ }
+}

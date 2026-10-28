@@ -1,0 +1,24 @@
+Data licence: Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+Copyright (c) 2026 Yueh-Cheng Huang
+
+The data files in this release are licensed under the Creative Commons Attribution 4.0 International licence:
+
+  catalog.csv          report list: firm, market, industry, year, download URL, sha256, pages, split
+  annotations/         guidelines, sampled items, labels, quality-control files, confirmed logo references
+  extraction/          image placements per report (page, bounding box, crop name, hashes, pixel size)
+  page_structure/      text-box geometry, roles, containers and reading order per page
+  photos/              the photo filter's decision and scores for every extracted image
+  results/             every result file behind the paper's tables and numbers
+
+You are free to share and adapt these files for any purpose, including commercially, provided that you give
+appropriate credit (see CITATION.cff), link to the licence and indicate if changes were made.
+
+Full licence text: https://creativecommons.org/licenses/by/4.0/legalcode
+Human-readable summary: https://creativecommons.org/licenses/by/4.0/
+
+What this licence does not cover
+- The sustainability reports themselves and the images in them. They are public filings of the reporting firms
+  on the ESG InfoHub of the Taiwan Stock Exchange and remain the firms' property. This release does not
+  redistribute them; catalog.csv points to the filings and the code downloads them from the source.
+- The code and configuration (src/, configs/, requirements.txt), which are under the MIT licence (see LICENSE).

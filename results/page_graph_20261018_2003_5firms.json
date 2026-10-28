@@ -1,0 +1,2775 @@
+{
+ "meta": {
+  "date": "2026-10-18T20:04:12+08:00",
+  "command": "python src\\page_graph.py --firms 1101 1707 2882 2610 2385 --verify-running --workers 6 --force",
+  "git": {
+   "commit": "d7b5d380678eb38e6ef962d285342d651955092d",
+   "uncommitted_changes": false
+  },
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "packages": {
+   "pymupdf": "1.28.2",
+   "pillow": "13.0.0",
+   "numpy": "2.4.6",
+   "pyyaml": "6.0.3"
+  },
+  "config_file": "configs\\default.yaml",
+  "config": "# 所有參數放這裡（PLAN v2.0）。標「初值」的門檻只能在開發集上調，11/2 凍結後另存 configs/frozen.yaml。\nseed: 2026\n\npaths:\n  raw: data/raw\n  catalog: data/catalog.csv\n  index: data/index\n  synthetic: data/synthetic\n  extract: work/extract\n  page_graph: work/page_graph\n  logo_refs: work/logo_refs\n  context: work/context\n  evidence: work/evidence\n  features: work/features\n  reuse: work/reuse\n  prompts: configs/prompts\n  annotations: annotations\n  results: results\n  reports: reports\n\ndata:\n  years: [2023, 2024, 2025]          # 報告年度（報告涵蓋的會計年度）\n  n_firms: 150\n  n_dev: 30                          # 以公司為單位\n  dev_must_include: [\"1101\", \"1707\"] # 台泥、葡萄王\n\nextract:\n  crop_long_side: 1024\n  jpg_quality: 90\n\npage_graph:\n  container_min_area: 0.02           # 色塊容器面積下限（占頁面比例）\n  container_max_area: 0.90\n  heading_levels: 3                  # 章、節、小標題\n  # 以下是 page_graph.py 用的初值（10/18 晚上加；只在開發集上看 HTML 調）\n  container_rect_fill: 0.90          # 線段／曲線圍成的形狀：多邊形面積 ≥ 外框的這個比例才算矩形（圓角矩形算，圓形不算）\n  colour_tolerance: 0.02             # 色塊顏色（乘上不透明度）跟底下顏色每個 RGB 通道都差不到這個值 → 只是重刷底色，不算容器\n  inside_container: 0.75             # 文字框、照片有這個比例以上在色塊裡，才算在這個容器裡\n  heading_min_ratio: 1.15            # 字級 ≥ 內文 × 這個值，才可能是標題\n  heading_min_pages: 3               # v2：一個字級至少出現在幾個不同頁的短文字框，才算一種標題字級（v1 是 heading_min_boxes: 3 個框）\n  heading_max_chars: 50              # 標題最多幾個字（不含空白）\n  split_size_jump: 0.20              # 同一個 MuPDF 區塊裡，相鄰兩行字級差超過 20% 就切開（標題和內文被放在同一區塊）\n  column_gap: 3                      # 分欄：兩群文字框的 x 範圍之間至少要空這麼多 pt\n  sparse_max_chars: 20               # --sparse-stats：一頁不超過這麼多字（不含空白）算「幾乎沒字」\n  # v2（10/18 晚上，審查後加；初值，只在開發集上看）\n  slot_tolerance: 4                  # 導覽列：同一段字在很多頁的「同一個位置」（左上角 x、y 差 ≤ 這麼多 pt）\n  repeat_heading_ratio: 1.5          # 重複出現的字 ≥ 內文 × 這個值、不在選單裡 → 當標題，不當導覽列\n  repeat_heading_max_share: 0.25     # …而且出現的頁數 ≤ 全本頁數的這個比例（超過的是頁首的報告名稱等）\n  caption_max_lines: 3               # 圖說型最多幾行\n  picture_unit_max_area: 0.6         # 閱讀順序：圖片 ≤ 頁面這個比例才排進順序（更大的是背景）\n  garbled_box_share: 0.5             # 文字框裡亂碼字 ≥ 這個比例 → 角色 garbled，不當標題\n  panel_area: 0.8                    # 色塊 ≥ 頁面這個比例（或包住整頁所有文字框）→ 標 panel（整頁大底板）\n\nlogo_refs:\n  min_pages: 3                       # 出現幾頁以上的小圖算候選\n  min_short_side_pt: 20\n  use_cover: true\n  # 以下 10/18 晚上 logo_refs.py 加的；標「初值」的只在開發集上調\n  cover_min_short_side_pt: 8         # 封面、封底的小圖：PLAN 沒設尺寸門檻；20 pt 會漏掉真的 logo（5519、6693、8070，審查 10/18），改 8 pt\n  whatif_min_short_side_pt: 10       # 只供比較：重複小圖門檻降到 10 pt 會多出哪些候選（頁尾 logo），不影響輸出；要不要改等 Eden 決定\n  shared_scope: dev                  # 算「幾家公司也有」只用開發集報告（測試集的圖不拿來調門檻）；--all 要不要改用全部 450 本等 Eden 決定\n  text_on_top_share: 0.5             # 一半以上的位置上面疊了文字的圖是底圖（頁籤、標題底色），不是 logo\n  ocr: true                          # 候選跑 PaddleOCR（.venv_ocr），讀到的字對得上公司名稱就算符合提議條件\n  ocr_lang: chinese_cht\n  ocr_min_score: 0.5                 # OCR 信心分數低於這個值的字不用\n  review_glob: annotations/logo_refs/review*.csv   # Eden 在確認頁勾選後匯出的 CSV；只有確認過的圖才是參考圖\n  use_back_cover: true               # 封底（最後一頁）的小圖也算候選\n  min_px: 16                         # 內嵌圖檔短邊至少幾像素（更小的是項目符號、細線，SuperPoint 也抓不到特徵點）\n  max_area_frac: 0.10                # 頁面上畫出來的面積超過頁面 10% 的不算小圖（整頁背景、封面大圖）\n  edge_frac: 0.12                    # 離頁緣不超過頁面短邊的 12% 算「靠邊」\n  tile_gap_pt: 1.5                   # 跟同頁其他圖片邊對邊貼齊（間距 <= 這個值）的是大圖切成的碎片\n  shared_min_firms: 3                # 同一張圖出現在 >= 3 家公司的報告裡：共用圖示（GRI、SDG、獎項），不是公司 logo\n  lookalike_dhash_bits: 26           # 256 位元 dHash 相差 <= 26 位元（約 10%）、長寬比差 <= 10%、平均顏色差 <= 30 算「看起來同一張」\n  lookalike_aspect_tol: 0.10\n  lookalike_colour_tol: 30\n  shared_dhash_bits: 32              # 初值：算「別家公司也有」時放寬到 32 位元（各家的 SDG 圖示版本略有不同）；每張候選「別家最像的差幾位元」記在結果檔 nearest_other_firm_bits\n  ref_long_side: 1024               # 存下來的參考圖長邊上限（像素）\n  min_contrast: 48                   # 灰階第 2～98 百分位差 < 48 的是色塊、陰影、漸層，不是 logo\n  max_refs_per_firm: 5\n  select_min_score: 0.5              # 初值：logo 分數 >= 這個值，而且符合提議條件（多頁、跨年或名稱對得上）才自動提議；提議還要 Eden 確認\n  weights: {small: 1.0, edge: 1.0, repeat: 1.0, cover: 1.0, cross_year: 2.0, aspect: 0.5, alpha: 1.0, flat: 1.0}\n\nphoto_filter:\n  model: ViT-L-14\n  pretrained: openai\n  exclude_first_last_page: true\n  photo_prompts: [\"a photograph of a real scene\", \"a photograph of people\"]\n  nonphoto_prompts: [\"an illustration\", \"a chart or infographic\", \"a logo or icon\",\n                     \"a scanned certificate or document\", \"an abstract graphic design\"]\n  photo_threshold: 0.5               # 初值：照片類提示詞的機率加總 ≥ 這個值算照片；用標註 A 開發集 100 張決定\n  exclude_image_only_reports: true   # 整本轉成圖片的報告（results/download_check_*.json 的 image_only）\n  exclude_vector_shading: true       # PyMuPDF 把向量漸層當成圖片回報的位置（LOG 2026-10-18 晚上）\n  batch_size: 64\n  load_workers: 8                    # 讀裁切圖的執行緒數\n\ncontext_link:\n  model: logistic_regression\n  max_body_blocks: 2\n  baselines: [nearest_paragraph, same_column_nearest, caption_only, section_heading_only, rules_v1]\n\nevidence:\n  llm: Qwen/Qwen2.5-7B-Instruct      # 開工時確認可用，記錄 revision\n  vlm: Qwen/Qwen2.5-VL-7B-Instruct   # 或 Qwen3-VL-8B\n  temperature: 0\n  ocr: paddleocr_chinese_cht\n  depiction_threshold: 0.5           # 初值\n  topical_threshold: 0.5             # 初值\n  ocr_match_threshold: 0.7           # 初值：字元二元組重疊\n  logo_min_inliers: 15               # 初值\n  years_roc_offset: 1911\n  baselines: [chinese_clip_vitl14, vlm_direct_zeroshot, vlm_direct_fewshot]\n\nreuse:\n  global_models: [dinov2_vitb14, sscd_disc_mixup]\n  topk: 10\n  years_back: [1]\n  use_flip: true\n  matcher: superpoint_lightglue\n  ransac: magsac\n  min_inliers: 25                    # 初值\n  min_coverage: 0.30                 # 初值\n  stock_topk_other_firms: 5\n\nsynthetic:\n  n_pos: 1000\n  n_neg: 5000\n  crop_keep_area: [0.5, 0.9]\n  brightness_contrast: 0.30\n  saturation: 0.50\n  hue_deg: 10\n  overlay_text_area: [0.10, 0.30]\n  jpeg_quality: [50, 90]\n  collage_area: [0.40, 0.70]\n\nevaluation:\n  bootstrap_unit: firm\n  bootstrap_n: 2000\n  ci: 0.95\n",
+  "data_sha256": {
+   "data/catalog.csv": "62c48866537324a53b2d5de29b716d4b9ec2b7af32a70c968eb92fcbf1d4eabd",
+   "D:\\accounting\\esg_reuse_kit\\results\\download_check_20261018_1603.json": "616f0e6023ccfcc827dd2ce0d2c294eb97f39279bdffd0016e0d4e779636a739",
+   "work\\extract\\1101_2023_pairs.jsonl": "21a0f2ca800a015a4ed123f311466a773be6fa01d2da14bc119017c18afce934",
+   "work\\extract\\1101_2024_pairs.jsonl": "fd68ef9f3a84c1778e3b3d375c42ce8ed2553875f8794167cb8d7c7476c3d592",
+   "work\\extract\\1101_2025_pairs.jsonl": "7f72b08706230c879dd7699c9f8a66ef8807f71858c18bd907c3372289cbe4e9",
+   "work\\extract\\1707_2023_pairs.jsonl": "5342dcd6276c768ab465ccbd3783f9ff67272c82f03ee3d2c3b394255a96c33c",
+   "work\\extract\\1707_2024_pairs.jsonl": "39598a5628fe77658b483806d72d15ae3ad08ef3712bb66831f293a3c6024632",
+   "work\\extract\\1707_2025_pairs.jsonl": "60f79d86975e07779756352d03ef5a9b9836d5224454254225e893f0856b271a",
+   "work\\extract\\2385_2023_pairs.jsonl": "4a0f37b60ddce5de0980b1c6d9dd99611295bbd563962d733ab06fae1936fb50",
+   "work\\extract\\2385_2024_pairs.jsonl": "1ea3aaee04d067cc1746cca3a9b49462a7579a7ea571c184763c6af74557c107",
+   "work\\extract\\2385_2025_pairs.jsonl": "dcd75dfe9830984541bb7a432ecc5613dc25403cc38f952137d65d1eb19a26b2",
+   "work\\extract\\2610_2023_pairs.jsonl": "2ee5488b74970943520c1b5dac4b090fba3a968b7971483be5e9c25c69b04a84",
+   "work\\extract\\2610_2024_pairs.jsonl": "7333d7f05d826c42dfabd828af4364c9d4729b5804ba391bbd65c7a6e75da5e7",
+   "work\\extract\\2610_2025_pairs.jsonl": "a0c4804cab819b53d349f7ae07625c46227333d75c509431aa2c535be5d90d1b",
+   "work\\extract\\2882_2023_pairs.jsonl": "7699452ff8fc8e5be8797e2186a785369307239522c16b276de7d9fbb30e2861",
+   "work\\extract\\2882_2024_pairs.jsonl": "11fd37896b1c6137cf7c9fd49fb0f47e0f396633aa6cc2b2d17429bcd56bf92f",
+   "work\\extract\\2882_2025_pairs.jsonl": "95d2e217af66808bd8c570c5332057586603c952ef4f3486495038fa8a0ae735"
+  }
+ },
+ "version": 2,
+ "params": {
+  "container_min_area": 0.02,
+  "container_max_area": 0.9,
+  "heading_levels": 3,
+  "container_rect_fill": 0.9,
+  "colour_tolerance": 0.02,
+  "inside_container": 0.75,
+  "heading_min_ratio": 1.15,
+  "heading_min_pages": 3,
+  "heading_max_chars": 50,
+  "split_size_jump": 0.2,
+  "column_gap": 3,
+  "sparse_max_chars": 20,
+  "slot_tolerance": 4,
+  "repeat_heading_ratio": 1.5,
+  "repeat_heading_max_share": 0.25,
+  "caption_max_lines": 3,
+  "picture_unit_max_area": 0.6,
+  "garbled_box_share": 0.5,
+  "panel_area": 0.8
+ },
+ "tag": "5firms",
+ "out_dir": "D:\\accounting\\esg_reuse_kit\\work\\page_graph",
+ "download_check": "D:\\accounting\\esg_reuse_kit\\results\\download_check_20261018_1603.json",
+ "skipped_image_only": [],
+ "errors": {},
+ "seconds": 39.6,
+ "totals": {
+  "pages_with_pictures": 1358,
+  "picture_records": 7231,
+  "pictures_visible_cut": 272,
+  "boxes": 50849,
+  "running_boxes": 7943,
+  "repeated_title_boxes": 16,
+  "containers": 3916,
+  "panel_containers": 34,
+  "blocks_split": 7089,
+  "lines_merged": 26934,
+  "lines_joined": 8678,
+  "paragraph_cuts": 3646,
+  "reports": 15,
+  "roles": {
+   "h2": 642,
+   "body": 35138,
+   "caption": 913,
+   "run": 7943,
+   "h3": 5274,
+   "note": 521,
+   "h1": 357,
+   "garbled": 61
+  },
+  "fills_dropped": {
+   "hidden_later": 668,
+   "not_rectangle": 4387,
+   "picture_tint": 174,
+   "same_colour_as_under": 257,
+   "page_background": 102
+  },
+  "text_dropped": {
+   "hidden_spans": 91,
+   "hidden_chars": 568,
+   "duplicate_spans": 139,
+   "duplicate_chars": 503
+  },
+  "issues": {
+   "hidden_dropped": 91,
+   "centre_inside": 424,
+   "garbled": 220,
+   "doubled": 18,
+   "interleaved": 8
+  },
+  "issue_pages": {
+   "hidden_dropped": 20,
+   "centre_inside": 173,
+   "garbled": 103,
+   "doubled": 11,
+   "interleaved": 4
+  },
+  "garbled_chars": 3394,
+  "chars": 1255927,
+  "hidden_test_candidate_spans": 3289,
+  "hidden_test_errors": 0,
+  "running_keys_checked": 15,
+  "running_keys_same": 15
+ },
+ "regression_checks": [
+  {
+   "report": "2610_2025",
+   "page": 43,
+   "check": "paragraph wrapping around a photo is one box, not a caption",
+   "ok": true,
+   "detail": [
+    [
+     "b022",
+     6,
+     "body",
+     "2025 年華信航空陸續引進二架ATR "
+    ]
+   ]
+  },
+  {
+   "report": "2610_2024",
+   "page": 38,
+   "check": "7-line paragraph is one box (was one box per line)",
+   "ok": true,
+   "detail": [
+    [
+     "b004",
+     7,
+     "body"
+    ]
+   ]
+  },
+  {
+   "report": "1707_2025",
+   "page": 103,
+   "check": "4-line paragraph under a formula with a smaller line pitch is one box",
+   "ok": true,
+   "detail": [
+    [
+     "b097",
+     4,
+     "葡萄王生技2025 年共有4 件工傷事故，類型主為夾傷等計工"
+    ]
+   ]
+  },
+  {
+   "report": "2882_2025",
+   "page": 18,
+   "check": "no interleaved or per-line boxes",
+   "ok": true,
+   "detail": {
+    "hidden_dropped": 2
+   }
+  },
+  {
+   "report": "2882_2025",
+   "page": 15,
+   "check": "page title '1.1 永續治理與管理' is not running",
+   "ok": true,
+   "detail": [
+    [
+     "b000",
+     22.0,
+     false,
+     "h2"
+    ],
+    [
+     "b005",
+     9.35,
+     true,
+     "h3"
+    ]
+   ]
+  },
+  {
+   "report": "2882_2025",
+   "page": 18,
+   "check": "title under the later picture is dropped as invisible",
+   "ok": true,
+   "detail": {
+    "boxes": [],
+    "text_dropped": {
+     "hidden_spans": 2,
+     "hidden_chars": 13
+    }
+   }
+  },
+  {
+   "report": "1101_2023",
+   "page": 9,
+   "check": "text under a see-through picture is kept",
+   "ok": true,
+   "detail": {
+    "boxes": [
+     "b000",
+     "b001",
+     "b002",
+     "b003"
+    ],
+    "text_dropped": {}
+   }
+  },
+  {
+   "report": "2610_2025",
+   "page": 26,
+   "check": "page number drawn three times is one running '26'",
+   "ok": true,
+   "detail": {
+    "doubled": [],
+    "page_no": [
+     "b072"
+    ]
+   }
+  },
+  {
+   "report": "1707_2024",
+   "page": null,
+   "check": "body text not counted as bold (DemiLight)",
+   "ok": true,
+   "detail": {
+    "body_bold_share": 0.008
+   }
+  },
+  {
+   "report": "2882_2023",
+   "page": null,
+   "check": "body text not counted as bold (DemiLight)",
+   "ok": true,
+   "detail": {
+    "body_bold_share": 0.001
+   }
+  },
+  {
+   "report": "2882_2024",
+   "page": null,
+   "check": "body text not counted as bold (DemiLight)",
+   "ok": true,
+   "detail": {
+    "body_bold_share": 0.0
+   }
+  }
+ ],
+ "per_report": {
+  "1101_2023": {
+   "report": "1101_2023",
+   "version": 2,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\1101_2023.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\1101_2023_pairs.jsonl",
+   "pairs_sha256": "21a0f2ca800a015a4ed123f311466a773be6fa01d2da14bc119017c18afce934",
+   "params_sha256": "0617a4792232920b035f83f3abad66020d1a9557a6285c8c98f1cf52c901b650",
+   "pages": 216,
+   "picture_records": 414,
+   "pages_with_pictures": 146,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 59,
+   "running_keys_check": {
+    "same": true,
+    "keys": 59,
+    "keys_all_dict": 59,
+    "slot_positions": 1747,
+    "slot_positions_all_dict": 1747
+   },
+   "body_size_for_running": 8.5,
+   "font": {
+    "body": 8.5,
+    "threshold": 9.77,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 19.0,
+      "max": 28.0,
+      "sizes": {
+       "19.0": 5,
+       "21.0": 31,
+       "25.0": 6,
+       "26.0": 11,
+       "28.0": 4
+      },
+      "pages": 50,
+      "boxes": 66,
+      "hi": null,
+      "lo": 18.49
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 13.0,
+      "max": 18.0,
+      "sizes": {
+       "13.0": 7,
+       "13.5": 3,
+       "15.0": 9,
+       "15.5": 21,
+       "16.0": 3,
+       "18.0": 3
+      },
+      "pages": 38,
+      "boxes": 112,
+      "hi": 18.49,
+      "lo": 12.49
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 10.0,
+      "max": 12.0,
+      "sizes": {
+       "10.0": 53,
+       "11.0": 116,
+       "12.0": 9
+      },
+      "pages": 123,
+      "boxes": 493,
+      "hi": 12.49,
+      "lo": 9.77
+     }
+    ],
+    "method": "size_clusters",
+    "anchor": null,
+    "body_bold_share": 0.083,
+    "size_chars": {
+     "8.5": 86924,
+     "8.0": 5739,
+     "9.0": 5178,
+     "6.0": 4268,
+     "11.0": 3984,
+     "7.0": 3008,
+     "10.0": 2525,
+     "6.5": 1273,
+     "7.5": 892,
+     "4.0": 588,
+     "15.5": 450,
+     "5.5": 412,
+     "13.0": 347,
+     "21.0": 333,
+     "15.0": 299,
+     "12.0": 260,
+     "9.5": 206,
+     "5.0": 187,
+     "26.0": 148,
+     "3.5": 125
+    },
+    "heading_size_pages": {
+     "10.0": 53,
+     "10.5": 1,
+     "11.0": 116,
+     "11.5": 1,
+     "12.0": 9,
+     "12.5": 1,
+     "13.0": 7,
+     "13.5": 3,
+     "14.0": 2,
+     "15.0": 9,
+     "15.5": 21,
+     "16.0": 3,
+     "17.0": 1,
+     "18.0": 3,
+     "19.0": 5,
+     "20.0": 2,
+     "20.5": 1,
+     "21.0": 31,
+     "22.0": 1,
+     "24.0": 1,
+     "24.5": 1,
+     "25.0": 6,
+     "26.0": 11,
+     "28.0": 4,
+     "29.0": 1,
+     "30.0": 1,
+     "33.5": 1,
+     "34.5": 1,
+     "35.5": 1,
+     "37.5": 1
+    },
+    "section_numbered_pages": {
+     "10.0": 0,
+     "11.0": 0,
+     "12.0": 0,
+     "13.0": 0,
+     "13.5": 0,
+     "15.0": 1,
+     "15.5": 0,
+     "16.0": 0,
+     "18.0": 0,
+     "19.0": 0,
+     "21.0": 0,
+     "25.0": 0,
+     "26.0": 0,
+     "28.0": 0,
+     "29.0": 1
+    }
+   },
+   "boxes": 4580,
+   "running_boxes": 702,
+   "repeated_title_boxes": 0,
+   "roles": {
+    "body": 2748,
+    "h2": 119,
+    "h1": 80,
+    "h3": 821,
+    "run": 702,
+    "caption": 89,
+    "note": 21
+   },
+   "containers": 254,
+   "panel_containers": 2,
+   "pictures_visible_cut": 42,
+   "fills_dropped": {
+    "page_background": 9,
+    "not_rectangle": 89,
+    "hidden_later": 31,
+    "same_colour_as_under": 7,
+    "picture_tint": 2
+   },
+   "text_dropped": {
+    "duplicate_spans": 3,
+    "duplicate_chars": 17
+   },
+   "hidden_test": {
+    "candidate_spans": 554,
+    "errors": 0,
+    "last_error": null
+   },
+   "garbled": {
+    "garbled_chars": 22,
+    "chars": 126183,
+    "boxes_with_garbled": 9,
+    "share": 0.0002
+   },
+   "blocks_split": 440,
+   "lines_merged": 3919,
+   "lines_joined": 590,
+   "paragraph_cuts": 306,
+   "issues": {
+    "centre_inside": 84,
+    "garbled": 2,
+    "doubled": 1
+   },
+   "issue_pages": {
+    "centre_inside": 31,
+    "garbled": 2,
+    "doubled": 1
+   },
+   "seconds": 19.1
+  },
+  "1101_2024": {
+   "report": "1101_2024",
+   "version": 2,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\1101_2024.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\1101_2024_pairs.jsonl",
+   "pairs_sha256": "fd68ef9f3a84c1778e3b3d375c42ce8ed2553875f8794167cb8d7c7476c3d592",
+   "params_sha256": "0617a4792232920b035f83f3abad66020d1a9557a6285c8c98f1cf52c901b650",
+   "pages": 269,
+   "picture_records": 159,
+   "pages_with_pictures": 115,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 33,
+   "running_keys_check": {
+    "same": true,
+    "keys": 33,
+    "keys_all_dict": 33,
+    "slot_positions": 2207,
+    "slot_positions_all_dict": 2207
+   },
+   "body_size_for_running": 9.0,
+   "font": {
+    "body": 9.0,
+    "threshold": 10.35,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 20.0,
+      "max": 42.0,
+      "sizes": {
+       "20.0": 6,
+       "21.0": 18,
+       "25.0": 17,
+       "26.0": 4,
+       "42.0": 5
+      },
+      "pages": 48,
+      "boxes": 63,
+      "hi": null,
+      "lo": 19.49
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 15.0,
+      "max": 19.0,
+      "sizes": {
+       "15.0": 36,
+       "17.0": 8,
+       "18.0": 7,
+       "19.0": 9
+      },
+      "pages": 54,
+      "boxes": 74,
+      "hi": 19.49,
+      "lo": 13.96
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 11.0,
+      "max": 13.0,
+      "sizes": {
+       "11.0": 51,
+       "13.0": 7
+      },
+      "pages": 57,
+      "boxes": 104,
+      "hi": 13.96,
+      "lo": 10.35
+     }
+    ],
+    "method": "size_clusters",
+    "anchor": null,
+    "body_bold_share": 0.056,
+    "size_chars": {
+     "9.0": 55097,
+     "7.0": 3323,
+     "8.0": 1819,
+     "11.0": 1398,
+     "10.0": 1322,
+     "8.5": 853,
+     "15.0": 447,
+     "21.0": 420,
+     "5.0": 323,
+     "7.5": 286,
+     "19.0": 190,
+     "25.0": 163,
+     "13.0": 162,
+     "17.0": 119,
+     "9.5": 111,
+     "6.5": 94,
+     "20.0": 90,
+     "4.5": 76
+    },
+    "heading_size_pages": {
+     "10.5": 2,
+     "11.0": 51,
+     "12.5": 1,
+     "13.0": 7,
+     "13.5": 1,
+     "14.0": 2,
+     "15.0": 36,
+     "15.5": 2,
+     "16.0": 1,
+     "17.0": 8,
+     "17.5": 1,
+     "18.0": 7,
+     "19.0": 9,
+     "19.5": 1,
+     "20.0": 6,
+     "21.0": 18,
+     "22.0": 1,
+     "23.0": 2,
+     "23.5": 1,
+     "24.0": 2,
+     "25.0": 17,
+     "26.0": 4,
+     "27.5": 1,
+     "28.0": 1,
+     "30.0": 2,
+     "30.5": 1,
+     "31.0": 1,
+     "31.5": 1,
+     "33.5": 1,
+     "36.0": 1,
+     "36.5": 1,
+     "40.0": 1,
+     "42.0": 5
+    },
+    "section_numbered_pages": {
+     "11.0": 0,
+     "13.0": 0,
+     "15.0": 0,
+     "15.5": 1,
+     "17.0": 0,
+     "18.0": 0,
+     "19.0": 0,
+     "20.0": 0,
+     "21.0": 0,
+     "25.0": 0,
+     "26.0": 0,
+     "42.0": 0
+    }
+   },
+   "boxes": 2223,
+   "running_boxes": 339,
+   "repeated_title_boxes": 0,
+   "roles": {
+    "body": 1344,
+    "h2": 88,
+    "h1": 87,
+    "run": 339,
+    "garbled": 21,
+    "h3": 287,
+    "caption": 45,
+    "note": 12
+   },
+   "containers": 214,
+   "panel_containers": 7,
+   "pictures_visible_cut": 1,
+   "fills_dropped": {
+    "page_background": 19,
+    "not_rectangle": 44,
+    "picture_tint": 13,
+    "same_colour_as_under": 14,
+    "hidden_later": 8
+   },
+   "text_dropped": {},
+   "hidden_test": {
+    "candidate_spans": 20,
+    "errors": 0,
+    "last_error": null
+   },
+   "garbled": {
+    "garbled_chars": 320,
+    "chars": 78916,
+    "boxes_with_garbled": 32,
+    "share": 0.0041
+   },
+   "blocks_split": 228,
+   "lines_merged": 2126,
+   "lines_joined": 382,
+   "paragraph_cuts": 79,
+   "issues": {
+    "garbled": 26,
+    "centre_inside": 12
+   },
+   "issue_pages": {
+    "garbled": 13,
+    "centre_inside": 8
+   },
+   "seconds": 9.6
+  },
+  "1101_2025": {
+   "report": "1101_2025",
+   "version": 2,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\1101_2025.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\1101_2025_pairs.jsonl",
+   "pairs_sha256": "7f72b08706230c879dd7699c9f8a66ef8807f71858c18bd907c3372289cbe4e9",
+   "params_sha256": "0617a4792232920b035f83f3abad66020d1a9557a6285c8c98f1cf52c901b650",
+   "pages": 235,
+   "picture_records": 280,
+   "pages_with_pictures": 130,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 124,
+   "running_keys_check": {
+    "same": true,
+    "keys": 124,
+    "keys_all_dict": 124,
+    "slot_positions": 7133,
+    "slot_positions_all_dict": 7133
+   },
+   "body_size_for_running": 9.0,
+   "font": {
+    "body": 9.0,
+    "threshold": 10.35,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 38.0,
+      "max": 61.0,
+      "sizes": {
+       "38.0": 5,
+       "40.5": 6,
+       "61.0": 6
+      },
+      "pages": 6,
+      "boxes": 18,
+      "hi": null,
+      "lo": 33.76
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 20.0,
+      "max": 30.0,
+      "sizes": {
+       "20.0": 3,
+       "22.0": 4,
+       "25.0": 40,
+       "30.0": 3
+      },
+      "pages": 48,
+      "boxes": 55,
+      "hi": 33.76,
+      "lo": 18.97
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 10.5,
+      "max": 18.0,
+      "sizes": {
+       "10.5": 3,
+       "11.0": 15,
+       "12.0": 10,
+       "13.0": 34,
+       "15.0": 84,
+       "16.0": 5,
+       "18.0": 6
+      },
+      "pages": 112,
+      "boxes": 308,
+      "hi": 18.97,
+      "lo": 10.35
+     }
+    ],
+    "method": "size_clusters",
+    "anchor": null,
+    "body_bold_share": 0.062,
+    "size_chars": {
+     "9.0": 76557,
+     "8.0": 6453,
+     "7.0": 4326,
+     "10.0": 2648,
+     "15.0": 2133,
+     "8.5": 955,
+     "13.0": 825,
+     "11.0": 540,
+     "12.0": 522,
+     "7.5": 506,
+     "25.0": 406,
+     "6.0": 306,
+     "9.5": 261,
+     "5.0": 249,
+     "22.0": 148,
+     "6.5": 127
+    },
+    "heading_size_pages": {
+     "10.5": 3,
+     "11.0": 15,
+     "11.5": 1,
+     "12.0": 10,
+     "12.5": 2,
+     "13.0": 34,
+     "13.5": 1,
+     "14.0": 1,
+     "15.0": 84,
+     "15.5": 1,
+     "16.0": 5,
+     "16.5": 2,
+     "17.0": 2,
+     "17.5": 1,
+     "18.0": 6,
+     "19.0": 2,
+     "20.0": 3,
+     "21.5": 1,
+     "22.0": 4,
+     "23.0": 1,
+     "23.5": 2,
+     "24.0": 1,
+     "25.0": 40,
+     "27.0": 1,
+     "28.0": 1,
+     "29.5": 1,
+     "30.0": 3,
+     "31.5": 1,
+     "34.0": 2,
+     "35.0": 1,
+     "35.5": 1,
+     "38.0": 5,
+     "38.5": 1,
+     "40.5": 6,
+     "43.0": 1,
+     "59.0": 1,
+     "61.0": 6,
+     "106.0": 1
+    },
+    "section_numbered_pages": {
+     "10.5": 0,
+     "11.0": 0,
+     "12.0": 0,
+     "13.0": 0,
+     "15.0": 0,
+     "16.0": 0,
+     "18.0": 0,
+     "20.0": 0,
+     "22.0": 0,
+     "25.0": 0,
+     "30.0": 0,
+     "38.0": 0,
+     "40.5": 0,
+     "61.0": 0
+    }
+   },
+   "boxes": 3838,
+   "running_boxes": 936,
+   "repeated_title_boxes": 0,
+   "roles": {
+    "body": 2053,
+    "h2": 68,
+    "h3": 647,
+    "caption": 80,
+    "run": 936,
+    "garbled": 1,
+    "note": 27,
+    "h1": 26
+   },
+   "containers": 445,
+   "panel_containers": 2,
+   "pictures_visible_cut": 21,
+   "fills_dropped": {
+    "not_rectangle": 211,
+    "page_background": 36,
+    "hidden_later": 44,
+    "same_colour_as_under": 13,
+    "picture_tint": 10
+   },
+   "text_dropped": {},
+   "hidden_test": {
+    "candidate_spans": 244,
+    "errors": 0,
+    "last_error": null
+   },
+   "garbled": {
+    "garbled_chars": 19,
+    "chars": 116470,
+    "boxes_with_garbled": 4,
+    "share": 0.0002
+   },
+   "blocks_split": 274,
+   "lines_merged": 5615,
+   "lines_joined": 187,
+   "paragraph_cuts": 173,
+   "issues": {
+    "garbled": 1,
+    "centre_inside": 22
+   },
+   "issue_pages": {
+    "garbled": 1,
+    "centre_inside": 13
+   },
+   "seconds": 20.2
+  },
+  "1707_2023": {
+   "report": "1707_2023",
+   "version": 2,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\1707_2023.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\1707_2023_pairs.jsonl",
+   "pairs_sha256": "5342dcd6276c768ab465ccbd3783f9ff67272c82f03ee3d2c3b394255a96c33c",
+   "params_sha256": "0617a4792232920b035f83f3abad66020d1a9557a6285c8c98f1cf52c901b650",
+   "pages": 143,
+   "picture_records": 118,
+   "pages_with_pictures": 62,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 12,
+   "running_keys_check": {
+    "same": true,
+    "keys": 12,
+    "keys_all_dict": 12,
+    "slot_positions": 181,
+    "slot_positions_all_dict": 181
+   },
+   "body_size_for_running": 9.0,
+   "font": {
+    "body": 9.0,
+    "threshold": 10.35,
+    "bands": [
+     {
+      "level": 2,
+      "name": "section",
+      "min": 18.0,
+      "max": 18.0,
+      "sizes": {
+       "18.0": 32
+      },
+      "pages": 32,
+      "boxes": 35,
+      "hi": null,
+      "lo": 15.87
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 11.0,
+      "max": 14.0,
+      "sizes": {
+       "11.0": 5,
+       "12.0": 37,
+       "14.0": 40
+      },
+      "pages": 53,
+      "boxes": 180,
+      "hi": 15.87,
+      "lo": 10.35
+     }
+    ],
+    "method": "numbered_anchor",
+    "anchor": 18.0,
+    "body_bold_share": 0.014,
+    "size_chars": {
+     "9.0": 33880,
+     "8.0": 7962,
+     "7.0": 6440,
+     "8.5": 3828,
+     "6.5": 3303,
+     "6.0": 2443,
+     "14.0": 1325,
+     "12.0": 890,
+     "10.0": 469,
+     "18.0": 386,
+     "5.0": 338,
+     "5.5": 301,
+     "7.5": 103,
+     "10.5": 84,
+     "11.0": 80
+    },
+    "heading_size_pages": {
+     "10.5": 1,
+     "11.0": 5,
+     "12.0": 37,
+     "13.5": 1,
+     "14.0": 40,
+     "14.5": 1,
+     "15.5": 2,
+     "16.0": 1,
+     "18.0": 32
+    },
+    "section_numbered_pages": {
+     "11.0": 0,
+     "12.0": 1,
+     "14.0": 1,
+     "18.0": 19
+    }
+   },
+   "boxes": 2316,
+   "running_boxes": 222,
+   "repeated_title_boxes": 1,
+   "roles": {
+    "h2": 42,
+    "body": 1761,
+    "caption": 32,
+    "run": 222,
+    "h3": 249,
+    "note": 10
+   },
+   "containers": 190,
+   "panel_containers": 5,
+   "pictures_visible_cut": 8,
+   "fills_dropped": {
+    "hidden_later": 14,
+    "not_rectangle": 31,
+    "picture_tint": 1,
+    "same_colour_as_under": 6,
+    "page_background": 1
+   },
+   "text_dropped": {
+    "hidden_spans": 41,
+    "hidden_chars": 135,
+    "duplicate_spans": 59,
+    "duplicate_chars": 221
+   },
+   "hidden_test": {
+    "candidate_spans": 121,
+    "errors": 0,
+    "last_error": null
+   },
+   "garbled": {
+    "garbled_chars": 7,
+    "chars": 65557,
+    "boxes_with_garbled": 3,
+    "share": 0.0001
+   },
+   "blocks_split": 489,
+   "lines_merged": 1127,
+   "lines_joined": 369,
+   "paragraph_cuts": 252,
+   "issues": {
+    "hidden_dropped": 41,
+    "centre_inside": 12
+   },
+   "issue_pages": {
+    "hidden_dropped": 5,
+    "centre_inside": 5
+   },
+   "seconds": 3.0
+  },
+  "1707_2024": {
+   "report": "1707_2024",
+   "version": 2,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\1707_2024.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\1707_2024_pairs.jsonl",
+   "pairs_sha256": "39598a5628fe77658b483806d72d15ae3ad08ef3712bb66831f293a3c6024632",
+   "params_sha256": "0617a4792232920b035f83f3abad66020d1a9557a6285c8c98f1cf52c901b650",
+   "pages": 149,
+   "picture_records": 129,
+   "pages_with_pictures": 76,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 24,
+   "running_keys_check": {
+    "same": true,
+    "keys": 24,
+    "keys_all_dict": 24,
+    "slot_positions": 410,
+    "slot_positions_all_dict": 410
+   },
+   "body_size_for_running": 8.0,
+   "font": {
+    "body": 8.0,
+    "threshold": 9.2,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 45.0,
+      "max": 45.0,
+      "sizes": {
+       "45.0": 11
+      },
+      "pages": 11,
+      "boxes": 11,
+      "hi": null,
+      "lo": 28.46
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 18.0,
+      "max": 18.0,
+      "sizes": {
+       "18.0": 29
+      },
+      "pages": 29,
+      "boxes": 31,
+      "hi": 28.46,
+      "lo": 15.87
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 10.0,
+      "max": 14.0,
+      "sizes": {
+       "10.0": 18,
+       "11.0": 4,
+       "12.0": 38,
+       "13.0": 9,
+       "14.0": 44
+      },
+      "pages": 63,
+      "boxes": 264,
+      "hi": 15.87,
+      "lo": 9.2
+     }
+    ],
+    "method": "numbered_anchor",
+    "anchor": 18.0,
+    "body_bold_share": 0.008,
+    "size_chars": {
+     "8.0": 34631,
+     "7.0": 8965,
+     "6.5": 5767,
+     "7.5": 4399,
+     "9.0": 2271,
+     "6.0": 1607,
+     "14.0": 1249,
+     "12.0": 1029,
+     "5.5": 807,
+     "13.0": 663,
+     "8.5": 458,
+     "5.0": 367,
+     "10.0": 342,
+     "18.0": 267,
+     "11.0": 172,
+     "11.5": 137,
+     "4.0": 129,
+     "4.5": 104,
+     "45.0": 83,
+     "9.5": 70
+    },
+    "heading_size_pages": {
+     "9.5": 1,
+     "10.0": 18,
+     "10.5": 2,
+     "11.0": 4,
+     "11.5": 1,
+     "12.0": 38,
+     "12.5": 1,
+     "13.0": 9,
+     "14.0": 44,
+     "14.5": 1,
+     "15.0": 1,
+     "15.5": 1,
+     "16.0": 2,
+     "16.5": 1,
+     "18.0": 29,
+     "19.0": 1,
+     "20.0": 1,
+     "23.0": 1,
+     "23.5": 1,
+     "45.0": 11
+    },
+    "section_numbered_pages": {
+     "10.0": 0,
+     "11.0": 0,
+     "12.0": 0,
+     "13.0": 0,
+     "14.0": 0,
+     "18.0": 17,
+     "45.0": 0
+    }
+   },
+   "boxes": 2552,
+   "running_boxes": 250,
+   "repeated_title_boxes": 3,
+   "roles": {
+    "run": 250,
+    "h2": 47,
+    "body": 1840,
+    "h1": 11,
+    "h3": 363,
+    "caption": 28,
+    "note": 13
+   },
+   "containers": 217,
+   "panel_containers": 0,
+   "pictures_visible_cut": 4,
+   "fills_dropped": {
+    "page_background": 11,
+    "not_rectangle": 99,
+    "hidden_later": 4,
+    "same_colour_as_under": 4,
+    "picture_tint": 2
+   },
+   "text_dropped": {
+    "duplicate_spans": 1,
+    "duplicate_chars": 2,
+    "hidden_spans": 7,
+    "hidden_chars": 31
+   },
+   "hidden_test": {
+    "candidate_spans": 128,
+    "errors": 0,
+    "last_error": null
+   },
+   "garbled": {
+    "garbled_chars": 8,
+    "chars": 69439,
+    "boxes_with_garbled": 3,
+    "share": 0.0001
+   },
+   "blocks_split": 355,
+   "lines_merged": 1266,
+   "lines_joined": 284,
+   "paragraph_cuts": 355,
+   "issues": {
+    "garbled": 1,
+    "doubled": 2,
+    "centre_inside": 9,
+    "hidden_dropped": 7
+   },
+   "issue_pages": {
+    "garbled": 1,
+    "doubled": 1,
+    "centre_inside": 3,
+    "hidden_dropped": 1
+   },
+   "seconds": 3.9
+  },
+  "1707_2025": {
+   "report": "1707_2025",
+   "version": 2,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\1707_2025.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\1707_2025_pairs.jsonl",
+   "pairs_sha256": "60f79d86975e07779756352d03ef5a9b9836d5224454254225e893f0856b271a",
+   "params_sha256": "0617a4792232920b035f83f3abad66020d1a9557a6285c8c98f1cf52c901b650",
+   "pages": 155,
+   "picture_records": 116,
+   "pages_with_pictures": 69,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 26,
+   "running_keys_check": {
+    "same": true,
+    "keys": 26,
+    "keys_all_dict": 26,
+    "slot_positions": 397,
+    "slot_positions_all_dict": 397
+   },
+   "body_size_for_running": 8.0,
+   "font": {
+    "body": 8.0,
+    "threshold": 9.2,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 45.0,
+      "max": 45.0,
+      "sizes": {
+       "45.0": 11
+      },
+      "pages": 11,
+      "boxes": 11,
+      "hi": null,
+      "lo": 28.46
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 18.0,
+      "max": 18.0,
+      "sizes": {
+       "18.0": 23
+      },
+      "pages": 23,
+      "boxes": 28,
+      "hi": 28.46,
+      "lo": 16.97
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 10.0,
+      "max": 16.0,
+      "sizes": {
+       "10.0": 21,
+       "11.0": 3,
+       "12.0": 32,
+       "13.0": 7,
+       "14.0": 34,
+       "15.0": 4,
+       "16.0": 4
+      },
+      "pages": 58,
+      "boxes": 298,
+      "hi": 16.97,
+      "lo": 9.2
+     }
+    ],
+    "method": "numbered_anchor",
+    "anchor": 18.0,
+    "body_bold_share": 0.023,
+    "size_chars": {
+     "8.0": 44992,
+     "7.0": 2801,
+     "9.0": 1496,
+     "10.0": 1151,
+     "14.0": 1129,
+     "12.0": 866,
+     "6.0": 599,
+     "2.0": 593,
+     "13.0": 560,
+     "1.5": 558,
+     "5.5": 295,
+     "6.5": 225,
+     "18.0": 222,
+     "11.0": 197,
+     "16.0": 122,
+     "3.0": 115,
+     "7.5": 106,
+     "5.0": 102,
+     "45.0": 83,
+     "15.0": 82,
+     "4.0": 80,
+     "9.5": 66
+    },
+    "heading_size_pages": {
+     "9.5": 1,
+     "10.0": 21,
+     "11.0": 3,
+     "12.0": 32,
+     "12.5": 1,
+     "13.0": 7,
+     "14.0": 34,
+     "14.5": 1,
+     "15.0": 4,
+     "16.0": 4,
+     "18.0": 23,
+     "19.0": 1,
+     "20.0": 1,
+     "22.0": 1,
+     "45.0": 11
+    },
+    "section_numbered_pages": {
+     "10.0": 0,
+     "11.0": 0,
+     "12.0": 0,
+     "13.0": 0,
+     "14.0": 0,
+     "15.0": 0,
+     "16.0": 0,
+     "18.0": 15,
+     "45.0": 0
+    }
+   },
+   "boxes": 2091,
+   "running_boxes": 194,
+   "repeated_title_boxes": 2,
+   "roles": {
+    "h1": 12,
+    "h2": 34,
+    "h3": 398,
+    "run": 194,
+    "body": 1417,
+    "caption": 26,
+    "note": 10
+   },
+   "containers": 169,
+   "panel_containers": 0,
+   "pictures_visible_cut": 4,
+   "fills_dropped": {
+    "page_background": 11,
+    "not_rectangle": 52,
+    "hidden_later": 4,
+    "same_colour_as_under": 3,
+    "picture_tint": 2
+   },
+   "text_dropped": {
+    "hidden_spans": 1,
+    "hidden_chars": 1
+   },
+   "hidden_test": {
+    "candidate_spans": 15,
+    "errors": 0,
+    "last_error": null
+   },
+   "garbled": {
+    "garbled_chars": 0,
+    "chars": 61377,
+    "share": 0.0
+   },
+   "blocks_split": 356,
+   "lines_merged": 1059,
+   "lines_joined": 363,
+   "paragraph_cuts": 312,
+   "issues": {
+    "centre_inside": 7,
+    "hidden_dropped": 1
+   },
+   "issue_pages": {
+    "centre_inside": 7,
+    "hidden_dropped": 1
+   },
+   "seconds": 3.2
+  },
+  "2385_2023": {
+   "report": "2385_2023",
+   "version": 2,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2385_2023.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2385_2023_pairs.jsonl",
+   "pairs_sha256": "4a0f37b60ddce5de0980b1c6d9dd99611295bbd563962d733ab06fae1936fb50",
+   "params_sha256": "0617a4792232920b035f83f3abad66020d1a9557a6285c8c98f1cf52c901b650",
+   "pages": 113,
+   "picture_records": 52,
+   "pages_with_pictures": 19,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 24,
+   "running_keys_check": {
+    "same": true,
+    "keys": 24,
+    "keys_all_dict": 24,
+    "slot_positions": 882,
+    "slot_positions_all_dict": 882
+   },
+   "body_size_for_running": 11.0,
+   "font": {
+    "body": 11.0,
+    "threshold": 12.65,
+    "bands": [
+     {
+      "level": 2,
+      "name": "section",
+      "min": 14.0,
+      "max": 14.0,
+      "sizes": {
+       "14.0": 7
+      },
+      "pages": 7,
+      "boxes": 11,
+      "hi": null,
+      "lo": 12.65
+     }
+    ],
+    "method": "numbered_anchor",
+    "anchor": 14.0,
+    "body_bold_share": 0.001,
+    "size_chars": {
+     "11.0": 7284,
+     "10.0": 1106,
+     "9.0": 509,
+     "4.0": 468,
+     "5.0": 464,
+     "7.0": 263,
+     "6.0": 205,
+     "4.5": 136,
+     "5.5": 128,
+     "6.5": 118,
+     "14.0": 111,
+     "12.0": 95,
+     "8.0": 81,
+     "11.5": 50
+    },
+    "heading_size_pages": {
+     "14.0": 7
+    },
+    "section_numbered_pages": {
+     "14.0": 5
+    }
+   },
+   "boxes": 503,
+   "running_boxes": 169,
+   "repeated_title_boxes": 0,
+   "roles": {
+    "run": 169,
+    "body": 255,
+    "h2": 11,
+    "caption": 43,
+    "h3": 17,
+    "note": 8
+   },
+   "containers": 19,
+   "panel_containers": 0,
+   "pictures_visible_cut": 6,
+   "fills_dropped": {
+    "not_rectangle": 5,
+    "picture_tint": 9,
+    "hidden_later": 10,
+    "same_colour_as_under": 25
+   },
+   "text_dropped": {},
+   "hidden_test": {
+    "candidate_spans": 6,
+    "errors": 0,
+    "last_error": null
+   },
+   "garbled": {
+    "garbled_chars": 0,
+    "chars": 11450,
+    "share": 0.0
+   },
+   "blocks_split": 66,
+   "lines_merged": 217,
+   "lines_joined": 75,
+   "paragraph_cuts": 11,
+   "issues": {},
+   "issue_pages": {},
+   "seconds": 3.9
+  },
+  "2385_2024": {
+   "report": "2385_2024",
+   "version": 2,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2385_2024.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2385_2024_pairs.jsonl",
+   "pairs_sha256": "1ea3aaee04d067cc1746cca3a9b49462a7579a7ea571c184763c6af74557c107",
+   "params_sha256": "0617a4792232920b035f83f3abad66020d1a9557a6285c8c98f1cf52c901b650",
+   "pages": 122,
+   "picture_records": 4550,
+   "pages_with_pictures": 122,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 18,
+   "running_keys_check": {
+    "same": true,
+    "keys": 18,
+    "keys_all_dict": 18,
+    "slot_positions": 463,
+    "slot_positions_all_dict": 463
+   },
+   "body_size_for_running": 10.0,
+   "font": {
+    "body": 10.0,
+    "threshold": 11.5,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 16.0,
+      "max": 292.5,
+      "sizes": {
+       "16.0": 6,
+       "30.0": 6,
+       "292.5": 3
+      },
+      "pages": 12,
+      "boxes": 40,
+      "hi": null,
+      "lo": 15.49
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 14.5,
+      "max": 15.0,
+      "sizes": {
+       "14.5": 3,
+       "15.0": 68
+      },
+      "pages": 69,
+      "boxes": 88,
+      "hi": 15.49,
+      "lo": 14.25
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 12.0,
+      "max": 14.0,
+      "sizes": {
+       "12.0": 80,
+       "13.0": 47,
+       "14.0": 8
+      },
+      "pages": 96,
+      "boxes": 242,
+      "hi": 14.25,
+      "lo": 11.5
+     }
+    ],
+    "method": "numbered_anchor",
+    "anchor": 15.0,
+    "body_bold_share": 0.016,
+    "size_chars": {
+     "10.0": 41441,
+     "8.0": 23980,
+     "9.0": 10598,
+     "7.0": 5064,
+     "12.0": 1809,
+     "11.0": 1116,
+     "15.0": 1047,
+     "13.0": 667,
+     "9.5": 425,
+     "7.5": 271,
+     "6.5": 260,
+     "16.0": 234,
+     "14.0": 201,
+     "2.5": 100,
+     "3.0": 96
+    },
+    "heading_size_pages": {
+     "12.0": 80,
+     "13.0": 47,
+     "14.0": 8,
+     "14.5": 3,
+     "15.0": 68,
+     "15.5": 1,
+     "16.0": 6,
+     "18.0": 1,
+     "20.0": 1,
+     "30.0": 6,
+     "32.0": 2,
+     "292.5": 3
+    },
+    "section_numbered_pages": {
+     "12.0": 2,
+     "13.0": 0,
+     "14.0": 0,
+     "14.5": 0,
+     "15.0": 28,
+     "16.0": 0,
+     "30.0": 0,
+     "292.5": 1
+    }
+   },
+   "boxes": 5922,
+   "running_boxes": 1161,
+   "repeated_title_boxes": 0,
+   "roles": {
+    "h1": 56,
+    "body": 4164,
+    "h3": 377,
+    "h2": 88,
+    "run": 1161,
+    "note": 56,
+    "caption": 20
+   },
+   "containers": 228,
+   "panel_containers": 4,
+   "pictures_visible_cut": 83,
+   "fills_dropped": {
+    "not_rectangle": 88,
+    "same_colour_as_under": 129,
+    "hidden_later": 11
+   },
+   "text_dropped": {
+    "duplicate_spans": 4,
+    "duplicate_chars": 56
+   },
+   "hidden_test": {
+    "candidate_spans": 382,
+    "errors": 0,
+    "last_error": null
+   },
+   "garbled": {
+    "garbled_chars": 0,
+    "chars": 101891,
+    "share": 0.0
+   },
+   "blocks_split": 949,
+   "lines_merged": 1392,
+   "lines_joined": 908,
+   "paragraph_cuts": 251,
+   "issues": {
+    "centre_inside": 79,
+    "doubled": 2,
+    "interleaved": 2
+   },
+   "issue_pages": {
+    "centre_inside": 27,
+    "doubled": 2,
+    "interleaved": 1
+   },
+   "seconds": 27.2
+  },
+  "2385_2025": {
+   "report": "2385_2025",
+   "version": 2,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2385_2025.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2385_2025_pairs.jsonl",
+   "pairs_sha256": "dcd75dfe9830984541bb7a432ecc5613dc25403cc38f952137d65d1eb19a26b2",
+   "params_sha256": "0617a4792232920b035f83f3abad66020d1a9557a6285c8c98f1cf52c901b650",
+   "pages": 144,
+   "picture_records": 111,
+   "pages_with_pictures": 41,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 15,
+   "running_keys_check": {
+    "same": true,
+    "keys": 15,
+    "keys_all_dict": 15,
+    "slot_positions": 480,
+    "slot_positions_all_dict": 480
+   },
+   "body_size_for_running": 10.0,
+   "font": {
+    "body": 10.0,
+    "threshold": 11.5,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 39.5,
+      "max": 39.5,
+      "sizes": {
+       "39.5": 6
+      },
+      "pages": 6,
+      "boxes": 6,
+      "hi": null,
+      "lo": 24.34
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 15.0,
+      "max": 15.0,
+      "sizes": {
+       "15.0": 9
+      },
+      "pages": 9,
+      "boxes": 12,
+      "hi": 24.34,
+      "lo": 14.49
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 12.0,
+      "max": 14.0,
+      "sizes": {
+       "12.0": 3,
+       "13.0": 23,
+       "14.0": 14
+      },
+      "pages": 30,
+      "boxes": 62,
+      "hi": 14.49,
+      "lo": 11.5
+     }
+    ],
+    "method": "numbered_anchor",
+    "anchor": 15.0,
+    "body_bold_share": 0.002,
+    "size_chars": {
+     "10.0": 16012,
+     "9.0": 2028,
+     "8.0": 1694,
+     "7.0": 1230,
+     "12.0": 679,
+     "13.0": 482,
+     "11.0": 288,
+     "15.0": 151,
+     "9.5": 59,
+     "7.5": 41,
+     "16.0": 29,
+     "10.5": 24,
+     "14.0": 23
+    },
+    "heading_size_pages": {
+     "11.5": 2,
+     "12.0": 3,
+     "13.0": 23,
+     "14.0": 14,
+     "15.0": 9,
+     "16.0": 1,
+     "18.0": 1,
+     "30.0": 1,
+     "39.5": 6
+    },
+    "section_numbered_pages": {
+     "12.0": 1,
+     "13.0": 0,
+     "14.0": 0,
+     "15.0": 3,
+     "39.5": 0
+    }
+   },
+   "boxes": 1205,
+   "running_boxes": 381,
+   "repeated_title_boxes": 0,
+   "roles": {
+    "h2": 23,
+    "h3": 99,
+    "body": 652,
+    "h1": 7,
+    "run": 381,
+    "note": 10,
+    "caption": 33
+   },
+   "containers": 59,
+   "panel_containers": 0,
+   "pictures_visible_cut": 9,
+   "fills_dropped": {
+    "not_rectangle": 1066,
+    "page_background": 11,
+    "hidden_later": 20,
+    "picture_tint": 5,
+    "same_colour_as_under": 10
+   },
+   "text_dropped": {
+    "duplicate_spans": 4,
+    "duplicate_chars": 56
+   },
+   "hidden_test": {
+    "candidate_spans": 113,
+    "errors": 0,
+    "last_error": null
+   },
+   "garbled": {
+    "garbled_chars": 0,
+    "chars": 26961,
+    "share": 0.0
+   },
+   "blocks_split": 182,
+   "lines_merged": 438,
+   "lines_joined": 148,
+   "paragraph_cuts": 53,
+   "issues": {
+    "centre_inside": 1,
+    "doubled": 1
+   },
+   "issue_pages": {
+    "centre_inside": 1,
+    "doubled": 1
+   },
+   "seconds": 5.6
+  },
+  "2610_2023": {
+   "report": "2610_2023",
+   "version": 2,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2610_2023.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2610_2023_pairs.jsonl",
+   "pairs_sha256": "2ee5488b74970943520c1b5dac4b090fba3a968b7971483be5e9c25c69b04a84",
+   "params_sha256": "0617a4792232920b035f83f3abad66020d1a9557a6285c8c98f1cf52c901b650",
+   "pages": 153,
+   "picture_records": 110,
+   "pages_with_pictures": 35,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 24,
+   "running_keys_check": {
+    "same": true,
+    "keys": 24,
+    "keys_all_dict": 24,
+    "slot_positions": 271,
+    "slot_positions_all_dict": 271
+   },
+   "body_size_for_running": 8.0,
+   "font": {
+    "body": 8.0,
+    "threshold": 9.2,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 23.5,
+      "max": 23.5,
+      "sizes": {
+       "23.5": 5
+      },
+      "pages": 5,
+      "boxes": 5,
+      "hi": null,
+      "lo": 16.79
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 12.0,
+      "max": 12.0,
+      "sizes": {
+       "12.0": 11
+      },
+      "pages": 11,
+      "boxes": 27,
+      "hi": 16.79,
+      "lo": 11.49
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 11.0,
+      "max": 11.0,
+      "sizes": {
+       "11.0": 14
+      },
+      "pages": 14,
+      "boxes": 18,
+      "hi": 11.49,
+      "lo": 9.2
+     }
+    ],
+    "method": "size_clusters",
+    "anchor": null,
+    "body_bold_share": 0.002,
+    "size_chars": {
+     "8.0": 30472,
+     "7.0": 3376,
+     "9.0": 1037,
+     "12.0": 303,
+     "6.5": 161,
+     "11.0": 160,
+     "6.0": 120,
+     "13.0": 36
+    },
+    "heading_size_pages": {
+     "11.0": 14,
+     "12.0": 11,
+     "16.0": 1,
+     "19.0": 2,
+     "23.5": 5
+    },
+    "section_numbered_pages": {
+     "11.0": 0,
+     "12.0": 0,
+     "23.5": 0
+    }
+   },
+   "boxes": 933,
+   "running_boxes": 71,
+   "repeated_title_boxes": 1,
+   "roles": {
+    "body": 671,
+    "h1": 9,
+    "h2": 28,
+    "run": 71,
+    "h3": 78,
+    "note": 20,
+    "caption": 56
+   },
+   "containers": 51,
+   "panel_containers": 6,
+   "pictures_visible_cut": 14,
+   "fills_dropped": {
+    "page_background": 2,
+    "not_rectangle": 29,
+    "hidden_later": 34,
+    "same_colour_as_under": 4
+   },
+   "text_dropped": {
+    "duplicate_spans": 1,
+    "duplicate_chars": 2,
+    "hidden_spans": 9,
+    "hidden_chars": 33
+   },
+   "hidden_test": {
+    "candidate_spans": 10,
+    "errors": 0,
+    "last_error": null
+   },
+   "garbled": {
+    "garbled_chars": 0,
+    "chars": 36075,
+    "share": 0.0
+   },
+   "blocks_split": 106,
+   "lines_merged": 786,
+   "lines_joined": 80,
+   "paragraph_cuts": 111,
+   "issues": {
+    "hidden_dropped": 9,
+    "centre_inside": 7
+   },
+   "issue_pages": {
+    "hidden_dropped": 5,
+    "centre_inside": 6
+   },
+   "seconds": 10.4
+  },
+  "2610_2024": {
+   "report": "2610_2024",
+   "version": 2,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2610_2024.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2610_2024_pairs.jsonl",
+   "pairs_sha256": "7333d7f05d826c42dfabd828af4364c9d4729b5804ba391bbd65c7a6e75da5e7",
+   "params_sha256": "0617a4792232920b035f83f3abad66020d1a9557a6285c8c98f1cf52c901b650",
+   "pages": 147,
+   "picture_records": 51,
+   "pages_with_pictures": 25,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 58,
+   "running_keys_check": {
+    "same": true,
+    "keys": 58,
+    "keys_all_dict": 58,
+    "slot_positions": 1930,
+    "slot_positions_all_dict": 1930
+   },
+   "body_size_for_running": 8.0,
+   "font": {
+    "body": 8.0,
+    "threshold": 9.2,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 17.0,
+      "max": 17.0,
+      "sizes": {
+       "17.0": 7
+      },
+      "pages": 7,
+      "boxes": 7,
+      "hi": null,
+      "lo": 16.49
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 16.0,
+      "max": 16.0,
+      "sizes": {
+       "16.0": 4
+      },
+      "pages": 4,
+      "boxes": 5,
+      "hi": 16.49,
+      "lo": 12.96
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 10.0,
+      "max": 10.5,
+      "sizes": {
+       "10.0": 14,
+       "10.5": 5
+      },
+      "pages": 14,
+      "boxes": 35,
+      "hi": 12.96,
+      "lo": 9.2
+     }
+    ],
+    "method": "size_clusters",
+    "anchor": null,
+    "body_bold_share": 0.021,
+    "size_chars": {
+     "8.0": 20630,
+     "7.0": 2326,
+     "6.0": 1450,
+     "10.0": 363,
+     "6.5": 154,
+     "8.5": 110,
+     "16.0": 106,
+     "9.0": 86,
+     "17.0": 32
+    },
+    "heading_size_pages": {
+     "10.0": 14,
+     "10.5": 5,
+     "11.5": 1,
+     "16.0": 4,
+     "17.0": 7,
+     "48.0": 1,
+     "50.0": 2,
+     "50.5": 2
+    },
+    "section_numbered_pages": {
+     "10.0": 0,
+     "10.5": 0,
+     "16.0": 0,
+     "17.0": 0
+    }
+   },
+   "boxes": 825,
+   "running_boxes": 255,
+   "repeated_title_boxes": 0,
+   "roles": {
+    "run": 255,
+    "h1": 12,
+    "body": 441,
+    "h2": 5,
+    "h3": 74,
+    "caption": 32,
+    "note": 6
+   },
+   "containers": 53,
+   "panel_containers": 2,
+   "pictures_visible_cut": 2,
+   "fills_dropped": {
+    "hidden_later": 5
+   },
+   "text_dropped": {
+    "hidden_spans": 3,
+    "hidden_chars": 7,
+    "duplicate_spans": 3,
+    "duplicate_chars": 7
+   },
+   "hidden_test": {
+    "candidate_spans": 250,
+    "errors": 0,
+    "last_error": null
+   },
+   "garbled": {
+    "garbled_chars": 4,
+    "chars": 27494,
+    "boxes_with_garbled": 1,
+    "share": 0.0001
+   },
+   "blocks_split": 87,
+   "lines_merged": 555,
+   "lines_joined": 61,
+   "paragraph_cuts": 92,
+   "issues": {
+    "hidden_dropped": 3,
+    "centre_inside": 7,
+    "doubled": 1
+   },
+   "issue_pages": {
+    "hidden_dropped": 3,
+    "centre_inside": 3,
+    "doubled": 1
+   },
+   "seconds": 21.4
+  },
+  "2610_2025": {
+   "report": "2610_2025",
+   "version": 2,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2610_2025.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2610_2025_pairs.jsonl",
+   "pairs_sha256": "a0c4804cab819b53d349f7ae07625c46227333d75c509431aa2c535be5d90d1b",
+   "params_sha256": "0617a4792232920b035f83f3abad66020d1a9557a6285c8c98f1cf52c901b650",
+   "pages": 150,
+   "picture_records": 150,
+   "pages_with_pictures": 48,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 63,
+   "running_keys_check": {
+    "same": true,
+    "keys": 63,
+    "keys_all_dict": 63,
+    "slot_positions": 2119,
+    "slot_positions_all_dict": 2119
+   },
+   "body_size_for_running": 8.0,
+   "font": {
+    "body": 8.0,
+    "threshold": 9.2,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 38.0,
+      "max": 38.0,
+      "sizes": {
+       "38.0": 3
+      },
+      "pages": 3,
+      "boxes": 3,
+      "hi": null,
+      "lo": 30.82
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 24.0,
+      "max": 25.0,
+      "sizes": {
+       "24.0": 3,
+       "25.0": 5
+      },
+      "pages": 8,
+      "boxes": 8,
+      "hi": 30.82,
+      "lo": 20.2
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 9.5,
+      "max": 17.0,
+      "sizes": {
+       "9.5": 8,
+       "10.0": 6,
+       "10.5": 3,
+       "11.0": 14,
+       "14.0": 3,
+       "16.0": 9,
+       "17.0": 19
+      },
+      "pages": 37,
+      "boxes": 106,
+      "hi": 20.2,
+      "lo": 9.2
+     }
+    ],
+    "method": "numbered_anchor",
+    "anchor": 25.0,
+    "body_bold_share": 0.008,
+    "size_chars": {
+     "8.0": 37521,
+     "8.5": 4539,
+     "6.0": 3554,
+     "7.0": 2929,
+     "9.0": 1302,
+     "7.5": 835,
+     "6.5": 615,
+     "10.0": 396,
+     "16.0": 224,
+     "11.0": 217,
+     "17.0": 154,
+     "12.0": 79,
+     "9.5": 73
+    },
+    "heading_size_pages": {
+     "9.5": 8,
+     "10.0": 6,
+     "10.5": 3,
+     "11.0": 14,
+     "11.5": 1,
+     "12.0": 2,
+     "14.0": 3,
+     "14.5": 2,
+     "16.0": 9,
+     "17.0": 19,
+     "24.0": 3,
+     "25.0": 5,
+     "36.0": 2,
+     "38.0": 3
+    },
+    "section_numbered_pages": {
+     "9.5": 0,
+     "10.0": 0,
+     "10.5": 0,
+     "11.0": 0,
+     "14.0": 0,
+     "16.0": 0,
+     "17.0": 0,
+     "24.0": 1,
+     "25.0": 5,
+     "38.0": 0
+    }
+   },
+   "boxes": 1740,
+   "running_boxes": 470,
+   "repeated_title_boxes": 6,
+   "roles": {
+    "body": 939,
+    "h3": 229,
+    "run": 470,
+    "h1": 5,
+    "h2": 8,
+    "note": 17,
+    "caption": 72
+   },
+   "containers": 127,
+   "panel_containers": 0,
+   "pictures_visible_cut": 6,
+   "fills_dropped": {
+    "same_colour_as_under": 5,
+    "picture_tint": 1,
+    "hidden_later": 4
+   },
+   "text_dropped": {
+    "hidden_spans": 26,
+    "hidden_chars": 346,
+    "duplicate_spans": 55,
+    "duplicate_chars": 120
+   },
+   "hidden_test": {
+    "candidate_spans": 710,
+    "errors": 0,
+    "last_error": null
+   },
+   "garbled": {
+    "garbled_chars": 6,
+    "chars": 56912,
+    "boxes_with_garbled": 3,
+    "share": 0.0001
+   },
+   "blocks_split": 141,
+   "lines_merged": 1240,
+   "lines_joined": 156,
+   "paragraph_cuts": 117,
+   "issues": {
+    "hidden_dropped": 26,
+    "centre_inside": 14
+   },
+   "issue_pages": {
+    "hidden_dropped": 3,
+    "centre_inside": 5
+   },
+   "seconds": 29.6
+  },
+  "2882_2023": {
+   "report": "2882_2023",
+   "version": 2,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2882_2023.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2882_2023_pairs.jsonl",
+   "pairs_sha256": "7699452ff8fc8e5be8797e2186a785369307239522c16b276de7d9fbb30e2861",
+   "params_sha256": "0617a4792232920b035f83f3abad66020d1a9557a6285c8c98f1cf52c901b650",
+   "pages": 213,
+   "picture_records": 409,
+   "pages_with_pictures": 153,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 35,
+   "running_keys_check": {
+    "same": true,
+    "keys": 35,
+    "keys_all_dict": 35,
+    "slot_positions": 3047,
+    "slot_positions_all_dict": 3047
+   },
+   "body_size_for_running": 8.5,
+   "font": {
+    "body": 8.5,
+    "threshold": 9.77,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 24.0,
+      "max": 24.0,
+      "sizes": {
+       "24.0": 7
+      },
+      "pages": 7,
+      "boxes": 7,
+      "hi": null,
+      "lo": 20.78
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 18.0,
+      "max": 18.0,
+      "sizes": {
+       "18.0": 29
+      },
+      "pages": 29,
+      "boxes": 29,
+      "hi": 20.78,
+      "lo": 16.97
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 10.0,
+      "max": 16.0,
+      "sizes": {
+       "10.0": 68,
+       "10.5": 3,
+       "11.0": 100,
+       "12.0": 3,
+       "12.5": 37,
+       "14.0": 9,
+       "16.0": 19
+      },
+      "pages": 133,
+      "boxes": 453,
+      "hi": 16.97,
+      "lo": 9.77
+     }
+    ],
+    "method": "numbered_anchor",
+    "anchor": 18.0,
+    "body_bold_share": 0.001,
+    "size_chars": {
+     "8.5": 122665,
+     "8.0": 10319,
+     "7.0": 6740,
+     "10.0": 2078,
+     "11.0": 1953,
+     "9.0": 1713,
+     "9.5": 1058,
+     "12.5": 593,
+     "6.0": 482,
+     "16.0": 328,
+     "18.0": 276,
+     "7.5": 271,
+     "4.5": 174
+    },
+    "heading_size_pages": {
+     "10.0": 68,
+     "10.5": 3,
+     "11.0": 100,
+     "12.0": 3,
+     "12.5": 37,
+     "14.0": 9,
+     "16.0": 19,
+     "18.0": 29,
+     "24.0": 7
+    },
+    "section_numbered_pages": {
+     "10.0": 0,
+     "10.5": 0,
+     "11.0": 0,
+     "12.0": 0,
+     "12.5": 0,
+     "14.0": 0,
+     "16.0": 2,
+     "18.0": 24,
+     "24.0": 0
+    }
+   },
+   "boxes": 6959,
+   "running_boxes": 754,
+   "repeated_title_boxes": 0,
+   "roles": {
+    "body": 5450,
+    "h2": 29,
+    "h3": 466,
+    "run": 754,
+    "caption": 177,
+    "note": 76,
+    "h1": 7
+   },
+   "containers": 683,
+   "panel_containers": 6,
+   "pictures_visible_cut": 36,
+   "fills_dropped": {
+    "picture_tint": 47,
+    "not_rectangle": 83,
+    "hidden_later": 407,
+    "page_background": 2,
+    "same_colour_as_under": 9
+   },
+   "text_dropped": {
+    "duplicate_spans": 7,
+    "duplicate_chars": 14
+   },
+   "hidden_test": {
+    "candidate_spans": 410,
+    "errors": 0,
+    "last_error": null
+   },
+   "garbled": {
+    "garbled_chars": 0,
+    "chars": 161300,
+    "share": 0.0
+   },
+   "blocks_split": 1210,
+   "lines_merged": 3255,
+   "lines_joined": 1594,
+   "paragraph_cuts": 601,
+   "issues": {
+    "centre_inside": 42,
+    "doubled": 4,
+    "interleaved": 4
+   },
+   "issue_pages": {
+    "centre_inside": 14,
+    "doubled": 1,
+    "interleaved": 2
+   },
+   "seconds": 17.6
+  },
+  "2882_2024": {
+   "report": "2882_2024",
+   "version": 2,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2882_2024.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2882_2024_pairs.jsonl",
+   "pairs_sha256": "11fd37896b1c6137cf7c9fd49fb0f47e0f396633aa6cc2b2d17429bcd56bf92f",
+   "params_sha256": "0617a4792232920b035f83f3abad66020d1a9557a6285c8c98f1cf52c901b650",
+   "pages": 233,
+   "picture_records": 428,
+   "pages_with_pictures": 233,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 24,
+   "running_keys_check": {
+    "same": true,
+    "keys": 24,
+    "keys_all_dict": 24,
+    "slot_positions": 3061,
+    "slot_positions_all_dict": 3061
+   },
+   "body_size_for_running": 8.0,
+   "font": {
+    "body": 8.0,
+    "threshold": 9.2,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 16.0,
+      "max": 22.0,
+      "sizes": {
+       "16.0": 9,
+       "19.5": 7,
+       "22.0": 4
+      },
+      "pages": 20,
+      "boxes": 23,
+      "hi": null,
+      "lo": 14.97
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 14.0,
+      "max": 14.0,
+      "sizes": {
+       "14.0": 36
+      },
+      "pages": 36,
+      "boxes": 38,
+      "hi": 14.97,
+      "lo": 12.96
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 9.5,
+      "max": 12.0,
+      "sizes": {
+       "9.5": 5,
+       "10.0": 95,
+       "12.0": 122
+      },
+      "pages": 168,
+      "boxes": 417,
+      "hi": 12.96,
+      "lo": 9.2
+     }
+    ],
+    "method": "numbered_anchor",
+    "anchor": 14.0,
+    "body_bold_share": 0.0,
+    "size_chars": {
+     "8.0": 118833,
+     "8.5": 68761,
+     "7.5": 13720,
+     "10.0": 2503,
+     "12.0": 2436,
+     "2.5": 2358,
+     "9.0": 1248,
+     "7.0": 969,
+     "14.0": 535,
+     "6.5": 466,
+     "4.5": 386
+    },
+    "heading_size_pages": {
+     "9.5": 5,
+     "10.0": 95,
+     "12.0": 122,
+     "14.0": 36,
+     "15.0": 2,
+     "16.0": 9,
+     "18.0": 1,
+     "19.5": 7,
+     "21.0": 1,
+     "22.0": 4,
+     "30.5": 1,
+     "60.0": 1
+    },
+    "section_numbered_pages": {
+     "9.5": 0,
+     "10.0": 0,
+     "12.0": 0,
+     "14.0": 29,
+     "16.0": 0,
+     "19.5": 0,
+     "22.0": 0
+    }
+   },
+   "boxes": 11963,
+   "running_boxes": 1357,
+   "repeated_title_boxes": 3,
+   "roles": {
+    "h1": 37,
+    "body": 9664,
+    "h3": 551,
+    "run": 1357,
+    "h2": 38,
+    "caption": 95,
+    "note": 182,
+    "garbled": 39
+   },
+   "containers": 988,
+   "panel_containers": 0,
+   "pictures_visible_cut": 27,
+   "fills_dropped": {
+    "picture_tint": 73,
+    "not_rectangle": 2492,
+    "hidden_later": 72,
+    "same_colour_as_under": 19
+   },
+   "text_dropped": {
+    "hidden_spans": 2,
+    "hidden_chars": 2,
+    "duplicate_spans": 2,
+    "duplicate_chars": 8
+   },
+   "hidden_test": {
+    "candidate_spans": 273,
+    "errors": 0,
+    "last_error": null
+   },
+   "garbled": {
+    "garbled_chars": 3003,
+    "chars": 230891,
+    "boxes_with_garbled": 1094,
+    "share": 0.013
+   },
+   "blocks_split": 1795,
+   "lines_merged": 2415,
+   "lines_joined": 3239,
+   "paragraph_cuts": 617,
+   "issues": {
+    "garbled": 190,
+    "hidden_dropped": 2,
+    "centre_inside": 113,
+    "doubled": 7,
+    "interleaved": 2
+   },
+   "issue_pages": {
+    "garbled": 86,
+    "hidden_dropped": 1,
+    "centre_inside": 41,
+    "doubled": 4,
+    "interleaved": 1
+   },
+   "seconds": 15.8
+  },
+  "2882_2025": {
+   "report": "2882_2025",
+   "version": 2,
+   "pymupdf": "1.28.2",
+   "pdf": "D:\\accounting\\esg_reuse_kit\\data\\raw\\2882_2025.pdf",
+   "pairs": "D:\\accounting\\esg_reuse_kit\\work\\extract\\2882_2025_pairs.jsonl",
+   "pairs_sha256": "95d2e217af66808bd8c570c5332057586603c952ef4f3486495038fa8a0ae735",
+   "params_sha256": "0617a4792232920b035f83f3abad66020d1a9557a6285c8c98f1cf52c901b650",
+   "pages": 213,
+   "picture_records": 154,
+   "pages_with_pictures": 84,
+   "pages_rotated": 0,
+   "page_errors": {},
+   "running_keys": 72,
+   "running_keys_check": {
+    "same": true,
+    "keys": 72,
+    "keys_all_dict": 72,
+    "slot_positions": 3486,
+    "slot_positions_all_dict": 3486
+   },
+   "body_size_for_running": 8.5,
+   "font": {
+    "body": 8.5,
+    "threshold": 9.77,
+    "bands": [
+     {
+      "level": 1,
+      "name": "chapter",
+      "min": 47.5,
+      "max": 47.5,
+      "sizes": {
+       "47.5": 6
+      },
+      "pages": 6,
+      "boxes": 6,
+      "hi": null,
+      "lo": 32.33
+     },
+     {
+      "level": 2,
+      "name": "section",
+      "min": 22.0,
+      "max": 22.0,
+      "sizes": {
+       "22.0": 12
+      },
+      "pages": 12,
+      "boxes": 12,
+      "hi": 32.33,
+      "lo": 19.05
+     },
+     {
+      "level": 3,
+      "name": "subheading",
+      "min": 10.0,
+      "max": 16.5,
+      "sizes": {
+       "10.0": 49,
+       "11.0": 41,
+       "12.0": 35,
+       "12.5": 4,
+       "13.0": 11,
+       "13.5": 3,
+       "14.5": 4,
+       "15.5": 21,
+       "16.5": 5
+      },
+      "pages": 74,
+      "boxes": 462,
+      "hi": 19.05,
+      "lo": 9.77
+     }
+    ],
+    "method": "numbered_anchor",
+    "anchor": 22.0,
+    "body_bold_share": 0.014,
+    "size_chars": {
+     "8.5": 55527,
+     "7.5": 5230,
+     "7.0": 3793,
+     "10.0": 3689,
+     "8.0": 2445,
+     "11.0": 1260,
+     "10.5": 1083,
+     "9.0": 970,
+     "12.0": 559,
+     "13.0": 221,
+     "9.5": 207,
+     "4.5": 200,
+     "14.0": 175,
+     "15.5": 118,
+     "20.0": 116,
+     "13.5": 90
+    },
+    "heading_size_pages": {
+     "10.0": 49,
+     "11.0": 41,
+     "12.0": 35,
+     "12.5": 4,
+     "13.0": 11,
+     "13.5": 3,
+     "14.0": 2,
+     "14.5": 4,
+     "15.5": 21,
+     "16.5": 5,
+     "20.5": 1,
+     "22.0": 12,
+     "28.0": 1,
+     "43.0": 1,
+     "47.5": 6
+    },
+    "section_numbered_pages": {
+     "10.0": 0,
+     "11.0": 0,
+     "12.0": 0,
+     "12.5": 0,
+     "13.0": 1,
+     "13.5": 0,
+     "14.5": 0,
+     "15.5": 0,
+     "16.5": 0,
+     "22.0": 12,
+     "47.5": 0
+    }
+   },
+   "boxes": 3199,
+   "running_boxes": 682,
+   "repeated_title_boxes": 0,
+   "roles": {
+    "h1": 8,
+    "run": 682,
+    "body": 1739,
+    "h2": 14,
+    "h3": 618,
+    "caption": 85,
+    "note": 53
+   },
+   "containers": 219,
+   "panel_containers": 0,
+   "pictures_visible_cut": 9,
+   "fills_dropped": {
+    "not_rectangle": 98,
+    "same_colour_as_under": 9,
+    "picture_tint": 9
+   },
+   "text_dropped": {
+    "hidden_spans": 2,
+    "hidden_chars": 13
+   },
+   "hidden_test": {
+    "candidate_spans": 53,
+    "errors": 0,
+    "last_error": null
+   },
+   "garbled": {
+    "garbled_chars": 5,
+    "chars": 85011,
+    "boxes_with_garbled": 2,
+    "share": 0.0001
+   },
+   "blocks_split": 411,
+   "lines_merged": 1524,
+   "lines_joined": 242,
+   "paragraph_cuts": 316,
+   "issues": {
+    "hidden_dropped": 2,
+    "centre_inside": 15
+   },
+   "issue_pages": {
+    "hidden_dropped": 1,
+    "centre_inside": 9
+   },
+   "seconds": 6.6
+  }
+ }
+}

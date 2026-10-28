@@ -1,0 +1,361 @@
+{
+ "meta": {
+  "date": "2026-10-18T17:06:19+08:00",
+  "command": "python src/inspect_no_text.py --download-check results/download_check_20261018_1603.json --vector-check results/photo_filter_vector_20261018_1628.json",
+  "git": {
+   "commit": null,
+   "uncommitted_changes": null,
+   "note": "not run inside a git repository"
+  },
+  "python": "3.13.16",
+  "platform": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39",
+  "packages": {
+   "pymupdf": "1.28.2",
+   "pillow": "13.0.0"
+  },
+  "config_file": null,
+  "config": null,
+  "data_sha256": {
+   "results/download_check_20261018_1603.json": "616f0e6023ccfcc827dd2ce0d2c294eb97f39279bdffd0016e0d4e779636a739",
+   "results/photo_filter_vector_20261018_1628.json": "1bf3635912890122f9208bdbde5c9ddc7c106327e115f5ab1a835ddbb3641c48",
+   "data/raw/1776_2023.pdf": "eb328dafd80938fd4586ae6768db35b774020da193640e9a330c1a66fd80d81e",
+   "data/raw/2392_2023.pdf": "feb832f17722867ef3b6be03a603d95fa13dea7bbf6dca9f68a92038d30c6061",
+   "data/raw/2392_2024.pdf": "ef85a8294b62d42b8f59b455ef38575e2c4784b1f06d011ae4ffb52d7fa0ae10",
+   "data/raw/4174_2025.pdf": "57273bf2f00117aa6af8234843fd1453ed01382e26284297a7757e92b9107b37",
+   "data/raw/4934_2023.pdf": "e5df287e9b166d4680a08ba9d2f7ee2a89365bfe7c9138e316e8ea4e4d5aa3c5",
+   "data/raw/4934_2025.pdf": "3e96308b2f9e6c2fc5c4b17d5a0f13b8861d0566f3b58824545faba1e087595b",
+   "data/raw/6823_2023.pdf": "d3d63aa429c446e6dbcd89f8255bc3c235ed42b3ee4e752d77df3b0f3db99796"
+  }
+ },
+ "rule": "check_downloads.py counts a page as a text page when it has more than 20 non-space characters and marks a report image_only when no page is a text page. pages_with_any_text counts pages with any text at all.",
+ "method": "Every page checked for text; 12 evenly spaced pages per report measured. kind: outlines when the median page has >= 100 Bezier curves; otherwise full_page_image when the largest image covers >= 90% of the median page; otherwise tiles.",
+ "summary": {
+  "reports": 450,
+  "firms": 150,
+  "no_text_layer": 7,
+  "no_text_firms": [
+   "1776",
+   "2392",
+   "4174",
+   "4934",
+   "6823"
+  ],
+  "no_text_by_split": {
+   "test": 5,
+   "dev": 2
+  },
+  "no_text_by_kind": {
+   "outlines": [
+    "1776_2023",
+    "2392_2023",
+    "4934_2023"
+   ],
+   "full_page_image": [
+    "2392_2024",
+    "4934_2025",
+    "6823_2023"
+   ],
+   "tiles": [
+    "4174_2025"
+   ]
+  },
+  "no_text_with_any_text_page": [],
+  "firms_with_3_usable_years": 145,
+  "text_page_share_bins": {
+   "0%": 7,
+   "0–50%": 0,
+   "50–80%": 2,
+   "80–95%": 75,
+   "95–100%": 366
+  },
+  "lowest_nonzero_text_share": [
+   {
+    "report": "6409_2023",
+    "text_pages": 142,
+    "pages": 191,
+    "share": 0.743
+   },
+   {
+    "report": "4714_2024",
+    "text_pages": 67,
+    "pages": 86,
+    "share": 0.779
+   },
+   {
+    "report": "6790_2024",
+    "text_pages": 87,
+    "pages": 107,
+    "share": 0.813
+   },
+   {
+    "report": "6790_2025",
+    "text_pages": 98,
+    "pages": 119,
+    "share": 0.824
+   },
+   {
+    "report": "6790_2023",
+    "text_pages": 85,
+    "pages": 103,
+    "share": 0.825
+   }
+  ],
+  "extracted_images": {
+   "records": {
+    "these_reports": 1639,
+    "all_reports": 73881
+   },
+   "analysed": {
+    "these_reports": 1380,
+    "all_reports": 57056
+   }
+  }
+ },
+ "reports": [
+  {
+   "report": "1776_2023",
+   "firm": "展宇",
+   "split": "test",
+   "pages": 98,
+   "pages_with_any_text": 0,
+   "sampled_pages": [
+    1,
+    10,
+    19,
+    27,
+    36,
+    45,
+    54,
+    63,
+    72,
+    80,
+    89,
+    98
+   ],
+   "median_per_sampled_page": {
+    "fonts_listed": 0.0,
+    "text_operators": 0.0,
+    "images": 0.0,
+    "small_images": 0.0,
+    "largest_image_share": 0.0,
+    "image_cover_share": 0.0,
+    "bezier_curves": 13146.0
+   },
+   "text_operators_in_sampled_pages": 0,
+   "kind": "outlines",
+   "producer": "Microsoft: Print To PDF",
+   "creator": "",
+   "picture_page": 54
+  },
+  {
+   "report": "2392_2023",
+   "firm": "正崴",
+   "split": "test",
+   "pages": 116,
+   "pages_with_any_text": 0,
+   "sampled_pages": [
+    1,
+    11,
+    22,
+    32,
+    43,
+    53,
+    64,
+    74,
+    85,
+    95,
+    106,
+    116
+   ],
+   "median_per_sampled_page": {
+    "fonts_listed": 0.0,
+    "text_operators": 0.0,
+    "images": 39.5,
+    "small_images": 26.0,
+    "largest_image_share": 0.03,
+    "image_cover_share": 0.44,
+    "bezier_curves": 4811.5
+   },
+   "text_operators_in_sampled_pages": 0,
+   "kind": "outlines",
+   "producer": "Microsoft: Print To PDF",
+   "creator": "",
+   "picture_page": 64
+  },
+  {
+   "report": "2392_2024",
+   "firm": "正崴",
+   "split": "test",
+   "pages": 113,
+   "pages_with_any_text": 0,
+   "sampled_pages": [
+    1,
+    11,
+    21,
+    32,
+    42,
+    52,
+    62,
+    72,
+    82,
+    93,
+    103,
+    113
+   ],
+   "median_per_sampled_page": {
+    "fonts_listed": 14.0,
+    "text_operators": 0.0,
+    "images": 1.0,
+    "small_images": 0.0,
+    "largest_image_share": 1.0,
+    "image_cover_share": 1.0,
+    "bezier_curves": 0.0
+   },
+   "text_operators_in_sampled_pages": 0,
+   "kind": "full_page_image",
+   "producer": "",
+   "creator": "",
+   "picture_page": 62
+  },
+  {
+   "report": "4174_2025",
+   "firm": "浩鼎",
+   "split": "test",
+   "pages": 156,
+   "pages_with_any_text": 0,
+   "sampled_pages": [
+    1,
+    15,
+    29,
+    43,
+    57,
+    71,
+    86,
+    100,
+    114,
+    128,
+    142,
+    156
+   ],
+   "median_per_sampled_page": {
+    "fonts_listed": 0.0,
+    "text_operators": 0.0,
+    "images": 24.0,
+    "small_images": 24.0,
+    "largest_image_share": 0.02,
+    "image_cover_share": 0.56,
+    "bezier_curves": 0.0
+   },
+   "text_operators_in_sampled_pages": 0,
+   "kind": "tiles",
+   "producer": "Microsoft: Print To PDF",
+   "creator": "",
+   "picture_page": 86
+  },
+  {
+   "report": "4934_2023",
+   "firm": "太極",
+   "split": "dev",
+   "pages": 104,
+   "pages_with_any_text": 0,
+   "sampled_pages": [
+    1,
+    10,
+    20,
+    29,
+    38,
+    48,
+    57,
+    67,
+    76,
+    85,
+    95,
+    104
+   ],
+   "median_per_sampled_page": {
+    "fonts_listed": 0.0,
+    "text_operators": 0.0,
+    "images": 29.0,
+    "small_images": 21.0,
+    "largest_image_share": 0.04,
+    "image_cover_share": 0.29,
+    "bezier_curves": 6849.5
+   },
+   "text_operators_in_sampled_pages": 0,
+   "kind": "outlines",
+   "producer": "Microsoft: Print To PDF",
+   "creator": "",
+   "picture_page": 57
+  },
+  {
+   "report": "4934_2025",
+   "firm": "太極",
+   "split": "dev",
+   "pages": 138,
+   "pages_with_any_text": 0,
+   "sampled_pages": [
+    1,
+    13,
+    26,
+    38,
+    51,
+    63,
+    76,
+    88,
+    101,
+    113,
+    126,
+    138
+   ],
+   "median_per_sampled_page": {
+    "fonts_listed": 0.0,
+    "text_operators": 0.0,
+    "images": 1.0,
+    "small_images": 0.0,
+    "largest_image_share": 1.0,
+    "image_cover_share": 1.0,
+    "bezier_curves": 0.0
+   },
+   "text_operators_in_sampled_pages": 0,
+   "kind": "full_page_image",
+   "producer": "iLovePDF",
+   "creator": "Adobe Acrobat 26.1",
+   "picture_page": 76
+  },
+  {
+   "report": "6823_2023",
+   "firm": "濾能",
+   "split": "test",
+   "pages": 87,
+   "pages_with_any_text": 0,
+   "sampled_pages": [
+    1,
+    9,
+    17,
+    24,
+    32,
+    40,
+    48,
+    56,
+    64,
+    71,
+    79,
+    87
+   ],
+   "median_per_sampled_page": {
+    "fonts_listed": 0.0,
+    "text_operators": 0.0,
+    "images": 1.0,
+    "small_images": 0.0,
+    "largest_image_share": 1.0,
+    "image_cover_share": 1.0,
+    "bezier_curves": 0.0
+   },
+   "text_operators_in_sampled_pages": 0,
+   "kind": "full_page_image",
+   "producer": "Pdftools SDK",
+   "creator": "",
+   "picture_page": 48
+  }
+ ]
+}

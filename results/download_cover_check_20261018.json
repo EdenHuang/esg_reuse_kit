@@ -1,0 +1,3176 @@
+{
+ "meta": {
+  "date": "2026-10-18T16:02:43+08:00",
+  "command": "Claude Code workflow verify-esg-downloads (run wf_ee6af92d-2d6), 2026-10-18 15:45-15:49",
+  "git": {
+   "commit": "c09926d51bc81265a9f17792b823239c825c0e04",
+   "uncommitted_changes": true
+  },
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "packages": {
+   "pymupdf": "1.28.2",
+   "pillow": "13.0.0",
+   "numpy": "2.4.6",
+   "pyyaml": "6.0.3"
+  },
+  "config_file": "configs\\default.yaml",
+  "config": "# 所有參數放這裡（PLAN v2.0）。標「初值」的門檻只能在開發集上調，11/2 凍結後另存 configs/frozen.yaml。\nseed: 2026\n\npaths:\n  raw: data/raw\n  catalog: data/catalog.csv\n  index: data/index\n  synthetic: data/synthetic\n  extract: work/extract\n  page_graph: work/page_graph\n  logo_refs: work/logo_refs\n  context: work/context\n  evidence: work/evidence\n  features: work/features\n  reuse: work/reuse\n  prompts: configs/prompts\n  annotations: annotations\n  results: results\n  reports: reports\n\ndata:\n  years: [2023, 2024, 2025]          # 報告年度（報告涵蓋的會計年度）\n  n_firms: 150\n  n_dev: 30                          # 以公司為單位\n  dev_must_include: [\"1101\", \"1707\"] # 台泥、葡萄王\n\nextract:\n  crop_long_side: 1024\n  jpg_quality: 90\n\npage_graph:\n  container_min_area: 0.02           # 色塊容器面積下限（占頁面比例）\n  container_max_area: 0.90\n  heading_levels: 3                  # 章、節、小標題\n\nlogo_refs:\n  min_pages: 3                       # 出現幾頁以上的小圖算候選\n  min_short_side_pt: 20\n  use_cover: true\n\nphoto_filter:\n  model: ViT-L-14\n  pretrained: openai\n  exclude_first_last_page: true\n  photo_prompts: [\"a photograph of a real scene\", \"a photograph of people\"]\n  nonphoto_prompts: [\"an illustration\", \"a chart or infographic\", \"a logo or icon\",\n                     \"a scanned certificate or document\", \"an abstract graphic design\"]\n\ncontext_link:\n  model: logistic_regression\n  max_body_blocks: 2\n  baselines: [nearest_paragraph, same_column_nearest, caption_only, section_heading_only, rules_v1]\n\nevidence:\n  llm: Qwen/Qwen2.5-7B-Instruct      # 開工時確認可用，記錄 revision\n  vlm: Qwen/Qwen2.5-VL-7B-Instruct   # 或 Qwen3-VL-8B\n  temperature: 0\n  ocr: paddleocr_chinese_cht\n  depiction_threshold: 0.5           # 初值\n  topical_threshold: 0.5             # 初值\n  ocr_match_threshold: 0.7           # 初值：字元二元組重疊\n  logo_min_inliers: 15               # 初值\n  years_roc_offset: 1911\n  baselines: [chinese_clip_vitl14, vlm_direct_zeroshot, vlm_direct_fewshot]\n\nreuse:\n  global_models: [dinov2_vitb14, sscd_disc_mixup]\n  topk: 10\n  years_back: [1]\n  use_flip: true\n  matcher: superpoint_lightglue\n  ransac: magsac\n  min_inliers: 25                    # 初值\n  min_coverage: 0.30                 # 初值\n  stock_topk_other_firms: 5\n\nsynthetic:\n  n_pos: 1000\n  n_neg: 5000\n  crop_keep_area: [0.5, 0.9]\n  brightness_contrast: 0.30\n  saturation: 0.50\n  hue_deg: 10\n  overlay_text_area: [0.10, 0.30]\n  jpeg_quality: [50, 90]\n  collage_area: [0.40, 0.70]\n\nevaluation:\n  bootstrap_unit: firm\n  bootstrap_n: 2000\n  ci: 0.95\n",
+  "data_sha256": {
+   "data/catalog.csv": "62c48866537324a53b2d5de29b716d4b9ec2b7af32a70c968eb92fcbf1d4eabd"
+  },
+  "method": "AI-assisted check, not ground truth. 5 Claude subagents (claude-opus-5-5), 30 firms each. Inputs per report: page 1 image (45 dpi; the three years side by side), page 2-3 images (36 dpi) when needed, text of pages 1-3 (PyMuPDF). Rules: firm_ok = the company name, English name or logo is visible; year_ok = cover year or stated reporting period equals the catalog year. Anything not yes/yes would get a second look with pages 1-8; none needed it."
+ },
+ "checks": [
+  {
+   "name": "1101_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover TCC 台灣水泥永續報告書 2023; p3 報導期間 2023年1月1日至12月31日, 發行2024年8月."
+  },
+  {
+   "name": "1101_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover TCC 2024 台灣水泥永續報告書; p3 cites 2024年總減碳量, 2024年儲能裝置容量."
+  },
+  {
+   "name": "1101_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover TCC '2025 台灣水泥永續報告書'; firm titles by fiscal year (2023 report covers 2023)."
+  },
+  {
+   "name": "1217_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 愛之味 logo, '2023年度 永續報告書', AGV Products Corporation 2023 Sustainability Report."
+  },
+  {
+   "name": "1217_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 愛之味 logo, '2024年度 永續報告書', AGV Products Corporation 2024."
+  },
+  {
+   "name": "1217_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 愛之味 logo, '2025年度 永續報告書', AGV Products Corporation 2025."
+  },
+  {
+   "name": "1227_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover '2023 佳格食品集團 永續報告書' with Standard Foods logo."
+  },
+  {
+   "name": "1227_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover '2024 永續報告書' 佳格食品集團 logo; p2 header '2024 佳格食品 永續報告書'."
+  },
+  {
+   "name": "1227_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '2025 永續報告書' with 佳格食品集團 Standard Foods logo."
+  },
+  {
+   "name": "1232_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 大統益股份有限公司 '2023 永續報告書'; TOC mentions 關於大統益."
+  },
+  {
+   "name": "1232_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 大統益股份有限公司 '2024 永續報告書 Sustainability Report'."
+  },
+  {
+   "name": "1232_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 大統益股份有限公司 '2025 永續報告書 Sustainability Report'."
+  },
+  {
+   "name": "1314_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 中國石油化學工業開發股份有限公司 CPDC '2023 永續報告書'."
+  },
+  {
+   "name": "1314_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover CPDC 2024; p3 資訊揭露期間為2024年1月1日至2024年12月31日."
+  },
+  {
+   "name": "1314_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 中國石油化學 2025 ESG Report; p3 資訊揭露期間為2025年1月1日至12月31日, 2026年出版."
+  },
+  {
+   "name": "1323_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover '2023 永裕塑膠 永續報告書'; TOC '2023年關鍵永續績效'."
+  },
+  {
+   "name": "1323_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover '2024 永裕塑膠 永續報告書'; TOC '2024年關鍵永續績效'."
+  },
+  {
+   "name": "1323_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '2025 永裕塑膠 永續報告書'; TOC '2025年關鍵永續績效'."
+  },
+  {
+   "name": "1402_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 遠東新世紀 2023; p3 2024年6月發行, 揭露期間2023年1月1日至12月31日."
+  },
+  {
+   "name": "1402_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 遠東新世紀 2024 永續報告書; TOC '2024年亮點績效'; 第十二本報告書."
+  },
+  {
+   "name": "1402_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 遠東新世紀 2025; p3 2026年6月發行, 揭露期間2025年1月1日至12月31日."
+  },
+  {
+   "name": "1416_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 廣豐實業 2023 永續報告書; p3 報告期間2023年1月1日至12月31日, 2024年8月發行."
+  },
+  {
+   "name": "1416_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 廣豐實業股份有限公司 '2024 永續報告書' Kwong Fong Sustainability Report."
+  },
+  {
+   "name": "1416_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 廣豐實業股份有限公司 '2025年 永續報告書' Kwong Fong."
+  },
+  {
+   "name": "1419_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 新光紡織 Shinkong Textile logo, 2023 永續報告書; chairman letter '回顧2023年度'."
+  },
+  {
+   "name": "1419_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "p2 '新光紡織股份有限公司 2024永續報告書'; chairman letter '回顧2024年'."
+  },
+  {
+   "name": "1419_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 新光紡織 Shinkong Textile logo, 2025 永續報告書; chairman letter reviews 2025."
+  },
+  {
+   "name": "1455_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 集盛實業 Zig Sheng logo, '2023 永續報告書', 2024.08 發行."
+  },
+  {
+   "name": "1455_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Image-only PDF; cover '2024 永續報告書' with 集盛實業 logo; firm titles by fiscal year (2023→2024.08發行)."
+  },
+  {
+   "name": "1455_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 集盛實業 logo, '2025 Sustainability Report 永續報告書', 2026.08 發行."
+  },
+  {
+   "name": "1464_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover '2023 得力實業股份有限公司 永續報告書' DE LICACY Industrial."
+  },
+  {
+   "name": "1464_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 2024 得力實業; p3 highlights '2024年能源總消耗量…較2023年減少'."
+  },
+  {
+   "name": "1464_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 2025 得力實業; p3 '2025年度永續成果與績效數據表現'."
+  },
+  {
+   "name": "1513_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 中興電工 '2023 永續報告書'; chairman letter reviews 2023."
+  },
+  {
+   "name": "1513_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 中興電工 '2024 永續報告書'; chairman letter '2024年度…再次締造營運新猷'."
+  },
+  {
+   "name": "1513_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 中興電工 '2025 永續報告書'; chairman letter '2025年…再創營運佳績'."
+  },
+  {
+   "name": "1535_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 中宇環保 China Ecotek logo, '2023年ESG永續報告書' (text layer only TOC)."
+  },
+  {
+   "name": "1535_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 中宇環保 China Ecotek logo, '2024年ESG永續報告書'."
+  },
+  {
+   "name": "1535_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '2025年ESG永續報告書', 中宇環保 logo and 中宇環保工程股份有限公司 sign."
+  },
+  {
+   "name": "1612_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 宏泰電工 ESG 2023 永續報告書; p3 mentions 2023年5月結束電材事業, 2023年底停產."
+  },
+  {
+   "name": "1612_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 宏泰電工 ESG 2024; p3 資訊涵蓋2024年1月1日至2024年12月31日."
+  },
+  {
+   "name": "1612_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '2025 宏泰電工股份有限公司 永續報告書'; TOC '2025年ESG亮點與成果績效'."
+  },
+  {
+   "name": "1707_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover '2023 葡萄王生技永續報告書' ESG Report with 葡萄王 logo."
+  },
+  {
+   "name": "1707_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover '2024 葡萄王生技永續報告書' ESG Report with logo."
+  },
+  {
+   "name": "1707_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '2025 葡萄王生技永續報告書' ESG Report with logo."
+  },
+  {
+   "name": "1737_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 臺鹽實業 TAIYEN '2023 永續報告書'; p3 image (garbled text layer) shows 報告期間 2023年1月1日至12月31日."
+  },
+  {
+   "name": "1737_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover TAIYEN '2024 Sustainability Report', 臺鹽實業股份有限公司 永續報告書."
+  },
+  {
+   "name": "1737_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover TAIYEN '2025 Sustainability Report 永續報告書', 臺鹽實業股份有限公司."
+  },
+  {
+   "name": "1776_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Image-only cover: 展宇科技材股份有限公司 Headway Advanced Materials '2023 永續報告書 ESG Report'."
+  },
+  {
+   "name": "1776_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 展宇 Headway '2024 永續報告書'; p2 '2024年永續報告書…第四本報告書'."
+  },
+  {
+   "name": "1776_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 展宇 '2025/永續報告書' 50th anniversary; p2 says issued by August for prior year."
+  },
+  {
+   "name": "1785_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover SOLAR 光洋應用材料科技 '2023 永續報告書'; chairman letter cites COP28, 2024 plans."
+  },
+  {
+   "name": "1785_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 光洋應用材料科技 SOLAR with faint '2024' above name; no year in text layer."
+  },
+  {
+   "name": "1785_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '2025 光洋應用材料科技股份有限公司 永續報告書' SOLAR logo."
+  },
+  {
+   "name": "1802_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 台灣玻璃 2023; TOC says '2022年度亮點績效' (likely stale); 2025 report=13th since 2013 implies fiscal titling."
+  },
+  {
+   "name": "1802_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 台灣玻璃工業公司 '2024 永續發展報告書'; TOC '2024 年度亮點績效'."
+  },
+  {
+   "name": "1802_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 台灣玻璃 2025; p3 '揭露台玻2025年在經濟、環境…' 第13本報告書."
+  },
+  {
+   "name": "2028_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover '2023 威致鋼鐵工業股份有限公司 永續報告書'; p3 第三本, 2024年08月發行."
+  },
+  {
+   "name": "2028_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 2024 威致鋼鐵; TOC '2024年ESG績效亮點'; p3 第四本, 2025年08月發行."
+  },
+  {
+   "name": "2028_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 威致鋼鐵 2025年永續報告書; p3 數據以2025年度(2025/01/01-12/31)為主."
+  },
+  {
+   "name": "2063_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 世鎧精密 Sheh Kai Precision 2023; TOC '2023年度ESG重點績效'."
+  },
+  {
+   "name": "2063_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 世鎧精密 Sheh Kai Precision 2024; TOC '2024年度ESG重點績效'."
+  },
+  {
+   "name": "2063_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 世鎧精密 Sheh Kai Precision 2025; TOC '2025年度ESG重點績效'."
+  },
+  {
+   "name": "2065_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover Sheh Fung Screws logo '2023 ESG 永續報告書'; TOC '2023 ESG績效與目標'."
+  },
+  {
+   "name": "2065_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover sheh fung 2024; p3 世豐螺絲 第9本, 範疇涵蓋2024年01月01日至12月31日."
+  },
+  {
+   "name": "2065_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover sheh fung 2025; p3 世豐螺絲 第10本, 範疇涵蓋2025年01月01日至12月31日."
+  },
+  {
+   "name": "2102_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover FEDERAL tire brand (泰豐 Federal Corp.), 'ESG Report 2023 永續報告書', EST. 1954."
+  },
+  {
+   "name": "2102_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover FEDERAL, 'ESG Report 2024 永續報告書'; TOC identical to 2023 but different file."
+  },
+  {
+   "name": "2102_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover FEDERAL, 'ESG Report 2025 永續報告書', EST. 1954."
+  },
+  {
+   "name": "2115_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 六暉控股股份有限公司 Lu Hai Holding '2023 永續報告書'."
+  },
+  {
+   "name": "2115_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 六暉控股 2024 永續報告書; letter '2024年董事會已通過…太陽能發電系統'."
+  },
+  {
+   "name": "2115_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover LUHAI 六暉控股 2025; p3 第四本, 揭露2025年度永續發展策略."
+  },
+  {
+   "name": "2312_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover Kinpo 金寶電子 2023; p3 揭露期間為2023財務年度(2023/1/1-12/31)."
+  },
+  {
+   "name": "2312_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 金寶電子 2024; p3 揭露期間為2024財務年度(2024/1/1-12/31)."
+  },
+  {
+   "name": "2312_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 金寶電子 2025; p3 揭露期間為2025財務年度(2025/1/1-12/31)."
+  },
+  {
+   "name": "2331_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover ECS Elitegroup '2023 永續報告書'; TOC '2023 永續績效亮點'."
+  },
+  {
+   "name": "2331_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover ECS 精英電腦 2024; p3 本報告書為精英電腦2024年1月1日至12月31日表現."
+  },
+  {
+   "name": "2331_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 精英電腦 2025; p3 本報告書為精英電腦2025年1月1日至12月31日表現."
+  },
+  {
+   "name": "2332_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover D-Link 友訊科技 2023永續報告書; TOC '2023年永續績效'."
+  },
+  {
+   "name": "2332_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover D-Link 友訊科技 2024; p3 《2024永續報告書》; TOC says '2023年永續績效' (likely stale)."
+  },
+  {
+   "name": "2332_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 友訊科技 2025永續報告書; TOC '2025年永續績效'."
+  },
+  {
+   "name": "2337_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover MXIC 旺宏電子 2023, 2024年8月發行; p2 '2023年共獲得309件專利'."
+  },
+  {
+   "name": "2337_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover MXIC 2024永續報告書, 2025年8月發行; p2 '2024年共獲得317件專利'."
+  },
+  {
+   "name": "2337_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover MXIC 旺宏 2025, 2026年8月發行; p2 '2025年共獲得391件專利, 截至2025年底'."
+  },
+  {
+   "name": "2362_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover CLEVO 2023; p3 藍天電腦 報導期間2023年度(1月1日至12月31日)."
+  },
+  {
+   "name": "2362_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 2024 藍天電腦永續報告書; p3 報導期間2024年度(1月1日至12月31日)."
+  },
+  {
+   "name": "2362_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover CLEVO 藍天電腦 2025; p3 呈現藍天電腦2025年度內四大面向成果."
+  },
+  {
+   "name": "2367_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover Unitech 燿華電子 2023 永續報告書; p2 '瞭解2023年我們因應永續議題'."
+  },
+  {
+   "name": "2367_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 燿華電子 2024; p2 資訊揭露期間為2024年度(1月1日至12月31日)."
+  },
+  {
+   "name": "2367_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 燿華電子 2025; p2 資訊揭露期間為2025年度(1月1日至12月31日)."
+  },
+  {
+   "name": "2376_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: GIGABYTE, 2023技嘉科技永續報告書; p3 says covers 2023年1月1日至12月31日."
+  },
+  {
+   "name": "2376_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: GIGABYTE, 2024技嘉科技永續報告書."
+  },
+  {
+   "name": "2376_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 2025 技嘉科技永續報告書; p3 says covers 2025年1月1日至12月31日."
+  },
+  {
+   "name": "2385_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 2023群光電子永續報告書, Chicony; p3: covers 2023/1/1-2023/12/31, issued 2024/6."
+  },
+  {
+   "name": "2385_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: Chicony 群光電子 2024 永續報告書."
+  },
+  {
+   "name": "2385_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: Chicony 群光電子 2025 永續報告書; TOC lists 2025年群光永續成果."
+  },
+  {
+   "name": "2392_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Image cover: FOXLINK logo, 2023 正崴精密永續報告書 (no text layer)."
+  },
+  {
+   "name": "2392_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Image cover: FOXLINK logo, 2024 正崴精密永續報告書 (no text layer)."
+  },
+  {
+   "name": "2392_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 2025 正崴精密永續報告書; p3 discloses 正崴集團 2025 年度 results."
+  },
+  {
+   "name": "2395_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: ADVANTECH 研華科技 2023企業永續報告書; p2 says published 2024/6."
+  },
+  {
+   "name": "2395_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 研華科技 2024企業永續報告書; p3 says published 2025/8."
+  },
+  {
+   "name": "2395_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 研華科技 2025企業永續報告書; p3 says published 2026/8."
+  },
+  {
+   "name": "2423_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Image cover: GW INSTEK (固緯), 企業永續報告書 2023."
+  },
+  {
+   "name": "2423_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 2024 企業永續報告書, GW INSTEK; p3 letter to 固緯電子 stakeholders reviews 2024."
+  },
+  {
+   "name": "2423_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Image cover: 2025 Corporate Sustainability Report 企業永續報告書, GW INSTEK (no text layer)."
+  },
+  {
+   "name": "2450_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 神腦國際 2023永續報告書; p3: reporting period 2023年度 (1/1-12/31)."
+  },
+  {
+   "name": "2450_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Image cover: 2024 永續報告書, 神腦國際企業股份有限公司 Senao."
+  },
+  {
+   "name": "2450_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Image cover: 2025 永續報告書, 神腦國際企業股份有限公司 Senao."
+  },
+  {
+   "name": "2454_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: MEDIATEK 聯發科技 2023 永續報告書; chairman letter reviews 2023."
+  },
+  {
+   "name": "2454_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 聯發科技 2024 永續報告書; chairman letter reviews 2024."
+  },
+  {
+   "name": "2454_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 聯發科技 2025 永續報告書; chairman letter reviews 2025 revenue."
+  },
+  {
+   "name": "2455_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: VPEC 全新光電 2455.TW 2023永續報告書; p3 covers 2023/1/1-2023/12/31."
+  },
+  {
+   "name": "2455_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 全新光電 2455.TW 2024 永續報告書, Visual Photonics Epitaxy 2024 ESG Report."
+  },
+  {
+   "name": "2455_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Image cover: 全新光電 2455.TW 2025 永續報告書, Visual Photonics Epitaxy 2025 ESG Report."
+  },
+  {
+   "name": "2480_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 2023年 敦陽 永續發展報告書; TOC has 2023 永續綜合績效."
+  },
+  {
+   "name": "2480_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 敦陽科技 2024年永續報告書; p3 period 2024/1/1-2024/12/31, published 2025/8."
+  },
+  {
+   "name": "2480_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 敦陽科技 2025 永續報告書; p3 period 2025/1/1-2025/12/31, published 2026/8."
+  },
+  {
+   "name": "2481_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: PANJIT 強茂股份有限公司 2023永續報告書; p3 period from 2023/1/1, released 2024/6/28."
+  },
+  {
+   "name": "2481_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 強茂 2024 永續報告書; p3 period 2024/1/1-2024/12/31."
+  },
+  {
+   "name": "2481_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 強茂 2025 永續報告書; p3 period 2025/1/1-12/31."
+  },
+  {
+   "name": "2484_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: SIWARD 希華晶體科技 2023 企業永續發展報告書."
+  },
+  {
+   "name": "2484_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: SIWARD 2024 企業永續發展報告書, 希華晶體科技股份有限公司."
+  },
+  {
+   "name": "2484_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: SIWARD 2025 企業永續發展報告書. Note: p2-p3 TOC identical to 2024 (different file, 121 vs 118 pages)."
+  },
+  {
+   "name": "2492_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 華新科技 2023年永續報告書; p2 period 2023/1/1-2023/12/31, issued 2024/08."
+  },
+  {
+   "name": "2492_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 華新科技 2024年永續報告書; p2 period 2024/1/1-2024/12/31."
+  },
+  {
+   "name": "2492_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 華新科技 2025年永續報告書; p2 period 2025/1/1-2025/12/31."
+  },
+  {
+   "name": "2495_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 普安科技 Infortrend 2023; p3 period 2023/01/01-2023/12/31."
+  },
+  {
+   "name": "2495_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 普安科技 2024 永續報告書; p3 period 2024/01/01-2024/12/31."
+  },
+  {
+   "name": "2495_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: Infortrend 2025 普安科技永續報告書; p3 period 2025/01/01-2025/12/31."
+  },
+  {
+   "name": "2498_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: HTC 2023 宏達國際電子永續報告書, published Aug 2024; p2 covers 2023 performance."
+  },
+  {
+   "name": "2498_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: HTC 2024 永續報告書, published Aug 2025; p2 covers 2024."
+  },
+  {
+   "name": "2498_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: HTC 2025 永續報告書, published Aug 2026; p2 covers 2025."
+  },
+  {
+   "name": "2501_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 國泰建設 logo, 2023永續報告書; p3 header 國泰建設 2023 永續報告書."
+  },
+  {
+   "name": "2501_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 2024 國泰建設永續報告書 (60th anniversary)."
+  },
+  {
+   "name": "2501_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Image cover: 國泰建設 Cathay Real Estate, 2025 永續報告書."
+  },
+  {
+   "name": "2528_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Image cover: 皇普建設股份有限公司 CROWELL, 2023 永續報告書."
+  },
+  {
+   "name": "2528_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: Sustainability Report 2024 皇普建設 永續報告書; TOC 2024 年度永續績效."
+  },
+  {
+   "name": "2528_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 2025 Sustainability Report, 皇普建設股份有限公司; TOC 2025 年度永續績效."
+  },
+  {
+   "name": "2530_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 大華建設 2023年企業永續經營報告書; p3 period 2023/1/1-2023/12/31."
+  },
+  {
+   "name": "2530_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 大華建設 2024年企業永續經營報告書; p3 period 2024/1/1-2024/12/31."
+  },
+  {
+   "name": "2530_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 大華建設 2025年企業永續經營報告書; p3 period 2025/1/1-2025/12/31."
+  },
+  {
+   "name": "2545_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 皇翔建設股份有限公司 112 年度永續報告書 (ROC 112 = 2023)."
+  },
+  {
+   "name": "2545_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 股票代碼2545, 113 年度永續報告書 (ROC 113 = 2024); p3 皇翔建設."
+  },
+  {
+   "name": "2545_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 股票代碼2545, 114 年度永續報告書 (ROC 114 = 2025); p3 皇翔建設."
+  },
+  {
+   "name": "2610_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: CHINA AIRLINES, 2023 中華航空 永續報告書; TOC 2023年ESG績效."
+  },
+  {
+   "name": "2610_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 2024 中華航空 永續報告書; TOC 2024 年 ESG 績效."
+  },
+  {
+   "name": "2610_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 2025 中華航空永續報告書, China Airlines; TOC 2025 年ESG 績效."
+  },
+  {
+   "name": "2641_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Image cover: 正德海運股份有限公司 永續報告書 2023; TOC 2023 年度永續經營績效."
+  },
+  {
+   "name": "2641_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 2024 永續報告書, 正德海運股份有限公司; p3 header 正德海運 2024 永續報告書."
+  },
+  {
+   "name": "2641_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 2025 正德海運永續報告書; TOC 2025年度永續經營績效."
+  },
+  {
+   "name": "2642_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: pelican 宅配通 2023 永續報告書; p3 current edition issued 2024/08."
+  },
+  {
+   "name": "2642_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 宅配通 2024 永續報告書; p3 current edition issued 2025/08."
+  },
+  {
+   "name": "2642_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 宅配通 2025 永續報告書; p3 period 2025/1/1-2025/12/31, issued 2026/08."
+  },
+  {
+   "name": "2645_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Image cover: 2023 EGAT ESG Report 長榮航太永續報告書; p3 first report issued in 2024."
+  },
+  {
+   "name": "2645_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: EGAT ESG Report 2024 長榮航太永續報告書; p3 second report issued 2025."
+  },
+  {
+   "name": "2645_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Image cover: 2025 長榮航太永續報告書; p3 third report issued 2026."
+  },
+  {
+   "name": "2739_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: My Humble House Group, 2023 ESG Report 寒舍餐旅 永續報告書."
+  },
+  {
+   "name": "2739_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Image cover: 寒舍餐旅 永續報告書 ESG Report, 2024 badge. Note: TOC page numbers identical to 2023's."
+  },
+  {
+   "name": "2739_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Image cover: My Humble House Group 寒舍集團 ESG Report; small vertical and faint large '2025'. Low-res but readable; new TOC."
+  },
+  {
+   "name": "2748_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: ESG 2023 雲品國際 永續報告書; TOC 2023 永續雲錄."
+  },
+  {
+   "name": "2748_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 2024 ESG Sustainability Report 雲品國際 永續報告書; p3 header 2024 雲品國際 永續報告書."
+  },
+  {
+   "name": "2748_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Image cover: 2025 ESG 雲品國際永續報告書, FDC logo; TOC 2025 永續雲錄."
+  },
+  {
+   "name": "2882_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 2023 國泰金控 Sustainability Report 永續報告書; chairman letter reviews 2023."
+  },
+  {
+   "name": "2882_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 國泰金控 Sustainability Report 2024 永續報告書; chairman letter reviews 2024."
+  },
+  {
+   "name": "2882_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 國泰金控 永續報告書 Sustainability Report 2025; chairman letter reviews 2025."
+  },
+  {
+   "name": "2892_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 2023 Sustainability Report, 第一金控; p3 reports 2023年1月1日至12月31日."
+  },
+  {
+   "name": "2892_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 2024 Sustainability Report, 第一金控; p3 reports 2024年1月1日至12月31日."
+  },
+  {
+   "name": "2892_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 2025 Sustainability Report, 第一金控; p3 reports 2025年1月1日至12月31日."
+  },
+  {
+   "name": "2915_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 潤泰全球股份有限公司 永續報告書; p3 report covers 2023年度 (2023/1/1-2023/12/31)."
+  },
+  {
+   "name": "2915_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: RUENTEX 潤泰全球 Sustainability Report 2024; p3 covers 2024年度 (1/1-12/31)."
+  },
+  {
+   "name": "2915_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 潤泰全球 Sustainability Report 2025; p3 covers 2025年度 (1/1-12/31)."
+  },
+  {
+   "name": "3015_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: FSP 2023全漢企業永續報告書, (c)2024; chairman letter reviews 2023."
+  },
+  {
+   "name": "3015_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: FSP 2024 永續報告書, (c)2025; chairman letter reviews 2024."
+  },
+  {
+   "name": "3015_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Image cover: FSP 2025永續報告書; p3 TOC header mentions 愛在全漢."
+  },
+  {
+   "name": "3026_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 2023年永續報告書, 禾伸堂 Holy Stone; p2 covers 2023/1/1-2023/12/31."
+  },
+  {
+   "name": "3026_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 2024年永續報告書, 禾伸堂; p2 covers 2024/1/1-2024/12/31."
+  },
+  {
+   "name": "3026_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 2025年永續報告書, Holy Stone 禾伸堂; p2 covers 2025/1/1-2025/12/31."
+  },
+  {
+   "name": "3031_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 佰鴻工業股份有限公司 2023 永續報告書; p3 period 2023/1/1-2023/12/31."
+  },
+  {
+   "name": "3031_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: BRT 佰鴻工業股份有限公司 2024 永續報告書."
+  },
+  {
+   "name": "3031_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: BRT 佰鴻工業股份有限公司 2025 永續報告書."
+  },
+  {
+   "name": "3034_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: NOVATEK 聯詠科技 2023 永續報告書; p3: 涵蓋2023年度(2023/1/1-12/31)"
+  },
+  {
+   "name": "3034_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 聯詠科技 2024 永續報告書; p3: 描述聯詠科技2024年於永續發展的實踐"
+  },
+  {
+   "name": "3034_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 聯詠科技 2025 永續報告書; p3: 涵蓋2025年度(2025/1/1-12/31)"
+  },
+  {
+   "name": "3071_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: ADDA 協禧電機股份有限公司 永續報告書 2023; TOC header '2023 永續報告書'; no period text seen"
+  },
+  {
+   "name": "3071_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: ADDA 協禧電機 2024 永續報告書; p3: 揭露期間為2024年度(2024/1/1-12/31)"
+  },
+  {
+   "name": "3071_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: ADDA 協禧電機股份有限公司 2025 Sustainability Report 永續報告書; firm titles by fiscal year (2024 precedent)"
+  },
+  {
+   "name": "3131_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 弘塑科技 永續報告書 2023, 股票代號3131; p3: 揭露2023年1月1日至12月31日"
+  },
+  {
+   "name": "3131_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: GPTC 弘塑科技股份有限公司 2024; p3: 期間 2024年全年"
+  },
+  {
+   "name": "3131_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 弘塑科技股份有限公司 2025 永續報告書; p3: 期間 2025年全年"
+  },
+  {
+   "name": "3230_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 錦明實業股份有限公司 2023 永續報告書; TOC '2023 績效亮點'"
+  },
+  {
+   "name": "3230_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 錦明實業股份有限公司 2024 永續報告書 (text layer garbled, cover clear)"
+  },
+  {
+   "name": "3230_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 錦明實業 2025 永續報告書; letter discusses 2025 operations (page header still says 2024, template leftover)"
+  },
+  {
+   "name": "3231_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: wistron 緯創資通 2023永續報告書"
+  },
+  {
+   "name": "3231_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: wistron 2024 永續報告書; p3: 緯創資通2024年永續報告書"
+  },
+  {
+   "name": "3231_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: wistron 緯創資通 2025 永續報告書; TOC header '2025 緯創資通永續報告書'"
+  },
+  {
+   "name": "3265_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: Winstek 2023 台星科永續報告書"
+  },
+  {
+   "name": "3265_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: Winstek 2024 台星科永續報告書, 台星科股份有限公司"
+  },
+  {
+   "name": "3265_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: Winstek 2025 台星科永續報告書"
+  },
+  {
+   "name": "3293_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: IGS 鈊象電子 2023年永續報告書; p2: 報導期間2023/1/1至2023/12/31"
+  },
+  {
+   "name": "3293_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 2024 永續報告書 鈊象電子; p2: 本年度（2024年）發行時間：2025年8月"
+  },
+  {
+   "name": "3293_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 2025 IGS 鈊象電子 永續報告書; p3: 本年度(2025年)發行時間：2026年8月"
+  },
+  {
+   "name": "3325_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: CASING 2023 Sustainability Report; letter mentions 旭品科技 and shipments from 2024/1 (FY2023 report)"
+  },
+  {
+   "name": "3325_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 2024 Sustainability Report ESG 永續報告書 CASING; letter names 旭品科技"
+  },
+  {
+   "name": "3325_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: CASING 旭品科技 2025 永續報告書"
+  },
+  {
+   "name": "3362_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: AOET 先進光電科技股份有限公司 2023年 先進光電集團永續報告書"
+  },
+  {
+   "name": "3362_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 先進光電科技股份有限公司 2024年永續報告書 2024FY SUSTAINABILITY REPORT"
+  },
+  {
+   "name": "3362_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 先進光電 2025 永續報告書; p3: 揭露2025年度（2025/1/1至12/31）"
+  },
+  {
+   "name": "3653_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: JENTECH 2023 ESG Report, 健策精密2023年報告書"
+  },
+  {
+   "name": "3653_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: JENTECH 2024 ESG Report 健策精密 2024 企業社會責任報告書; p3 header same"
+  },
+  {
+   "name": "3653_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: JENTECH 健策精密 2025年度永續報告書"
+  },
+  {
+   "name": "3679_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: NISHOKU 新至陞科技 2023 永續報告書; letter reports 2023 revenue 35.08億"
+  },
+  {
+   "name": "3679_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 新至陞 2024 永續報告書, 發行日期2025年8月28日; letter reports 2024 revenue"
+  },
+  {
+   "name": "3679_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 新至陞科技 2025 永續報告書; letter reports 2025 revenue 44.71億"
+  },
+  {
+   "name": "3711_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 日月光投控 2023 日月光投資控股 永續報告書; p2 describes 2023 activities"
+  },
+  {
+   "name": "3711_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 日月光投控 2024 永續報告書; p2: 2024年... activities"
+  },
+  {
+   "name": "3711_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 日月光投控 2025 日月光投資控股 永續報告書; p2: 2025年..."
+  },
+  {
+   "name": "4105_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: TTY 東洋藥品 永續報告書 2023 Sustainability Report; p3 header 台灣東洋 2023永續報告書"
+  },
+  {
+   "name": "4105_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: TTY 台灣東洋藥品 2024 永續報告書; letter: 回顧2024年"
+  },
+  {
+   "name": "4105_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: TTY 台灣東洋藥品 2025 永續報告書; letter: 回首2025年"
+  },
+  {
+   "name": "4121_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: rossmax 2023年 優盛醫學 企業永續報告書; p3: 資料時間範疇...至2023年12月31日"
+  },
+  {
+   "name": "4121_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: rossmax (優盛 brand) 2024 永續報告書 ESG Report; copyright 2025 (publication year)"
+  },
+  {
+   "name": "4121_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: rossmax (優盛 brand) 2025 永續報告書 ESG Report"
+  },
+  {
+   "name": "4126_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: PAHSCO 2023 永續報告書, 太平洋醫材股份有限公司"
+  },
+  {
+   "name": "4126_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: PAHSCO 2024 永續報告書, 太平洋醫材股份有限公司"
+  },
+  {
+   "name": "4126_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: PAHSCO 永續ESG 2025 報告書, 太平洋醫材股份有限公司"
+  },
+  {
+   "name": "4128_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: MICROBIO 中天生物科技 2023 永續報告書; letter: 2023年是中天生技...關鍵年"
+  },
+  {
+   "name": "4128_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: MICROBIO 2024 中天生物科技永續報告書; letter describes 2024 results"
+  },
+  {
+   "name": "4128_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: MICROBIO 2025 中天生物科技永續報告書; letter: 2025年..."
+  },
+  {
+   "name": "4174_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: OBI Pharma 2023 台灣浩鼎永續報告書; TOC '2023永續績效'"
+  },
+  {
+   "name": "4174_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: OBI Pharma 2024 台灣浩鼎 ESG永續報告書"
+  },
+  {
+   "name": "4174_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Image-only. Cover: OBI 2025 台灣浩鼎 ESG永續報告書; p3 footer same"
+  },
+  {
+   "name": "4306_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 炎洲集團 2023 永續報告書; p3: 揭露期間2023/1/1至2023/12/31"
+  },
+  {
+   "name": "4306_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 炎洲集團 2024 永續報告書; p3: 揭露期間2024/1/1至2024/12/31"
+  },
+  {
+   "name": "4306_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 炎洲集團 2025 永續報告書; p3: 揭露期間2025/1/1至2025/12/31"
+  },
+  {
+   "name": "4419_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 皇家國際美食股份有限公司 2023 Sustainability Report; p3: 揭露期間2023/1/1至12/31"
+  },
+  {
+   "name": "4419_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 皇家國際美食 2024 永續報告書; p3: 揭露期間2024/1/1至12/31"
+  },
+  {
+   "name": "4419_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 皇家國際美食股份有限公司 2025 年 永續報告書"
+  },
+  {
+   "name": "4506_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 崇友實業 GFC 2023 永續報告書; TOC '2023年風險管理運作情形'"
+  },
+  {
+   "name": "4506_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 崇友實業 2024 永續報告書; TOC '2024年風險管理運作情形'"
+  },
+  {
+   "name": "4506_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 崇友實業 GFC 2025 永續報告書; TOC '2025年風險管理運作情形'"
+  },
+  {
+   "name": "4540_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 全球傳動科技 2023 永續報告書; p3: 揭露期間2023/1/1至2023/12/31"
+  },
+  {
+   "name": "4540_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: TBI 2024 全球傳動科技股份有限公司 永續報告書"
+  },
+  {
+   "name": "4540_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: TBI 2025 全球傳動 永續報告書"
+  },
+  {
+   "name": "4549_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: FineTek 2023 桓達科技 永續報告書; p3: 揭露期間2023/1/1至12/31"
+  },
+  {
+   "name": "4549_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: FineTek 2024 桓達科技 永續報告書; p3: 揭露期間2024/1/1至12/31"
+  },
+  {
+   "name": "4549_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: FineTek 2025 桓達科技 永續報告書; p3: 揭露期間2025/1/1至12/31"
+  },
+  {
+   "name": "4558_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: ALFORMER 寶緯工業 2023 永續報告書; TOC '2023年寶緯ESG亮點'"
+  },
+  {
+   "name": "4558_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 2024 寶緯永續報告書; p3: 涵蓋2024/1/1至2024/12/31, 發行2025年8月"
+  },
+  {
+   "name": "4558_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: ALFORMER 2025 寶緯永續報告書; TOC '2025年寶緯ESG亮點'"
+  },
+  {
+   "name": "4706_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: TKC 2023 大恭化學永續報告書; p3: 2023年1月1日至12月31日"
+  },
+  {
+   "name": "4706_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: TKC 2024 大恭化學永續報告書; p3: 報告期間2024年1月1日至12月31日"
+  },
+  {
+   "name": "4706_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: TKC 2025 大恭化學永續報告書; p3: 報告期間2025年1月1日至12月31日"
+  },
+  {
+   "name": "4707_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 2023年 磐亞股份有限公司 永續報告書; p3: 2023/1/1至2023/12/31"
+  },
+  {
+   "name": "4707_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 2024年 磐亞股份有限公司 永續報告書; p3: 2024/1/1至2024/12/31"
+  },
+  {
+   "name": "4707_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 2025年 磐亞股份有限公司 永續報告書; p3: 2025/1/1至2025/12/31"
+  },
+  {
+   "name": "4714_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "p1 is KPMG assurance letter (no cover) for 永捷創新科技 民國一一二年度（2023年度）永續報告書"
+  },
+  {
+   "name": "4714_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: ESG Report 2024 永捷創新科技; p3: 揭露2024年度, 發行2025年8月"
+  },
+  {
+   "name": "4714_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 永捷創新科技股份有限公司 2025 年永續報告書, 股票代碼4714"
+  },
+  {
+   "name": "4755_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: SAN FU CHEMICAL 三福化工 2023 ESG REPORT; letter discusses 2023 results"
+  },
+  {
+   "name": "4755_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 三福化工 2024 永續報告書; letter: 2024年公司營收5,324百萬元"
+  },
+  {
+   "name": "4755_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 三福化工 2025 永續報告書; letter: 去年2025的營收較2024年略增"
+  },
+  {
+   "name": "4764_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: DBC 雙鍵化工 2023年永續報告書; p3: 資料期間2023/1/1至12/31"
+  },
+  {
+   "name": "4764_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: DBC 雙鍵化工 2024年永續報告書; p3: 資料期間2024/1/1至12/31"
+  },
+  {
+   "name": "4764_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: DBC 雙鍵化工 2025年永續報告書; p3: 資料期間2025/1/1至12/31"
+  },
+  {
+   "name": "4906_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: Gemtek 正文科技 2023 ESG Report; p3: 揭露區間2023/1/1至12/31"
+  },
+  {
+   "name": "4906_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: Gemtek 正文科技 2024 永續報告書; p3: 揭露區間2024/1/1至12/31"
+  },
+  {
+   "name": "4906_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: Gemtek 正文科技 2025 ESG Report; p3: 揭露區間2025/1/1至12/31"
+  },
+  {
+   "name": "4927_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 泰鼎國際 APEX 2023 永續報告書, Published June 2024; p3: 2023年度資料為主"
+  },
+  {
+   "name": "4927_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 泰鼎國際股份有限公司 2024 永續報告書, Published June 2025; highlights 第11屆（2024年）評鑑"
+  },
+  {
+   "name": "4927_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 泰鼎國際股份有限公司 2025 永續報告書; highlights 第12屆（2025年）評鑑"
+  },
+  {
+   "name": "4934_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover image: 太極能源科技股份有限公司, TAINERGY logo, '2023 Sustainability Report 永續報告書'. No text layer."
+  },
+  {
+   "name": "4934_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover image: 太極能源科技股份有限公司 SUSTAINABILITY REPORT, large '2024', Tainergy logo. No text layer."
+  },
+  {
+   "name": "4934_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover image: '2025 太極能源科技股份有限公司 SUSTAINABILITY REPORT 永續報告書', Tainergy logo. No text layer."
+  },
+  {
+   "name": "4949_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover '2023 有成精密永續報告書'; p3: 本報告書揭露期間為2023年度."
+  },
+  {
+   "name": "4949_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover '2024 有成精密永續報告書'; p3: 揭露範疇為2024年1月1日至12月31日, published 2025/8."
+  },
+  {
+   "name": "4949_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '2025 有成精密永續報告書'; p3 says third consecutive annual report since 2023."
+  },
+  {
+   "name": "4961_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 'fitipower 2023 天鈺科技永續報告書 Sustainability Report, TWSE:4961'."
+  },
+  {
+   "name": "4961_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover image '2024天鈺科技 永續報告書, TWSE:4961, Fitipower Integrated Technology Inc.'"
+  },
+  {
+   "name": "4961_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover image '2025天鈺科技 永續報告書, TWSE:4961'; p2 text '2025 年永續報告書'."
+  },
+  {
+   "name": "4979_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover '112年度永續報告 華星光通科技股份有限公司'; p2: 揭露期間為112年1月1日至112年12月31日."
+  },
+  {
+   "name": "4979_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover '2024年永續報告書 華星光通科技股份有限公司', LUXNET logo."
+  },
+  {
+   "name": "4979_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 股票代碼4979 華星光通科技股份有限公司 2025年永續報告書, 發行日期 2026年8月13日."
+  },
+  {
+   "name": "5009_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 榮剛材料科技 2023年永續報告書; p3: 揭露期間為2023年1月1日至2023年12月31日, issued 2024/8."
+  },
+  {
+   "name": "5009_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 'GMTC 2024 永續報告書 榮剛材料科技股份有限公司'; p3: 榮剛2024年永續報告書."
+  },
+  {
+   "name": "5009_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '2025 榮剛材料科技 永續報告書'; p3: 榮剛 2025年永續報告書."
+  },
+  {
+   "name": "5201_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover '2023 凱衛資訊股份有限公司 永續報告書'; p3: 凱衛資訊2023年永續報告, first report."
+  },
+  {
+   "name": "5201_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover '凱衛資訊股份有限公司 2024年 永續報告書'; p3: 2024年永續報告, second report."
+  },
+  {
+   "name": "5201_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover image: 凱衛資訊 Kaiwei Information logo, '2025 永續報告書 SUSTAINABILITY REPORT'."
+  },
+  {
+   "name": "5213_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover image: 亞昕集團 logo, '2023 永續報告書'; p3 text names 亞昕國際開發股份有限公司."
+  },
+  {
+   "name": "5213_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover '亞昕集團 2024 ESG 永續報告書'; chairman letter looks ahead to 2025 (consistent with FY2024)."
+  },
+  {
+   "name": "5213_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover image: 亞昕集團 logo, '2025 ESG SUSTAINABILITY REPORT 永續報告書'."
+  },
+  {
+   "name": "5312_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 'SUSTAINABILITY REPORT 2023 寶島光學科技股份有限公司'; TOC '2023年公益活動參與成效'; first report."
+  },
+  {
+   "name": "5312_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 'SUSTAINABILITY REPORT 2024 寶島光學科技股份有限公司'; TOC '2024年公益活動參與成效'."
+  },
+  {
+   "name": "5312_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '寶島光學科技股份有限公司 SUSTAINABILITY REPORT 2025'; TOC '2025年公益活動參與成效'."
+  },
+  {
+   "name": "5426_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover '2023 企業社會責任報告書', 振發實業股份有限公司 (old-style CSR, GRI G3.1 index); no explicit period."
+  },
+  {
+   "name": "5426_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Page 1 is TOC (no cover); chairman letter signed 振發實業 蔡宗勳, cites 2024年度營收."
+  },
+  {
+   "name": "5426_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '振發實業股份有限公司 2025年永續報告書 股票代號:5426'; letter cites 2025年度營收."
+  },
+  {
+   "name": "5515_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover image '建國工程 2023年企業永續報告書 ESG Report'; TOC '2023 工案場域'."
+  },
+  {
+   "name": "5515_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 'ESG Sustainability Report 建國工程 2024'; p3 header '建國工程永續報告書 2024'."
+  },
+  {
+   "name": "5515_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover image: 建國工程 logo, 'ESG SUSTAINABILITY REPORT 2025 永續報告書'."
+  },
+  {
+   "name": "5519_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover '2023 隆大永續報告書'; p3 highlights: 2023年能源使用量 vs 2022."
+  },
+  {
+   "name": "5519_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover '2024 隆大營建事業股份有限公司 永續報告書'."
+  },
+  {
+   "name": "5519_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover image: 隆大營建 logo, '2025 Sustainability Report 永續報告書'."
+  },
+  {
+   "name": "5522_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 'Farglory Land 遠雄建設 2023 永續報告書'; p3: 揭露期間為2023年1月1日至12月31日."
+  },
+  {
+   "name": "5522_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 'Farglory Land 2024 ESG REPORT 永續報告書'; TOC '2024年永續績效亮點'."
+  },
+  {
+   "name": "5522_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 'Farglory Land 2025 ESG REPORT' (same design as 2024, different file, 186 pages); TOC '2025年永續績效亮點'."
+  },
+  {
+   "name": "5878_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover '台名保險經紀人股份有限公司 2023 Sustainability Report 台名永續報告書'."
+  },
+  {
+   "name": "5878_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover '台名永續報告書 2024 Sustainability Report', 台名保險經紀人 logo."
+  },
+  {
+   "name": "5878_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '2025 台名永續報告書', 台名保險經紀人股份有限公司 logo; 11th report."
+  },
+  {
+   "name": "5880_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 合庫金控 2023 SUSTAINABILITY REPORT; p3: 揭露2023年度（2023年1月1日至12月31日）."
+  },
+  {
+   "name": "5880_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 合庫金控 2024 SUSTAINABILITY REPORT; p3: 揭露2024年度（2024年1月1日至12月31日）."
+  },
+  {
+   "name": "5880_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 合庫金控 2025 SUSTAINABILITY REPORT; p3: 揭露2025年度（2025年1月1日至12月31日）."
+  },
+  {
+   "name": "5902_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover '德記洋行股份有限公司 2023年 永續報告書'; p3: 資訊期間為2023年1月1日至12月31日."
+  },
+  {
+   "name": "5902_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover '德記洋行股份有限公司 2024年 永續報告書'; p3: 資訊期間為2024年1月1日至12月31日."
+  },
+  {
+   "name": "5902_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '德記洋行股份有限公司 2025年 永續報告書'; p3: 資訊期間為2025年1月1日至12月31日."
+  },
+  {
+   "name": "6016_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover '2023 永續報告書' 康和綜合證券 logo; p3: 2024年6月發布「康和證券2023年永續報告書」."
+  },
+  {
+   "name": "6016_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 康和綜合證券 '2024永續報告書'; p3: 涵蓋2024年1月1日至12月31日."
+  },
+  {
+   "name": "6016_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '2025 永續報告書 康和綜合證券'; p3: 涵蓋2025年1月1日至12月31日, published 2026/8."
+  },
+  {
+   "name": "6116_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 'HannStar 2023 瀚宇彩晶永續報告書'; p2 nav '2023年永續重點績效'."
+  },
+  {
+   "name": "6116_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 'HannStar 2024 瀚宇彩晶 永續報告書'; text header '2024 瀚宇彩晶永續報告書'."
+  },
+  {
+   "name": "6116_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 'HannStar 2025 瀚宇彩晶 永續報告書'; text header '2025 瀚宇彩晶永續報告書'."
+  },
+  {
+   "name": "6120_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover image 'DARWIN 2023 達運精密工業 永續報告書 Sustainability Report 2023'."
+  },
+  {
+   "name": "6120_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover image 'DARWIN ESG 達運精密永續報告書 Annual Report 2024'."
+  },
+  {
+   "name": "6120_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 'DARWIN ESG 達運精密永續報告書 Annual Report 2025'."
+  },
+  {
+   "name": "6142_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 'CAMEO 友勁科技股份有限公司 2023永續報告書'; letter discusses 2023 business conditions."
+  },
+  {
+   "name": "6142_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover '2024永續報告書 友勁科技股份有限公司'; letter: 一一三年度合併營收11.8億."
+  },
+  {
+   "name": "6142_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '友勁科技2025年 永續報告書'; letter: 一一四年度合併營收18.03億元."
+  },
+  {
+   "name": "6248_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 'TNP 沛波鋼鐵 永續報告書 2023'; p3: 2023年度亮點, 產量244,067公噸."
+  },
+  {
+   "name": "6248_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 'TNP 沛波鋼鐵 永續報告書 Sustainability Report 2024'."
+  },
+  {
+   "name": "6248_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '沛波鋼鐵 2025 永續報告書'; p3: 2025年度亮點, 產量295,926公噸 vs 2024. Same page count as 2023 but different content."
+  },
+  {
+   "name": "6269_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover image 'FLEXium 台郡科技 2023 永續報告書 Sustainability Report'. Little text layer."
+  },
+  {
+   "name": "6269_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover image 'FLEXium 台郡科技 2024 永續報告書 SUSTAINABILITY REPORT'."
+  },
+  {
+   "name": "6269_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 'FLEXium 2025 永續報告書'; page headers '2025 年永續報告書'."
+  },
+  {
+   "name": "6271_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 同欣電子 2023 永續報告書; p3: 資料期間 2023年1月01日起至2023年12月31日."
+  },
+  {
+   "name": "6271_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover '同欣電子工業股份有限公司 2024 永續報告書'; p3: 2024年1月01日至12月31日."
+  },
+  {
+   "name": "6271_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 同欣電子 2025 永續報告書; p3: 資料期間 2025年1月01日至2025年12月31日."
+  },
+  {
+   "name": "6281_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover '全國電子 2023 永續報告書'; p3: 揭露時間為2023年1月至2023年12月."
+  },
+  {
+   "name": "6281_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover '全國電子 2024 永續報告書'; p3: 揭露時間為2024年1月至2024年12月."
+  },
+  {
+   "name": "6281_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '全國電子 ESG 2025 永續報告書'; p3: 揭露時間為2025年1月至2025年12月."
+  },
+  {
+   "name": "6409_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 'Voltronic Power 旭隼科技股份有限公司 2023年度 永續報告書'."
+  },
+  {
+   "name": "6409_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover '旭隼科技股份有限公司及子公司 2024年度 合併永續報告書暨獨立會計師確信報告'."
+  },
+  {
+   "name": "6409_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '旭隼科技股份有限公司及子公司 2025年度 合併永續報告書暨獨立會計師確信報告'."
+  },
+  {
+   "name": "6464_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover image: 台灣數位光訊科技集團 TAIWAN OPTICAL PLATFORM logo, '2023年 永續發展報告書'."
+  },
+  {
+   "name": "6464_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover image: 台灣數位光訊科技集團 logo, '2024年 永續發展報告書 ESG Report'."
+  },
+  {
+   "name": "6464_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover image: 台灣數位光訊科技股份有限公司 header, '2025 永續報告書'."
+  },
+  {
+   "name": "6491_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 'PEGAVISION 晶碩光學 2023永續報告書'; p3 cites 《晶碩光學2023年永續報告書》 and 112年年報."
+  },
+  {
+   "name": "6491_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover '2024 PEGAVISION 晶碩光學 永續報告書'; p3: 報導期間 2024年1月1日至12月31日."
+  },
+  {
+   "name": "6491_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 'ESG 2025 PEGAVISION 2025 永續報告書'; p3: 晶碩光學 seventh report."
+  },
+  {
+   "name": "6499_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 'MEDEON 2023 永續報告書'; p3: 益安生醫, 內容時間自2023年1月1日至2023年12月31日."
+  },
+  {
+   "name": "6499_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 'MEDEON 2024 永續報告書'; p3: 2024年1月1日至12月31日 (page header still says 2023)."
+  },
+  {
+   "name": "6499_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 'MEDEON 2025 永續報告書'; p3: 益安生醫, 內容時間自2025年1月1日至2025年12月31日."
+  },
+  {
+   "name": "6538_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover '倉和股份有限公司 2023 永續報告書'; letter cites 2023 data and 30th anniversary in 2024."
+  },
+  {
+   "name": "6538_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover '倉和股份有限公司 2024 永續報告書'; TOC '2024年重點榮耀'; p3 footer 2024 Sustainability Report."
+  },
+  {
+   "name": "6538_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '倉和股份有限公司 2025 永續報告書'; TOC '2025年 永續績效亮點與肯定'."
+  },
+  {
+   "name": "6552_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover '易華電子股份有限公司 2023年永續報告書'; p3: 揭露期間為2023年1月1日至12月31日."
+  },
+  {
+   "name": "6552_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 'JMC 易華電子股份有限公司 2024 永續報告書'; TOC '2024年永續亮點'."
+  },
+  {
+   "name": "6552_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover JMC 易華電子 2025 永續報告書; p3: 揭露期間為2025年1月1日至2025年12月31日."
+  },
+  {
+   "name": "6576_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover image: 逸達生物科技股份有限公司 / Foresee Pharmaceuticals logo, '2023年永續報告書'."
+  },
+  {
+   "name": "6576_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover '逸達生物科技 2024 永續報告書'; TOC footer 逸達生物科技股份有限公司2024永續報告書."
+  },
+  {
+   "name": "6576_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover '2025 逸達生物科技永續報告書', FORESEE Pharmaceuticals logo."
+  },
+  {
+   "name": "6593_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: tnp 台灣銘板股份有限公司 2023 ESG Report; p3: data covers 2023/1/1-2023/12/31."
+  },
+  {
+   "name": "6593_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 2024 台灣銘板永續報告書; p3: covers 2024/1/1-2024/12/31, published 2025."
+  },
+  {
+   "name": "6593_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 2025 台灣銘板永續報告書, Taiwan Numerical Powers; prior years titled by fiscal year."
+  },
+  {
+   "name": "6605_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 帝寶工業股份有限公司 DEPO logo, 2023 永續報告書."
+  },
+  {
+   "name": "6605_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 2024 帝寶工業股份有限公司永續報告書, 股票代碼6605."
+  },
+  {
+   "name": "6605_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 2025 帝寶工業; p3: 本報告揭露帝寶2025年行動成果."
+  },
+  {
+   "name": "6670_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 復盛應用科技 2023; p3: covers 2023/1-2023/12/31, published 2024/8."
+  },
+  {
+   "name": "6670_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 復盛應用科技 2024 Fusheng Precision; TOC: 2024年永續績效亮點."
+  },
+  {
+   "name": "6670_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 復盛應用科技永續報告書 2025; TOC: 2025年永續績效亮點, 5th report."
+  },
+  {
+   "name": "6689_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 2023 伊雲谷永續報告書; p3: 伊雲谷 2023 年度永續報告書."
+  },
+  {
+   "name": "6689_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 2024 伊雲谷永續報告書; p3: 2024 年度永續報告書."
+  },
+  {
+   "name": "6689_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 伊雲谷 2025; p3: 揭露期間為2025年度(2025/1/1-12/31), published 2026/6."
+  },
+  {
+   "name": "6691_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover YKE 洋基工程 2023 永續報告書; chairman letter reports 2023 results."
+  },
+  {
+   "name": "6691_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover YKE 洋基工程 2024; chairman letter cites 2024 figures."
+  },
+  {
+   "name": "6691_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 2025 YKE 洋基工程; letter: 2025年營業收入 results."
+  },
+  {
+   "name": "6693_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 廣閎科技 2023; p3: 揭露期間為2023年度, published 2024/8."
+  },
+  {
+   "name": "6693_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 2024 永續報告書 廣閎科技股份有限公司; same fiscal-year naming as 2023."
+  },
+  {
+   "name": "6693_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 2025 廣閎科技股份有限公司永續報告書, inergy logo."
+  },
+  {
+   "name": "6716_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover PADAUK 應廣科技 2023 年度永續報告書."
+  },
+  {
+   "name": "6716_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 應廣科技 2024年永續報告書 PADAUK."
+  },
+  {
+   "name": "6716_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 應廣科技 2025年永續報告書 PADAUK."
+  },
+  {
+   "name": "6790_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 2023 永續報告書, 永豐餘消費品實業股份有限公司 logo."
+  },
+  {
+   "name": "6790_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 2024 永續報告書, 永豐餘消費品實業股份有限公司 logo."
+  },
+  {
+   "name": "6790_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 永豐餘消費品實業 logo, 2025 永續報告書."
+  },
+  {
+   "name": "6823_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover (image only): 濾能 FILTEC, 2023 永續報告書."
+  },
+  {
+   "name": "6823_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 濾能 FILTEC 2024 永續報告書."
+  },
+  {
+   "name": "6823_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover ESG 2025 永續報告書; header 濾能股份有限公司 2025 ESG Report."
+  },
+  {
+   "name": "6854_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: PlayNitride 2023 Sustainability Report; letter discusses 2023 operations."
+  },
+  {
+   "name": "6854_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover PlayNitride 2024; letter: 2024 revenue 17.68億, up 88% vs 2023."
+  },
+  {
+   "name": "6854_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: PLAYNITRIDE 2025 永續報告書; prior years titled by fiscal year."
+  },
+  {
+   "name": "6968_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 萬達寵物 2023 年永續報告書; p3: 以112年萬達寵物...為主."
+  },
+  {
+   "name": "6968_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover image: 萬達寵物 2024年永續報告書."
+  },
+  {
+   "name": "6968_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 2025 年永續報告書 萬達寵物事業股份有限公司."
+  },
+  {
+   "name": "7723_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 2023 築間餐飲企業永續報告書."
+  },
+  {
+   "name": "7723_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 築間餐飲集團 2024 永續報告書, 股票代碼7723; TOC 2024亮點績效."
+  },
+  {
+   "name": "7723_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 2025 築間餐飲集團永續報告書; TOC 2025年績效亮點."
+  },
+  {
+   "name": "8016_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover Sitronix 矽創集團 2023; letter dated 2024/5 describes 2023 actions."
+  },
+  {
+   "name": "8016_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover Sitronix 矽創電子 2024; letter dated 2025/5: 2024年度具體作為."
+  },
+  {
+   "name": "8016_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover Sitronix 矽創電子 2025; TOC: 2025年度永續亮點, 2026年度目標."
+  },
+  {
+   "name": "8021_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover topoint 尖點科技 2023; p3: 內容期間為2023年1月1日至..."
+  },
+  {
+   "name": "8021_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: topoint 尖點科技 2024 企業永續報告書."
+  },
+  {
+   "name": "8021_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 2025 尖點科技; p3: 尖點科技2025年企業永續報告書."
+  },
+  {
+   "name": "8046_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 南亞電路板 2023; p3: 涵蓋2023/1/1至2023/12/31, published 2024/06."
+  },
+  {
+   "name": "8046_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 南亞電路板 2024; p3: 涵蓋2024/1/1至2024/12/31, published 2025/6."
+  },
+  {
+   "name": "8046_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 南亞電路板 2025; p3: 涵蓋2025/1/1至2025/12/31, published 2026/6."
+  },
+  {
+   "name": "8069_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover E Ink 元太科技 2023 report; p3: financials match 2023 年度合併財務報告."
+  },
+  {
+   "name": "8069_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover E Ink 元太科技 2024 report; p3: 2024 年度合併財務報告."
+  },
+  {
+   "name": "8069_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover E Ink 元太科技 2025 report; p3: 2025 年度合併財務報告."
+  },
+  {
+   "name": "8070_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 長華電材 2023; p3: 揭露期間為2023/1/1至2023/12/31, published 2024/8."
+  },
+  {
+   "name": "8070_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 長華電材 2024; p3: 揭露期間為2024/1/1至2024/12/31."
+  },
+  {
+   "name": "8070_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 長華電材 2025; p3: 揭露期間為2025/1/1至2025/12/31, published 2026/8."
+  },
+  {
+   "name": "8150_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover ChipMOS 南茂科技 2023 ESG Report; TOC 2023 年永續績效."
+  },
+  {
+   "name": "8150_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 南茂科技 2024 永續報告書; TOC 2024 年永續績效."
+  },
+  {
+   "name": "8150_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 南茂科技 2025; p3: 涵蓋2025/1/1至2025/12/31, published 2026/8."
+  },
+  {
+   "name": "8163_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover DARFON 達方電子 2023 永續報告書; TOC 2023 年永續績效."
+  },
+  {
+   "name": "8163_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 2024 達方電子企業永續報告書, DARFON."
+  },
+  {
+   "name": "8163_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 2025 達方電子; letter: 2025 年度合併營收250.74億."
+  },
+  {
+   "name": "8171_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 2023 天宇工業股份有限公司永續報告書, dated 2024/08/29."
+  },
+  {
+   "name": "8171_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 2024 天宇工業股份有限公司永續報告書, dated 2025/8/5."
+  },
+  {
+   "name": "8171_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: 2025 天宇工業股份有限公司 ESG 永續報告書; same fiscal-year naming."
+  },
+  {
+   "name": "8182_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 加高電子 2023 永續報告書; letter reviews 2023 conditions."
+  },
+  {
+   "name": "8182_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: 加高電子股份有限公司 2024 ESG 永續報告書."
+  },
+  {
+   "name": "8182_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover image: 加高電子股份有限公司 2025 ESG永續報告書."
+  },
+  {
+   "name": "8289_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: TAITIEN (泰藝英文名) 2023 永續報告書."
+  },
+  {
+   "name": "8289_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: TAITIEN 2024 永續報告書."
+  },
+  {
+   "name": "8289_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 泰藝電子 2025 永續報告書; chairman letter discusses 2025."
+  },
+  {
+   "name": "8426_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover REDWOOD 紅木 logo, 2023 永續報告書; p3: 2023年合併營收新台幣28億."
+  },
+  {
+   "name": "8426_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover REDWOOD 2024; p3 image: 報告期間2024/1/1至2024/12/31 (also says 第一年發行)."
+  },
+  {
+   "name": "8426_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover REDWOOD 永續報告書 2025; p3: 2025年是紅木集團第二年發行."
+  },
+  {
+   "name": "8466_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover (8466) MEIJER 美喆; p3: 呈現2023年1月1日至12月31日."
+  },
+  {
+   "name": "8466_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 美喆國際集團 MEIJER; p3: 呈現我們在2024年度的行動成果."
+  },
+  {
+   "name": "8466_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Same cover design as 2024 but different file; p3: 2025年度的行動成果."
+  },
+  {
+   "name": "8473_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: 2023 山林水永續報告書, 山林水環境工程股份有限公司."
+  },
+  {
+   "name": "8473_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 2024 山林水環境工程; letter: after 2023, 2024年 results."
+  },
+  {
+   "name": "8473_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 山林水環境工程 2025 永續報告書; letter opens 2025年."
+  },
+  {
+   "name": "8476_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 台境企業 2023; p3: 涵蓋2023/1/1至2023/12/31."
+  },
+  {
+   "name": "8476_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 台境企業 2024; p3: 涵蓋2024/1/1至2024/12/31."
+  },
+  {
+   "name": "8476_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 台境企業 2025; p3: 涵蓋2025/1/1至2025/12/31."
+  },
+  {
+   "name": "8929_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover FUBURG 富堡 112年度 ESG REPORT 2023; p2: 富堡2023年度績效."
+  },
+  {
+   "name": "8929_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover 富堡 2024, 113年度; p2: 陳述富堡2024年度績效."
+  },
+  {
+   "name": "8929_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover 富堡 2025, 114年度; p2: 陳述富堡2025年度績效."
+  },
+  {
+   "name": "9910_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover 豐泰企業 2023 ESG; letter: 2023年 results."
+  },
+  {
+   "name": "9910_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover FT 2024 ESG; p3: 2024 豐泰企業永續報告書, 2024年 results."
+  },
+  {
+   "name": "9910_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: Feng Tay Group (豐泰) 2025 永續報告書; prior years titled by fiscal year."
+  },
+  {
+   "name": "9933_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: CTCI 2023 中鼎永續報告書."
+  },
+  {
+   "name": "9933_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: CTCI 2024 中鼎永續報告書."
+  },
+  {
+   "name": "9933_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: CTCI 2025 中鼎永續報告書."
+  },
+  {
+   "name": "9937_2023",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2023",
+   "evidence": "Cover: NPC 全國加油站 2023 永續報告書."
+  },
+  {
+   "name": "9937_2024",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2024",
+   "evidence": "Cover: NPC 全國加油站 2024 永續報告書."
+  },
+  {
+   "name": "9937_2025",
+   "firm_ok": "yes",
+   "year_ok": "yes",
+   "covered_year_seen": "2025",
+   "evidence": "Cover: NPC 全國加油站 2025 永續報告書."
+  }
+ ]
+}

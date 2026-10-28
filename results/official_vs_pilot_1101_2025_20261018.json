@@ -1,0 +1,60 @@
+{
+ "meta": {
+  "date": "2026-10-18T14:47:51+08:00",
+  "command": "one-off comparison script in the cloud session (not in the repo); method below",
+  "git": {
+   "commit": null,
+   "uncommitted_changes": null,
+   "note": "not run inside a git repository"
+  },
+  "python": "3.13.16",
+  "platform": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39",
+  "packages": {
+   "pymupdf": "1.28.2",
+   "pillow": "13.0.0",
+   "numpy": "2.5.4",
+   "pyyaml": "6.0.3"
+  },
+  "config_file": null,
+  "config": null,
+  "data_sha256": {},
+  "inputs": {
+   "official_pdf": {
+    "path": "data/raw/1101_2025.pdf",
+    "bytes": 45441709,
+    "sha256": "2d8c11a51bf1561e0954d08a14f7c24c6ba193801446ec4ed1a660a1c37f5854"
+   },
+   "official_records": "work/extract/1101_2025_pairs.jsonl (local run 2026-10-18 14:35)",
+   "pilot_records": "work/extract_pilot/1101_2025_pairs.jsonl (= pilot/tcc_pairs.jsonl fields), pilot PDF sha256 32297641063f0f5d6e0516aa9e7d00b2d6dfb851aef5fbd3b8c495c987983225"
+  }
+ },
+ "method": "A pilot picture 'has a match' when an official picture on the same page overlaps it with IoU > 0.8. For pilot pictures without a match, the official PDF page is searched for an image placement overlapping the same box (IoU > 0.5) and its stored pixel size is read (pymupdf get_image_info).",
+ "pictures_after_merging": {
+  "pilot": 327,
+  "official": 289
+ },
+ "pilot_pictures_without_match": 73,
+ "official_pictures_without_match": 35,
+ "missing_pilot_pictures": {
+  "short_side_px_in_pilot": {
+   "median": 596,
+   "min": 175,
+   "max": 2210
+  },
+  "image_found_at_same_place_in_official_pdf": 47,
+  "official_short_side_px": {
+   "median": 126,
+   "max": 590
+  },
+  "below_150px_so_dropped_by_extract_filter": 32,
+  "no_image_at_same_place_in_official_pdf": 26
+ },
+ "matched_pictures": {
+  "official_to_pilot_short_side_ratio_median": 0.5,
+  "short_side_px_median": {
+   "official": 365,
+   "pilot": 748
+  }
+ },
+ "reading": "The official (amended) filing stores 台泥's photos at about half the resolution of the company-website copy. 32 pictures shrink below the 150 px floor in extract_pairs.py (MIN_PX) and are dropped. The other differences (26 missing places, 35 new places) were not traced; the official file is the 2026/10/02 amended edition, so content or layout changes are possible. 葡萄王 2025 gives identical numbers for both files."
+}

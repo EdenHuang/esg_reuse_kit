@@ -1,0 +1,41 @@
+{"meta": {"reader": "Claude Opus 5.5", "date": "2026-10-20", "manual": "R_evidence_zh.md v1.5", "use": "calibration only (Eden asked, 10/20); Eden decides every change in Label Studio; never used as gold labels", "labels_compared": "annotations/dev/R.jsonl (results/annotation_R_import_dev_20261020_0013.json)", "items_read": 106}}
+{"item": "R7ad35a2a", "task": 21, "kind": "level", "eden": "unrelated", "claude": "direct", "confidence": "高", "reason": "描述文字是捐血活動；照片是寒舍餐旅的人舉著「250cc」「500cc」「熱血」牌子、拿著公司布條，就是那場捐血活動。"}
+{"item": "R9ef34bf5", "task": 49, "kind": "level", "eden": "unrelated", "claude": "direct", "confidence": "高", "reason": "同一頁有講「鸚鵡螺圖書館」的文字（你在同一頁另一張 p042_03 選了它）；這張是圖書館內部（旁邊印 NAUTILUS BIBLIOTHECA）。應取消「這頁沒有描述文字」，點那段文字。"}
+{"item": "Rb924d029", "task": 62, "kind": "level", "eden": "unrelated", "claude": "direct", "confidence": "高", "reason": "這頁有一段寫「園區餐廳『品山海』採用花蓮小農食材」；照片就是一盤餐點。應取消「這頁沒有描述文字」，點那段文字。"}
+{"item": "R3b4a0d6b", "task": 63, "kind": "level", "eden": "unrelated", "claude": "topical", "confidence": "高", "reason": "沒有描述文字，跟「社會參與」比。拳頭相碰是「一起參與」的象徵照：手冊 v1.5 的例子，主題相關（包裝）。"}
+{"item": "R0b3e2994", "task": 109, "kind": "level", "eden": "topical", "claude": "unrelated", "confidence": "高", "reason": "沒有描述文字，跟「2.6 資訊安全管理」比。飛機維修人員是本業照，跟資訊安全無關：手冊 v1.5 的例子。"}
+{"item": "Rbd503689", "task": 110, "kind": "level", "eden": "topical", "claude": "unrelated", "confidence": "中", "reason": "這頁是「1.2 企業永續治理」的重大主題排序表；照片是技師在熱壓罐裡工作，是本業照，跟排序表沒關係（跟 task 109 同一種）。"}
+{"item": "R01a9d499", "task": 106, "kind": "level", "eden": "direct", "claude": "topical", "confidence": "中", "reason": "你點的文字講天合聯盟「最佳前瞻策略獎」；照片是「華航添加 20% 永續航空燃油」合作儀式，這頁沒有講永續航空燃油的文字。沒拍到得獎，主題相近：主題相關。"}
+{"item": "R4dae1d03", "task": 57, "kind": "level", "eden": "unrelated", "claude": "topical", "confidence": "低", "reason": "章名頁「客戶服務及供應商管理」；照片像是門市內部（衣架、展示架）。如果是這家公司的門市就算主題相關；看不出來就維持無關。"}
+{"item": "Ra08501b0", "task": 88, "kind": "not_photo", "eden": "not_photo", "claude": "photo", "confidence": "中", "reason": "這是相機拍的會議照片（圓桌會議，右邊切到另一張）。是照片就要標；這頁有圖說「主辦國際氣候領袖圓桌論壇」，會是直接對應。"}
+{"item": "R2dcb7765", "task": 76, "kind": "not_photo", "eden": "not_photo", "claude": "photo", "confidence": "低", "reason": "看起來是一張照片被切開的一小塊（建築一角和地面）。標註 A 的規則是不完整也算照片，但只剩一小塊，標「不是照片」也說得過去。"}
+{"item": "R3450e454", "task": 92, "kind": "not_photo", "eden": "not_photo", "claude": "photo", "confidence": "低", "reason": "章名頁的玻璃地球放在苔蘚上，像是圖庫照片（也可能是電腦合成），拿不準。"}
+{"item": "Rf7ba7771", "task": 111, "kind": "describing_text", "confidence": "高", "reason": "照片是有人在打羽毛球；這頁有「羽球社」那一段，你點的是「手作苔球慶端午」。"}
+{"item": "Re6ce6d64", "task": 115, "kind": "describing_text", "confidence": "中", "reason": "內文有「一起減塑護海、撿塑淨灘」那段，照片布條寫「2023年皇普建設 淨灘 一起愛海洋」；你點的是大標題「公益參與」（手冊：大主題的標題不選）。"}
+{"item": "R1eb3f7ae", "task": 98, "kind": "describing_text", "confidence": "低", "reason": "照片是參觀者隔著玻璃看資源回收中心（RRRC）裡的抓斗；你點的是「雨水再利用與省水用具」。比較接近的是講 RRRC 這棟建築的那段。三級一樣是直接對應（拍到 RRRC 這個地點）。"}
+{"item": "Rb590628a", "task": 22, "kind": "describing_text", "confidence": "低", "reason": "你點的是晉升作業那段；照片像是上課或專案報告，這頁有「課程實況」和 Six Sigma 訓練的說明，比較像在講這張。"}
+{"item": "Ra486ab05", "task": 116, "kind": "describing_text", "confidence": "低", "reason": "照片是倉庫裡一箱箱的貨；這頁的備註寫「購置男性休閒短褲 13,254 件捐贈」，比較像在講這張。"}
+{"item": "R7ad35a2a", "task": 21, "kind": "anchor", "confidence": "高", "reason": "布條「寒舍餐旅管理顧問」"}
+{"item": "R63796264", "task": 23, "kind": "anchor", "confidence": "高", "reason": "布條「榮剛慢跑社」"}
+{"item": "Rd429dcb0", "task": 40, "kind": "anchor", "confidence": "高", "reason": "機艙模型上的「CHINA AIRLINES」"}
+{"item": "Rdbdc984d", "task": 52, "kind": "anchor", "confidence": "高", "reason": "背板「2024 中華企業射箭聯賽」（活動名＋年份）"}
+{"item": "R73b59c8e", "task": 54, "kind": "anchor", "confidence": "高", "reason": "投影幕上「全漢集團 … 書報講堂暨徵才說明會」、FSP logo"}
+{"item": "Rcf34861f", "task": 56, "kind": "anchor", "confidence": "高", "reason": "展位上的「NHOA」「TCC」（子公司、公司簡稱）"}
+{"item": "R065b4686", "task": 59, "kind": "anchor", "confidence": "高", "reason": "布條上的「正文科技」"}
+{"item": "Rb6b80d80", "task": 67, "kind": "anchor", "confidence": "高", "reason": "背板「2025 IASMS 飛航安全管理國際峰會」（活動名＋年份）"}
+{"item": "R54ef6144", "task": 69, "kind": "anchor", "confidence": "高", "reason": "工地圍籬上的「皇普建設」"}
+{"item": "R34fc32e7", "task": 65, "kind": "anchor", "confidence": "高", "reason": "米袋上印的「耕著東洋挺健康」"}
+{"item": "R90673532", "task": 45, "kind": "anchor", "confidence": "中", "reason": "飛機上的「CHINA AIRLINES」（這張框到好幾張圖）"}
+{"item": "R5d5295db", "task": 66, "kind": "anchor", "confidence": "中", "reason": "背板上方台灣東洋的 logo、CSL Seqirus"}
+{"item": "R399167c1", "task": 79, "kind": "anchor", "confidence": "中", "reason": "充電站招牌「atlante」（子公司）"}
+{"item": "Rb9336526", "task": 114, "kind": "anchor", "confidence": "中", "reason": "牌子上國泰的大樹 logo"}
+{"item": "R82db240f", "task": 41, "kind": "anchor", "confidence": "中", "reason": "礦卡車頭的「TCC」"}
+{"item": "R47d660b6", "task": 105, "kind": "anchor", "confidence": "低", "reason": "背板上的電影名「BIG」（贊助的專案名）"}
+{"item": "Re24dbed9", "task": 31, "kind": "overlay", "confidence": "中", "reason": "後製疊上的字"}
+{"item": "R303140f8", "task": 33, "kind": "overlay", "confidence": "中", "reason": "後製疊上的字"}
+{"item": "R847b4754", "task": 38, "kind": "overlay", "confidence": "中", "reason": "後製疊上的字"}
+{"item": "R82db240f", "task": 41, "kind": "overlay", "confidence": "中", "reason": "後製疊上的字"}
+{"item": "Rcafef7da", "task": 44, "kind": "overlay", "confidence": "中", "reason": "後製疊上的字"}
+{"item": "R90779209", "task": 53, "kind": "overlay", "confidence": "中", "reason": "後製疊上的字"}
+{"item": "R1b876483", "task": 87, "kind": "overlay", "confidence": "中", "reason": "後製疊上的字"}
+{"item": "Rc27f20b1", "task": 90, "kind": "overlay", "confidence": "中", "reason": "後製疊上的字"}
