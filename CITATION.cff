@@ -21,7 +21,7 @@ identifiers:
     description: "Concept DOI: resolves to the latest version of the release on Zenodo."
   - type: doi
     value: 10.5281/zenodo.23720138
-    description: "Version 1.0.0 on Zenodo."
+    description: "Version 1.0.0 on Zenodo, the archived version; the repository's tag v1.0.1 adds the English guideline translations and the test-split section check and is not archived separately."
 keywords:
   - sustainability reports
   - document analysis
