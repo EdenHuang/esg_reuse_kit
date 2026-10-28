@@ -12,9 +12,16 @@ date-released: 2026-10-28
 license:
   - MIT
   - CC-BY-4.0
-# repository-code and doi are filled in when the GitHub repository and the Zenodo record exist.
-# repository-code: "https://github.com/<owner>/<repository>"
-# doi: 10.5281/zenodo.<record>
+doi: 10.5281/zenodo.23720137
+repository-code: "https://github.com/EdenHuang/esg_reuse_kit"
+url: "https://doi.org/10.5281/zenodo.23720137"
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.23720137
+    description: "Concept DOI: resolves to the latest version of the release on Zenodo."
+  - type: doi
+    value: 10.5281/zenodo.23720138
+    description: "Version 1.0.0 on Zenodo."
 keywords:
   - sustainability reports
   - document analysis

@@ -4,7 +4,12 @@
 
 Yueh-Cheng Huang, Department of Computer Science and Information Engineering, National Dong Hwa University, Hualien, Taiwan.
 Companion release of the paper of the same title, submitted to the *International Journal on Document Analysis and
-Recognition* (ICDAR 2027 journal track). Zenodo DOI: to be added with the first tagged release.
+Recognition* (ICDAR 2027 journal track).
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23720137.svg)](https://doi.org/10.5281/zenodo.23720137)
+Repository: https://github.com/EdenHuang/esg_reuse_kit · Archive of every tagged release on Zenodo: concept DOI
+[10.5281/zenodo.23720137](https://doi.org/10.5281/zenodo.23720137) (always the latest version); version 1.0.0 is
+[10.5281/zenodo.23720138](https://doi.org/10.5281/zenodo.23720138).
 
 A photo in a report counts as **evidence** when it directly depicts what the text beside it claims *and* something
 recorded by the camera anchors it to the firm or the event (the firm's name, an event name, a year, or the firm's
@@ -124,7 +129,7 @@ Please cite the paper and the release (`CITATION.cff` has both in machine-readab
 > Measurement. Submitted to the *International Journal on Document Analysis and Recognition* (ICDAR 2027 journal track).
 
 > Huang, Y.-C. (2026). Do Sustainability Report Photos Show What the Text Claims? A Dataset and a Four-Level
-> Measurement (data and code release), version 1.0.0. Zenodo. DOI: to be added.
+> Measurement (data and code release), version 1.0.0. Zenodo. https://doi.org/10.5281/zenodo.23720137
 
 ## Contact
 
